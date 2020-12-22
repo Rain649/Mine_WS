@@ -24,7 +24,7 @@
 #include <pcl/visualization/pcl_plotter.h>
 #include <visualization_msgs/Marker.h>
 
-const int Horizon_SCAN = 360/1;
+const int Horizon_SCAN = 360/2;
 
 class Detection
 {
