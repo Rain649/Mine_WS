@@ -6,7 +6,7 @@
   
   <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" ></node>
 
-  <node name="rqt_logger_level" pkg="rqt_logger_level" type="rqt_logger_level" ></node>
+  <!-- <node name="rqt_logger_level" pkg="rqt_logger_level" type="rqt_logger_level" ></node> -->
   
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find preception)/launch/intersectionDetection.rviz"/>
 
