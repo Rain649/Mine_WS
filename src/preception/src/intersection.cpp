@@ -12,6 +12,8 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h> //统计滤波
 #include <pcl/filters/conditional_removal.h>    //条件滤波
+#include <pcl/kdtree/kdtree_flann.h>    //kdtree搜索
+#include <pcl/segmentation/extract_clusters.h>  //分割聚类
 #include <cmath>
 #include <vector>
 #include <stdio.h>
@@ -46,6 +48,8 @@ private:
     int median_Size;
     int distance_Thre;
     int col_minus_Thre;
+    int clusterRadius;
+    int clusterSize_min;
     std_msgs::Int16 peak_Num;
     int index_Array[Horizon_SCAN];
     int Col_Array[10];
@@ -61,7 +65,9 @@ private:
     bool outlier_Bool;
     bool medianFilter_Bool;
 
-    std::vector<std::pair<int,double> > beam_Invalid;
+    std::vector<int> pointSearchInd;    //聚类索引
+    std::vector<float> pointSearchSqDis;    //聚类距离
+    std::vector<std::pair<int,double> > beam_Invalid;   //有效laser列索引、距离
 
     std_msgs::Bool intersectionDetected;
     std_msgs::Bool intersectionVerified;
@@ -83,12 +89,17 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudWithInfo;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudFar;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudAfterCondition;
-    pcl::console::TicToc time;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_1;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_2;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_5;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter;
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> cloud_after_StatisticalRemoval;  //统计滤波
     pcl::ConditionOr<pcl::PointXYZI>::Ptr range_Condition;  //条件滤波
     pcl::ConditionalRemoval<pcl::PointXYZI> condition;
     pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang");    //定义绘图器
+    pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kd_first;
 
     ros::Publisher pubCloud;
     ros::Publisher pubCloudWithInfo;
@@ -100,6 +111,11 @@ private:
     ros::Publisher pubLaserLane;
     ros::Publisher pubEdgeLane;
     ros::Publisher pubPeakNum;
+    ros::Publisher pubCluster_1;
+    ros::Publisher pubCluster_2;
+    ros::Publisher pubCluster_3;
+    ros::Publisher pubCluster_4;
+    ros::Publisher pubCluster_5;
 
 
 public:
@@ -117,6 +133,11 @@ public:
         pubLaserLane = nh.advertise<visualization_msgs::Marker>("laserLane", 1);
         pubEdgeLane = nh.advertise<visualization_msgs::Marker>("edgeLane", 1);
         pubPeakNum = nh.advertise<std_msgs::Int16>("peakNum", 1);
+        pubCluster_1 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_1", 5);
+        pubCluster_2 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_2", 5);
+        pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 5);
+        pubCluster_4 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_4", 5);
+        pubCluster_5 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_5", 5);
         nanPoint.x = std::numeric_limits<float>::quiet_NaN();
         nanPoint.y = std::numeric_limits<float>::quiet_NaN();
         nanPoint.z = std::numeric_limits<float>::quiet_NaN();
@@ -176,6 +197,11 @@ public:
         cloudFar.reset(new pcl::PointCloud<pcl::PointXYZI>());
         cloudAfterCondition.reset(new pcl::PointCloud<pcl::PointXYZI>());
         range_Condition.reset(new pcl::ConditionOr<pcl::PointXYZI>());
+        cloudCluster_1.reset(new pcl::PointCloud<pcl::PointXYZI>());
+        cloudCluster_2.reset(new pcl::PointCloud<pcl::PointXYZI>());
+        cloudCluster_3.reset(new pcl::PointCloud<pcl::PointXYZI>());
+        cloudCluster_4.reset(new pcl::PointCloud<pcl::PointXYZI>());
+        cloudCluster_5.reset(new pcl::PointCloud<pcl::PointXYZI>());
     
         //构建有序点云
         cloudWithInfo->points.resize(N_SCAN * Horizon_SCAN);
@@ -207,11 +233,15 @@ public:
         intersectionDetected.data = false;
         intersectionVerified.data = false;
 
+        cloudCluster_1->clear();
+        cloudCluster_2->clear();
+        cloudCluster_3->clear();
+        cloudCluster_4->clear();
+        cloudCluster_5->clear();
     }
 
     void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
-        // time.tic();
         timeLaserCloudNew = msg->header.stamp.toSec();
         laser_Lane.header.stamp = msg->header.stamp;
         laserCloudNew->clear();
@@ -580,6 +610,85 @@ public:
         condition.filter(*cloudAfterCondition);
     }
 
+    void intersectionCluster()
+    {
+        // Creating the KdTree object for the search method of the extraction
+        pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>);
+        tree->setInputCloud(cloudAfterCondition); //创建点云索引向量，用于存储实际的点云信息
+
+        std::vector<pcl::PointIndices> cluster_indices;
+        pcl::EuclideanClusterExtraction<pcl::PointXYZI> ec;
+        ec.setClusterTolerance(clusterRadius); //设置近邻搜索的搜索半径
+        ec.setMinClusterSize(clusterSize_min);    //设置一个聚类需要的最少点数目
+        // ec.setMaxClusterSize(1000);   //设置一个聚类需要的最大点数目
+        ec.setSearchMethod(tree);    //设置点云的搜索机制
+        ec.setInputCloud(cloudAfterCondition);
+        ec.extract(cluster_indices); //从点云中提取聚类，并将点云索引保存在cluster_indices中
+
+        /*为了从点云索引向量中分割出每个聚类，必须迭代访问点云索引，每次创建一个新的点云数据集，并且将所有当前聚类的点写入到点云数据集中。*/
+        //迭代访问点云索引cluster_indices，直到分割出所有聚类
+        int j = 0;
+        for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+        {
+            // pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZI>);
+            // //创建新的点云数据集cloud_cluster，将所有当前聚类写入到点云数据集中
+
+            // std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size() << " data points." << std::endl;
+            j++;
+
+            switch (j)
+            {
+            case 1:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_1->points.push_back(cloudAfterCondition->points[*pit]);
+                cloudCluster_1->width = cloudCluster_1->points.size();
+                cloudCluster_1->height = 1;
+                cloudCluster_1->is_dense = true;
+
+                break;
+
+            case 2:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_2->points.push_back(cloudAfterCondition->points[*pit]);
+                cloudCluster_2->width = cloudCluster_2->points.size();
+                cloudCluster_2->height = 1;
+                cloudCluster_2->is_dense = true;
+                ROS_INFO("Cluster 222");
+                break;
+
+            case 3:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_3->points.push_back(cloudAfterCondition->points[*pit]);
+                cloudCluster_3->width = cloudCluster_3->points.size();
+                cloudCluster_3->height = 1;
+                cloudCluster_3->is_dense = true;
+
+                break;
+
+            case 4:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_4->points.push_back(cloudAfterCondition->points[*pit]);
+                cloudCluster_4->width = cloudCluster_4->points.size();
+                cloudCluster_4->height = 1;
+                cloudCluster_4->is_dense = true;
+
+                break;
+
+            case 5:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_5->points.push_back(cloudAfterCondition->points[*pit]);
+                cloudCluster_5->width = cloudCluster_5->points.size();
+                cloudCluster_5->height = 1;
+                cloudCluster_5->is_dense = true;
+
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
+
     void publishResult()
     {
         if (pubCloud.getNumSubscribers() != 0)
@@ -622,6 +731,55 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
         }
 
+        // if (pubCluster_1.getNumSubscribers() != 0 && cloudCluster_1->width != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = "velodyne";
+            pubCluster_1.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
+        }
+
+        // if (pubCluster_2.getNumSubscribers() != 0 && cloudCluster_2->width != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = "velodyne";
+            pubCluster_2.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
+        }
+
+        // if (pubCluster_3.getNumSubscribers() != 0 && cloudCluster_3->width != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = "velodyne";
+            pubCluster_3.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
+        }
+
+        // if (pubCluster_4.getNumSubscribers() != 0 && cloudCluster_4->width != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = "velodyne";
+            pubCluster_4.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
+        }
+
+        // if (pubCluster_5.getNumSubscribers() != 0 && cloudCluster_5->width != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_5, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = "velodyne";
+            pubCluster_5.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
+        }
 
         if (pubIntersectionDetected.getNumSubscribers() != 0)
         {
@@ -664,6 +822,7 @@ public:
             if(intersectionVerified.data || true)
             {
                 intersectionDivide();
+                intersectionCluster();
             }
             publishResult();
             clearMemory();
@@ -676,10 +835,9 @@ public:
         ros::param::get("/intersection/y_condition",y_Condition);
         ros::param::get("/intersection/width_threshold",width_Thre);
         ros::param::get("/intersection/distance_threshold",distance_Thre);
-        
-
-        
         ros::param::get("/intersection/col_minus_threshold",col_minus_Thre);
+        ros::param::get("/intersection/cluster_radius",clusterRadius);
+        ros::param::get("/intersection/cluster_size_min",clusterSize_min);
         ros::param::get("/intersection/bool_outlier_removal",outlier_Bool);
         ros::param::get("/intersection/bool_median_filter",medianFilter_Bool);
         ros::param::get("/intersection/median_size",median_Size);
@@ -690,13 +848,15 @@ public:
 //动态调参
 void callback(preception::param_Config &config, uint32_t level)
 {
-    ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %f %s %s %s %d",
+    ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %d %d %f %s %s %s %d",
              config.x_condition,
              config.y_condition,
              config.width_threshold,
              config.distance_threshold,
              config.col_minus_threshold,
              config.median_size,
+             config.cluster_radius,
+             config.cluster_size_min,
              config.median_coefficient,
              config.str_param.c_str(),
              config.bool_outlier_removal ? "True" : "False",
@@ -725,7 +885,6 @@ int main(int argc, char **argv)
         ND.run();
         rate.sleep();
     }
-
 
     return 0;
 }

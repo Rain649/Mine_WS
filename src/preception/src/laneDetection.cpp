@@ -90,7 +90,7 @@ private:
     pcl::ModelCoefficients::Ptr coefficients_2;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_plane;
 
-    pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdLeft;
+    // pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdLeft;
     pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdRight;
     pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdFirst;
     std::vector<int> pointSearchInd;
@@ -159,7 +159,7 @@ public:
         cloudCluster_4.reset(new pcl::PointCloud<pcl::PointXYZI>());
 
         kdFirst.reset(new pcl::KdTreeFLANN<pcl::PointXYZI>());
-        kdLeft.reset(new pcl::KdTreeFLANN<pcl::PointXYZI>());
+        // kdLeft.reset(new pcl::KdTreeFLANN<pcl::PointXYZI>());
         kdRight.reset(new pcl::KdTreeFLANN<pcl::PointXYZI>());
 
         coefficients_1.reset(new pcl::ModelCoefficients());
@@ -189,42 +189,10 @@ public:
 
         receivePoints = false;
         over = true;
-
-        // std::cout << "[done, " << time.toc () << " ms ]" << std::endl;
-    }
-
-    void changeValue()
-    {
-        char key;
-        std::cout << "Change Value: " << std::endl;
-        while (2)
-        {
-            system("stty -echo");
-            key = getchar();
-            fflush(stdin);
-            // std::cout<<"key = "<< (int)key <<std::endl;
-            system("stty echo");
-            if (key == 47)
-                break; //////
-            switch (key)
-            {
-            case 65:
-                std::cout << "up" << std::endl;
-                test_value += 1;
-                break;
-
-            case 66:
-                std::cout << "down" << std::endl;
-                test_value -= 1;
-                break;
-            }
-            std::cout << "test_value = " << test_value << std::endl;
-        }
     }
 
     void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
-        // time.tic();
         timeLaserCloudNew = msg->header.stamp.toSec();
         laneRight->clear();
         laserCloudNew->clear();
@@ -675,8 +643,6 @@ int main(int argc, char **argv)
     ROS_INFO("\033[1;32m---->\033[0m Lane Detection Started.");
 
     laneDetection LD;
-
-    // std::thread changethread(&laneDetection::changeValue, &LD);
 
     ros::Rate rate(5);
     while (ros::ok())

@@ -245,6 +245,8 @@ class DEFAULT
         if("distance_threshold"==(*_i)->name){distance_threshold = boost::any_cast<int>(val);}
         if("col_minus_threshold"==(*_i)->name){col_minus_threshold = boost::any_cast<int>(val);}
         if("median_size"==(*_i)->name){median_size = boost::any_cast<int>(val);}
+        if("cluster_radius"==(*_i)->name){cluster_radius = boost::any_cast<int>(val);}
+        if("cluster_size_min"==(*_i)->name){cluster_size_min = boost::any_cast<int>(val);}
         if("median_coefficient"==(*_i)->name){median_coefficient = boost::any_cast<double>(val);}
         if("str_param"==(*_i)->name){str_param = boost::any_cast<std::string>(val);}
         if("bool_outlier_removal"==(*_i)->name){bool_outlier_removal = boost::any_cast<bool>(val);}
@@ -259,6 +261,8 @@ int width_threshold;
 int distance_threshold;
 int col_minus_threshold;
 int median_size;
+int cluster_radius;
+int cluster_size_min;
 double median_coefficient;
 std::string str_param;
 bool bool_outlier_removal;
@@ -285,6 +289,10 @@ int size;
       int col_minus_threshold;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       int median_size;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      int cluster_radius;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      int cluster_size_min;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       double median_coefficient;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -494,6 +502,26 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("median_size", "int", 0, "An Integer parameter", "", &param_Config::median_size)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.cluster_radius = 0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.cluster_radius = 20;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.cluster_radius = 6;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_radius", "int", 0, "An Integer parameter", "", &param_Config::cluster_radius)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_radius", "int", 0, "An Integer parameter", "", &param_Config::cluster_radius)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.cluster_size_min = 10;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.cluster_size_min = 100;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.cluster_size_min = 30;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_size_min", "int", 0, "An Integer parameter", "", &param_Config::cluster_size_min)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_size_min", "int", 0, "An Integer parameter", "", &param_Config::cluster_size_min)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.median_coefficient = 0.0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __max__.median_coefficient = 1.0;
@@ -540,9 +568,9 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __default__.size = 1;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("size", "int", 0, "Select from the list", "{'enum': [{'name': 'Low', 'type': 'int', 'value': 0, 'srcline': 19, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Low is 0', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'Medium', 'type': 'int', 'value': 1, 'srcline': 20, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Medium is 1', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'High', 'type': 'int', 'value': 2, 'srcline': 21, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Hight is 2', 'ctype': 'int', 'cconsttype': 'const int'}], 'enum_description': 'Select from the list'}", &param_Config::size)));
+      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("size", "int", 0, "Select from the list", "{'enum': [{'name': 'Low', 'type': 'int', 'value': 0, 'srcline': 21, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Low is 0', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'Medium', 'type': 'int', 'value': 1, 'srcline': 22, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Medium is 1', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'High', 'type': 'int', 'value': 2, 'srcline': 23, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Hight is 2', 'ctype': 'int', 'cconsttype': 'const int'}], 'enum_description': 'Select from the list'}", &param_Config::size)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("size", "int", 0, "Select from the list", "{'enum': [{'name': 'Low', 'type': 'int', 'value': 0, 'srcline': 19, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Low is 0', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'Medium', 'type': 'int', 'value': 1, 'srcline': 20, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Medium is 1', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'High', 'type': 'int', 'value': 2, 'srcline': 21, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Hight is 2', 'ctype': 'int', 'cconsttype': 'const int'}], 'enum_description': 'Select from the list'}", &param_Config::size)));
+      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("size", "int", 0, "Select from the list", "{'enum': [{'name': 'Low', 'type': 'int', 'value': 0, 'srcline': 21, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Low is 0', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'Medium', 'type': 'int', 'value': 1, 'srcline': 22, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Medium is 1', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'High', 'type': 'int', 'value': 2, 'srcline': 23, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Hight is 2', 'ctype': 'int', 'cconsttype': 'const int'}], 'enum_description': 'Select from the list'}", &param_Config::size)));
 //#line 246 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Default.convertParams();
 //#line 246 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -622,11 +650,11 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
     return statics;
   }
 
-//#line 19 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
-      const int param__Low = 0;
-//#line 20 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
-      const int param__Medium = 1;
 //#line 21 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
+      const int param__Low = 0;
+//#line 22 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
+      const int param__Medium = 1;
+//#line 23 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
       const int param__High = 2;
 }
 
