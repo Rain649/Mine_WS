@@ -1,0 +1,16 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~x_condition" : \b [int] An Integer parameter min: 0, default: 8, max: 20
+- \b "~y_condition" : \b [int] An Integer parameter min: 0, default: 8, max: 20
+- \b "~width_threshold" : \b [int] An Integer parameter min: 0, default: 4, max: 20
+- \b "~distance_threshold" : \b [int] An Integer parameter min: 0, default: 15, max: 80
+- \b "~col_minus_threshold" : \b [int] An Integer parameter min: 0, default: 80, max: 80
+- \b "~median_size" : \b [int] An Integer parameter min: 3, default: 9, max: 15
+- \b "~median_coefficient" : \b [double] A double parameter min: 0.0, default: 1.0, max: 1.0
+- \b "~str_param" : \b [str] A string parameter min: , default: dynamic_reconfigure, max: 
+- \b "~bool_outlier_removal" : \b [bool] A Boolean parameter min: False, default: True, max: True
+- \b "~bool_median_filter" : \b [bool] A Boolean parameter min: False, default: True, max: True
+- \b "~size" : \b [int] Select from the list min: 0, default: 1, max: 3
+

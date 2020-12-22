@@ -1,0 +1,17 @@
+\subsubsection usage Usage
+\verbatim
+<node name="preception" pkg="preception" type="preception">
+  <param name="x_condition" type="int" value="8" />
+  <param name="y_condition" type="int" value="8" />
+  <param name="width_threshold" type="int" value="4" />
+  <param name="distance_threshold" type="int" value="15" />
+  <param name="col_minus_threshold" type="int" value="80" />
+  <param name="median_size" type="int" value="9" />
+  <param name="median_coefficient" type="double" value="1.0" />
+  <param name="str_param" type="str" value="dynamic_reconfigure" />
+  <param name="bool_outlier_removal" type="bool" value="True" />
+  <param name="bool_median_filter" type="bool" value="True" />
+  <param name="size" type="int" value="1" />
+</node>
+\endverbatim
+

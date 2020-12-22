@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "catkin",
+			"problemMatcher": [
+				"$catkin-gcc"
+			],
+			"group": "build",
+			"label": "catkin: make"
+		}
+	]
+}
