@@ -61,3 +61,11 @@ add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPO
 target_link_libraries(laneDetection
   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  ${OpenCV_LIBS}
 )
+
+add_executable(keyPointSave
+  src/keyPointSave.cpp
+)
+add_dependencies(keyPointSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(keyPointSave
+  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
+)

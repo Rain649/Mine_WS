@@ -168,6 +168,21 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+preception/CMakeFiles/keyPointSave.dir/rule:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f CMakeFiles/Makefile2 preception/CMakeFiles/keyPointSave.dir/rule
+.PHONY : preception/CMakeFiles/keyPointSave.dir/rule
+
+# Convenience name for target.
+keyPointSave: preception/CMakeFiles/keyPointSave.dir/rule
+
+.PHONY : keyPointSave
+
+# fast build rule for target.
+keyPointSave/fast:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/keyPointSave.dir/build.make preception/CMakeFiles/keyPointSave.dir/build
+.PHONY : keyPointSave/fast
+
+# Convenience name for target.
 preception/CMakeFiles/laneDetection.dir/rule:
 	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f CMakeFiles/Makefile2 preception/CMakeFiles/laneDetection.dir/rule
 .PHONY : preception/CMakeFiles/laneDetection.dir/rule
@@ -1424,6 +1439,33 @@ src/intersection.cpp.s:
 	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/intersection.dir/build.make preception/CMakeFiles/intersection.dir/src/intersection.cpp.s
 .PHONY : src/intersection.cpp.s
 
+src/keyPointSave.o: src/keyPointSave.cpp.o
+
+.PHONY : src/keyPointSave.o
+
+# target to build an object file
+src/keyPointSave.cpp.o:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/keyPointSave.dir/build.make preception/CMakeFiles/keyPointSave.dir/src/keyPointSave.cpp.o
+.PHONY : src/keyPointSave.cpp.o
+
+src/keyPointSave.i: src/keyPointSave.cpp.i
+
+.PHONY : src/keyPointSave.i
+
+# target to preprocess a source file
+src/keyPointSave.cpp.i:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/keyPointSave.dir/build.make preception/CMakeFiles/keyPointSave.dir/src/keyPointSave.cpp.i
+.PHONY : src/keyPointSave.cpp.i
+
+src/keyPointSave.s: src/keyPointSave.cpp.s
+
+.PHONY : src/keyPointSave.s
+
+# target to generate assembly for a file
+src/keyPointSave.cpp.s:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/keyPointSave.dir/build.make preception/CMakeFiles/keyPointSave.dir/src/keyPointSave.cpp.s
+.PHONY : src/keyPointSave.cpp.s
+
 src/laneDetection.o: src/laneDetection.cpp.o
 
 .PHONY : src/laneDetection.o
@@ -1462,6 +1504,7 @@ help:
 	@echo "... install"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... keyPointSave"
 	@echo "... laneDetection"
 	@echo "... intersection"
 	@echo "... preception_gencfg"
@@ -1549,6 +1592,9 @@ help:
 	@echo "... src/intersection.o"
 	@echo "... src/intersection.i"
 	@echo "... src/intersection.s"
+	@echo "... src/keyPointSave.o"
+	@echo "... src/keyPointSave.i"
+	@echo "... src/keyPointSave.s"
 	@echo "... src/laneDetection.o"
 	@echo "... src/laneDetection.i"
 	@echo "... src/laneDetection.s"

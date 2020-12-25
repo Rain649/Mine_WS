@@ -2,8 +2,7 @@
 
 Reads and maintains the following parameters on the ROS server
 
-- \b "~x_condition" : \b [int] An Integer parameter min: 0, default: 8, max: 20
-- \b "~y_condition" : \b [int] An Integer parameter min: 0, default: 8, max: 20
+- \b "~xy_condition" : \b [int] An Integer parameter min: 0, default: 8, max: 20
 - \b "~width_threshold" : \b [int] An Integer parameter min: 0, default: 4, max: 20
 - \b "~distance_threshold" : \b [int] An Integer parameter min: 0, default: 15, max: 80
 - \b "~col_minus_threshold" : \b [int] An Integer parameter min: 0, default: 80, max: 80

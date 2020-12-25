@@ -1,8 +1,7 @@
 \subsubsection usage Usage
 \verbatim
 <node name="preception" pkg="preception" type="preception">
-  <param name="x_condition" type="int" value="8" />
-  <param name="y_condition" type="int" value="8" />
+  <param name="xy_condition" type="int" value="8" />
   <param name="width_threshold" type="int" value="4" />
   <param name="distance_threshold" type="int" value="15" />
   <param name="col_minus_threshold" type="int" value="80" />

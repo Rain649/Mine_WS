@@ -40,6 +40,7 @@
 /home/lsj/dev/Mine_WS/build/preception/CMakeFiles/install.dir
 /home/lsj/dev/Mine_WS/build/preception/CMakeFiles/list_install_components.dir
 /home/lsj/dev/Mine_WS/build/preception/CMakeFiles/rebuild_cache.dir
+/home/lsj/dev/Mine_WS/build/preception/CMakeFiles/keyPointSave.dir
 /home/lsj/dev/Mine_WS/build/preception/CMakeFiles/laneDetection.dir
 /home/lsj/dev/Mine_WS/build/preception/CMakeFiles/intersection.dir
 /home/lsj/dev/Mine_WS/build/preception/CMakeFiles/preception_gencfg.dir

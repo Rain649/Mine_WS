@@ -30,7 +30,7 @@ const int Horizon_SCAN = 360/2;
 
 class Detection
 {
-private:
+    private:
     // const int kernelSize = 5;
     const int N_SCAN = 16;
     // const float ang_res_x = 0.2;
@@ -119,7 +119,7 @@ private:
     ros::Publisher pubCluster_5;
 
 
-public:
+    public:
     Detection() : nh("~")
     {
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_ma", 5, &Detection::laserCloudNewHandler, this);

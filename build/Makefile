@@ -285,6 +285,19 @@ gtest/fast:
 .PHONY : gtest/fast
 
 #=============================================================================
+# Target rules for targets named keyPointSave
+
+# Build rule for target.
+keyPointSave: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 keyPointSave
+.PHONY : keyPointSave
+
+# fast build rule for target.
+keyPointSave/fast:
+	$(MAKE) -f preception/CMakeFiles/keyPointSave.dir/build.make preception/CMakeFiles/keyPointSave.dir/build
+.PHONY : keyPointSave/fast
+
+#=============================================================================
 # Target rules for targets named laneDetection
 
 # Build rule for target.
@@ -1372,6 +1385,7 @@ help:
 	@echo "... gmock"
 	@echo "... gtest_main"
 	@echo "... gtest"
+	@echo "... keyPointSave"
 	@echo "... laneDetection"
 	@echo "... intersection"
 	@echo "... preception_gencfg"
