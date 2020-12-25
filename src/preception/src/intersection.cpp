@@ -42,15 +42,13 @@ private:
     // const int colBL = 120;
     // const int colBR = 240;
     const int colFR = Horizon_SCAN;
-    int x_Condition;
-    int y_Condition;
+    int xy_Condition;
     int width_Thre;
     int median_Size;
     int distance_Thre;
     int col_minus_Thre;
     int clusterRadius;
     int clusterSize_min;
-    std_msgs::Int16 peak_Num;
     int index_Array[Horizon_SCAN];
     int Col_Array[10];
     int Cols_plot[10];
@@ -71,6 +69,8 @@ private:
 
     std_msgs::Bool intersectionDetected;
     std_msgs::Bool intersectionVerified;
+    std_msgs::Int16 peak_Num;
+    std_msgs::Int16 cluster_Num;
 
     ros::NodeHandle nh;
 
@@ -111,6 +111,7 @@ private:
     ros::Publisher pubLaserLane;
     ros::Publisher pubEdgeLane;
     ros::Publisher pubPeakNum;
+    ros::Publisher pubClusterNum;
     ros::Publisher pubCluster_1;
     ros::Publisher pubCluster_2;
     ros::Publisher pubCluster_3;
@@ -133,6 +134,7 @@ public:
         pubLaserLane = nh.advertise<visualization_msgs::Marker>("laserLane", 1);
         pubEdgeLane = nh.advertise<visualization_msgs::Marker>("edgeLane", 1);
         pubPeakNum = nh.advertise<std_msgs::Int16>("peakNum", 1);
+        pubClusterNum = nh.advertise<std_msgs::Int16>("clusterNum", 1);
         pubCluster_1 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_1", 5);
         pubCluster_2 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_2", 5);
         pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 5);
@@ -213,6 +215,7 @@ public:
         memset(beam_Distance,0,sizeof(beam_Distance));
         memset(index_Array,0,sizeof(index_Array));
         peak_Num.data = 0;
+        cluster_Num.data = 0;
 
         laserCloudNew->clear();
         laserCloudNewDS->clear();
@@ -238,15 +241,14 @@ public:
         cloudCluster_3->clear();
         cloudCluster_4->clear();
         cloudCluster_5->clear();
+
+        range_Condition.reset(new pcl::ConditionOr<pcl::PointXYZI>());
     }
 
     void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
         timeLaserCloudNew = msg->header.stamp.toSec();
         laser_Lane.header.stamp = msg->header.stamp;
-        laserCloudNew->clear();
-        laserCloudNewDS->clear();
-        laserCloudNewTFDS->clear();
         pcl::fromROSMsg(*msg, *laserCloudNew);
 
         downSizeFilter.setInputCloud(laserCloudNew);
@@ -595,23 +597,34 @@ public:
     {
         //条件设定
         range_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-            pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, x_Condition)));  //GT表示大于等于
+            pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, xy_Condition)));  //GT表示大于等于
         range_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-            pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -x_Condition)));  //GT表示大于等于
+            pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -xy_Condition)));  //GT表示大于等于
         range_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-            pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, y_Condition)));  //LT表示小于等于
+            pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, xy_Condition)));  //LT表示小于等于
         range_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-            pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -y_Condition)));  //LT表示小于等于
+            pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -xy_Condition)));  //LT表示小于等于
 
         //条件滤波
         condition.setCondition(range_Condition);
-        condition.setInputCloud(laserCloudNewTFDS);
+        condition.setInputCloud(laserCloudNew);
         condition.setKeepOrganized(false);
         condition.filter(*cloudAfterCondition);
     }
 
+    // void set_Condition(pcl::PointXYZI>::Ptr msg)
+    // {
+    //         int x = msg->points.x;
+    //         int y = msg->points.y;
+    //         int dis = pow(x,2) + pow(y,2);
+    //         if(dis>pow(xy_Condition,2)) return true;
+    //         else return false;
+    // }
+
     void intersectionCluster()
     {
+        // if(cloudAfterCondition->width == 0) return;
+
         // Creating the KdTree object for the search method of the extraction
         pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>);
         tree->setInputCloud(cloudAfterCondition); //创建点云索引向量，用于存储实际的点云信息
@@ -627,16 +640,12 @@ public:
 
         /*为了从点云索引向量中分割出每个聚类，必须迭代访问点云索引，每次创建一个新的点云数据集，并且将所有当前聚类的点写入到点云数据集中。*/
         //迭代访问点云索引cluster_indices，直到分割出所有聚类
-        int j = 0;
+        cluster_Num.data = 0;
         for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
         {
-            // pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cluster(new pcl::PointCloud<pcl::PointXYZI>);
-            // //创建新的点云数据集cloud_cluster，将所有当前聚类写入到点云数据集中
+            cluster_Num.data++;
 
-            // std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size() << " data points." << std::endl;
-            j++;
-
-            switch (j)
+            switch (cluster_Num.data)
             {
             case 1:
                 for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
@@ -653,7 +662,6 @@ public:
                 cloudCluster_2->width = cloudCluster_2->points.size();
                 cloudCluster_2->height = 1;
                 cloudCluster_2->is_dense = true;
-                ROS_INFO("Cluster 222");
                 break;
 
             case 3:
@@ -698,7 +706,6 @@ public:
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCloud.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m Cloud Published.");
         }
 
         if (pubCloudWithInfo.getNumSubscribers() != 0)
@@ -708,7 +715,6 @@ public:
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCloudWithInfo.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudWithInfo Published.");
         }
 
         if (pubCloudFar.getNumSubscribers() != 0)
@@ -718,7 +724,6 @@ public:
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCloudFar.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudFar Published.");
         }
 
         if (pubCloudAfterCondition.getNumSubscribers() != 0)
@@ -728,69 +733,61 @@ public:
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCloudAfterCondition.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
         }
 
-        // if (pubCluster_1.getNumSubscribers() != 0 && cloudCluster_1->width != 0)
+        if (pubCluster_1.getNumSubscribers() != 0 )
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCluster_1.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
         }
 
-        // if (pubCluster_2.getNumSubscribers() != 0 && cloudCluster_2->width != 0)
+        if (pubCluster_2.getNumSubscribers() != 0 )
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCluster_2.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
         }
 
-        // if (pubCluster_3.getNumSubscribers() != 0 && cloudCluster_3->width != 0)
+        if (pubCluster_3.getNumSubscribers() != 0 )
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCluster_3.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
         }
 
-        // if (pubCluster_4.getNumSubscribers() != 0 && cloudCluster_4->width != 0)
+        if (pubCluster_4.getNumSubscribers() != 0 )
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCluster_4.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
         }
 
-        // if (pubCluster_5.getNumSubscribers() != 0 && cloudCluster_5->width != 0)
+        if (pubCluster_5.getNumSubscribers() != 0 )
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_5, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = "velodyne";
             pubCluster_5.publish(cloudMsgTemp);
-            // ROS_INFO("\033[1;32m--->\033[0m cloudAfterCondition Published.");
         }
 
         if (pubIntersectionDetected.getNumSubscribers() != 0)
         {
             pubIntersectionDetected.publish(intersectionDetected);
-            // ROS_INFO("\033[1;32m--->\033[0m Intersection Detected Published.");
         }
 
         if (pubIntersectionVerified.getNumSubscribers() != 0)
         {
             pubIntersectionVerified.publish(intersectionVerified);
-            // ROS_INFO("\033[1;32m--->\033[0m Intersection Verified Published.");
         }
 
         if (1)
@@ -799,6 +796,7 @@ public:
             pubEdgeLane.publish(Edge_Lane);
             pubEdgeLane.publish(circle_Lane);
             pubPeakNum.publish(peak_Num);
+            pubClusterNum.publish(cluster_Num);
             
             std_msgs::Float32MultiArray beam_Dis;
             for (int i = 0; i < Horizon_SCAN; i++)
@@ -806,7 +804,6 @@ public:
                 beam_Dis.data.push_back(beam_Distance[i]);
             }
             pubBeamDistance.publish(beam_Dis);
-            // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
         }
     }
 
@@ -821,8 +818,23 @@ public:
             intersectionDetection();
             if(intersectionVerified.data || true)
             {
-                intersectionDivide();
-                intersectionCluster();
+                loop:
+                    ROS_INFO_STREAM("Condition  ===========    " << xy_Condition);
+                    intersectionDivide();
+                    intersectionCluster();
+                    
+                if(cluster_Num.data<peak_Num.data && xy_Condition<16)
+                {   
+                    xy_Condition += 2;
+                    range_Condition.reset(new pcl::ConditionOr<pcl::PointXYZI>());
+                    cloudAfterCondition->clear();
+                    cloudCluster_1->clear();
+                    cloudCluster_2->clear();
+                    cloudCluster_3->clear();
+                    cloudCluster_4->clear();
+                    cloudCluster_5->clear();
+                    goto loop;
+                }
             }
             publishResult();
             clearMemory();
@@ -831,8 +843,7 @@ public:
 
     void getDynamicParameter()
     {
-        ros::param::get("/intersection/x_condition",x_Condition);
-        ros::param::get("/intersection/y_condition",y_Condition);
+        ros::param::get("/intersection/xy_condition",xy_Condition);
         ros::param::get("/intersection/width_threshold",width_Thre);
         ros::param::get("/intersection/distance_threshold",distance_Thre);
         ros::param::get("/intersection/col_minus_threshold",col_minus_Thre);
@@ -848,9 +859,8 @@ public:
 //动态调参
 void callback(preception::param_Config &config, uint32_t level)
 {
-    ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %d %d %f %s %s %s %d",
-             config.x_condition,
-             config.y_condition,
+    ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %d %f %s %s %s %d",
+             config.xy_condition,
              config.width_threshold,
              config.distance_threshold,
              config.col_minus_threshold,
