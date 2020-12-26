@@ -1,0 +1,5 @@
+peak_number    cluster_number
+4    6
+3    3
+3    3
+3    3

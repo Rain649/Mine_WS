@@ -44,7 +44,9 @@ pcl/point_types.h
 pcl/console/time.h
 -
 std_msgs/UInt8.h
-/home/lsj/dev/Mine_WS/src/preception/src/std_msgs/UInt8.h
+-
+std_msgs/Bool.h
+-
 nav_msgs/Odometry.h
 -
 vector
@@ -1085,6 +1087,22 @@ ros/forwards.h
 /opt/ros/noetic/include/ros/ros/forwards.h
 
 /opt/ros/noetic/include/rosconsole/macros_generated.h
+
+/opt/ros/noetic/include/std_msgs/Bool.h
+string
+-
+vector
+-
+map
+-
+ros/types.h
+-
+ros/serialization.h
+-
+ros/builtin_message_traits.h
+-
+ros/message_operations.h
+-
 
 /opt/ros/noetic/include/std_msgs/Header.h
 string

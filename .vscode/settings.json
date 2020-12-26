@@ -2,5 +2,9 @@
     "python.autoComplete.extraPaths": [
         "/home/lsj/dev/Mine_WS/devel/lib/python3/dist-packages",
         "/opt/ros/noetic/lib/python3/dist-packages"
-    ]
+    ],
+    "files.associations": {
+        "*.tcc": "cpp",
+        "fstream": "cpp"
+    }
 }
