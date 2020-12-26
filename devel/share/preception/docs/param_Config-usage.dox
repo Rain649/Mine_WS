@@ -9,10 +9,10 @@
   <param name="cluster_radius" type="int" value="6" />
   <param name="cluster_size_min" type="int" value="30" />
   <param name="median_coefficient" type="double" value="1.0" />
-  <param name="str_param" type="str" value="dynamic_reconfigure" />
   <param name="bool_outlier_removal" type="bool" value="True" />
   <param name="bool_median_filter" type="bool" value="True" />
-  <param name="size" type="int" value="1" />
+  <param name="bool_save" type="bool" value="False" />
+  <param name="save_name" type="str" value="intersection_info" />
 </node>
 \endverbatim
 

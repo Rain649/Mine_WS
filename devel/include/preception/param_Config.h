@@ -247,10 +247,10 @@ class DEFAULT
         if("cluster_radius"==(*_i)->name){cluster_radius = boost::any_cast<int>(val);}
         if("cluster_size_min"==(*_i)->name){cluster_size_min = boost::any_cast<int>(val);}
         if("median_coefficient"==(*_i)->name){median_coefficient = boost::any_cast<double>(val);}
-        if("str_param"==(*_i)->name){str_param = boost::any_cast<std::string>(val);}
         if("bool_outlier_removal"==(*_i)->name){bool_outlier_removal = boost::any_cast<bool>(val);}
         if("bool_median_filter"==(*_i)->name){bool_median_filter = boost::any_cast<bool>(val);}
-        if("size"==(*_i)->name){size = boost::any_cast<int>(val);}
+        if("bool_save"==(*_i)->name){bool_save = boost::any_cast<bool>(val);}
+        if("save_name"==(*_i)->name){save_name = boost::any_cast<std::string>(val);}
       }
     }
 
@@ -262,10 +262,10 @@ int median_size;
 int cluster_radius;
 int cluster_size_min;
 double median_coefficient;
-std::string str_param;
 bool bool_outlier_removal;
 bool bool_median_filter;
-int size;
+bool bool_save;
+std::string save_name;
 
     bool state;
     std::string name;
@@ -292,13 +292,13 @@ int size;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       double median_coefficient;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      std::string str_param;
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       bool bool_outlier_removal;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       bool bool_median_filter;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      int size;
+      bool bool_save;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      std::string save_name;
 //#line 231 "/opt/ros/noetic/share/dynamic_reconfigure/cmake/../templates/ConfigType.h.template"
 
     bool __fromMessage__(dynamic_reconfigure::Config &msg)
@@ -518,16 +518,6 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<double>("median_coefficient", "double", 0, "A double parameter", "", &param_Config::median_coefficient)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __min__.str_param = "";
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __max__.str_param = "";
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __default__.str_param = "dynamic_reconfigure";
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<std::string>("str_param", "str", 0, "A string parameter", "", &param_Config::str_param)));
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<std::string>("str_param", "str", 0, "A string parameter", "", &param_Config::str_param)));
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.bool_outlier_removal = 0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __max__.bool_outlier_removal = 1;
@@ -548,15 +538,25 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<bool>("bool_median_filter", "bool", 0, "A Boolean parameter", "", &param_Config::bool_median_filter)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __min__.size = 0;
+      __min__.bool_save = 0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __max__.size = 3;
+      __max__.bool_save = 1;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __default__.size = 1;
+      __default__.bool_save = 0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("size", "int", 0, "Select from the list", "{'enum': [{'name': 'Low', 'type': 'int', 'value': 0, 'srcline': 20, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Low is 0', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'Medium', 'type': 'int', 'value': 1, 'srcline': 21, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Medium is 1', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'High', 'type': 'int', 'value': 2, 'srcline': 22, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Hight is 2', 'ctype': 'int', 'cconsttype': 'const int'}], 'enum_description': 'Select from the list'}", &param_Config::size)));
+      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<bool>("bool_save", "bool", 0, "A Boolean parameter", "", &param_Config::bool_save)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("size", "int", 0, "Select from the list", "{'enum': [{'name': 'Low', 'type': 'int', 'value': 0, 'srcline': 20, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Low is 0', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'Medium', 'type': 'int', 'value': 1, 'srcline': 21, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Medium is 1', 'ctype': 'int', 'cconsttype': 'const int'}, {'name': 'High', 'type': 'int', 'value': 2, 'srcline': 22, 'srcfile': '/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg', 'description': 'Hight is 2', 'ctype': 'int', 'cconsttype': 'const int'}], 'enum_description': 'Select from the list'}", &param_Config::size)));
+      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<bool>("bool_save", "bool", 0, "A Boolean parameter", "", &param_Config::bool_save)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.save_name = "";
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.save_name = "";
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.save_name = "intersection_info";
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<std::string>("save_name", "str", 0, "A string parameter", "", &param_Config::save_name)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<std::string>("save_name", "str", 0, "A string parameter", "", &param_Config::save_name)));
 //#line 246 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Default.convertParams();
 //#line 246 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -636,12 +636,7 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
     return statics;
   }
 
-//#line 20 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
-      const int param__Low = 0;
-//#line 21 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
-      const int param__Medium = 1;
-//#line 22 "/home/lsj/dev/Mine_WS/src/preception/cfg/param.cfg"
-      const int param__High = 2;
+
 }
 
 #undef DYNAMIC_RECONFIGURE_FINAL

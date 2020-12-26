@@ -21,7 +21,7 @@
 #include <std_msgs/Bool.h>
 #include <dynamic_reconfigure/server.h>
 #include <preception/param_Config.h>
-#include "std_msgs/Int16.h"
+#include "std_msgs/UInt8.h"
 #include "std_msgs/Float32MultiArray.h"
 #include <pcl/visualization/pcl_plotter.h>
 #include <visualization_msgs/Marker.h>
@@ -69,8 +69,8 @@ class Detection
 
     std_msgs::Bool intersectionDetected;
     std_msgs::Bool intersectionVerified;
-    std_msgs::Int16 peak_Num;
-    std_msgs::Int16 cluster_Num;
+    std_msgs::UInt8 peak_Num;
+    std_msgs::UInt8 cluster_Num;
 
     ros::NodeHandle nh;
 
@@ -133,8 +133,8 @@ class Detection
         pubBeamDistance = nh.advertise<std_msgs::Float32MultiArray>("beamDistance", 1);
         pubLaserLane = nh.advertise<visualization_msgs::Marker>("laserLane", 1);
         pubEdgeLane = nh.advertise<visualization_msgs::Marker>("edgeLane", 1);
-        pubPeakNum = nh.advertise<std_msgs::Int16>("peakNum", 1);
-        pubClusterNum = nh.advertise<std_msgs::Int16>("clusterNum", 1);
+        pubPeakNum = nh.advertise<std_msgs::UInt8>("peakNum", 1);
+        pubClusterNum = nh.advertise<std_msgs::UInt8>("clusterNum", 1);
         pubCluster_1 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_1", 5);
         pubCluster_2 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_2", 5);
         pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 5);
@@ -859,7 +859,7 @@ class Detection
 //动态调参
 void callback(preception::param_Config &config, uint32_t level)
 {
-    ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %d %f %s %s %s %d",
+    ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %d %f %s %s",
              config.xy_condition,
              config.width_threshold,
              config.distance_threshold,
@@ -868,10 +868,8 @@ void callback(preception::param_Config &config, uint32_t level)
              config.cluster_radius,
              config.cluster_size_min,
              config.median_coefficient,
-             config.str_param.c_str(),
              config.bool_outlier_removal ? "True" : "False",
-             config.bool_median_filter ? "True" : "False",
-             config.size);
+             config.bool_median_filter ? "True" : "False");
 }
 
 int main(int argc, char **argv)

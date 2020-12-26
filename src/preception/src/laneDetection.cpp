@@ -652,7 +652,6 @@ int main(int argc, char **argv)
         rate.sleep();
     }
 
-    // changethread.join();
 
     return 0;
 }

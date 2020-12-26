@@ -1,33 +1,217 @@
-#include<ros/ros.h>
-#include<pcl/point_cloud.h>
-#include<pcl/point_types.h>
+#include <iostream>  
+#include <fstream>  
+#include <iomanip>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "std_msgs/Int16.h"
+#include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/console/time.h>
+
+#include "std_msgs/UInt8.h"
+#include <nav_msgs/Odometry.h>
+
+#include <vector>
+#include <string>
+
+#include <dynamic_reconfigure/server.h>
+#include <preception/param_Config.h>
 
 class keyPointSave
 {
     private:
-        uint16_t clusterNum;
+        uint8_t clusterNum = -1;
+        uint8_t peakNum = -1;
+        uint8_t clusterNum_Pre =-1;
+        uint8_t peakNum_Pre = -1;
+        uint8_t counter = 0;
+        uint8_t clusterNum_max = 0;
+        uint8_t peakNum_max = 0;
+
+        double interval;
+
+        bool record_Bool = false;
+        bool save_Bool = false;
+
+        std::string save_Name;
+        std::string path;
+
+        std::vector<std::pair<uint8_t,pcl::PointXYZ> > keyPoints;
+        std::vector<std::pair<uint8_t,uint8_t> > numOfIntersection;
+
+        pcl::PointXYZ thisKeyPoint;
+
         ros::NodeHandle nh;
+        ros::Time begin;
+        ros::Subscriber subPeakNum;
         ros::Subscriber subClusterNum;
+        ros::Subscriber subOdomAftMapped;
     
 public:
     keyPointSave() : nh("~")
     {  
-        subClusterNum = nh.subscribe<std_msgs::Int16>("/intersection/clusterNum", 1, &keyPointSave::clusterNumHandler, this);
+        subPeakNum = nh.subscribe<std_msgs::UInt8>("/intersection/peakNum", 1, &keyPointSave::peakNumHandler, this);
+        subClusterNum = nh.subscribe<std_msgs::UInt8>("/intersection/clusterNum", 1, &keyPointSave::clusterNumHandler, this);
+        subOdomAftMapped = nh.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 1, &keyPointSave::odomAftMapped, this);
 
+        allocateMemory();
+    }
+    
+    void allocateMemory()
+    {
+        ROS_INFO("allocateMemory");
+        path = "/home/lsj/dev/MINE_WS/data/";
     }
 
-    void clusterNumHandler(std_msgs::Int16 msg)
+    void peakNumHandler(std_msgs::UInt8 msg)
+    {
+        peakNum = msg.data;
+
+        ROS_INFO_STREAM("Peak Number  =    " << peakNum);
+    }
+
+    void clusterNumHandler(std_msgs::UInt8 msg)
     {
         clusterNum = msg.data;
+
         ROS_INFO_STREAM("Cluster Number  =    " << clusterNum);
     }
+
+    void odomAftMapped(nav_msgs::Odometry msg)
+    {
+        thisKeyPoint.x = msg.pose.pose.position.x;
+        thisKeyPoint.y = msg.pose.pose.position.y;
+        thisKeyPoint.z = msg.pose.pose.position.z;
+
+        ROS_INFO_STREAM("This Key Point: x = " << thisKeyPoint.x <<" y = " << thisKeyPoint.y << " z = " << thisKeyPoint.z);
+    }
+
+    void judge()
+    {
+        //初次赋值
+        if(peakNum_Pre == -1)   peakNum_Pre = peakNum;
+        if(clusterNum_Pre == -1)    clusterNum_Pre = clusterNum;
+
+        //判断变化
+        if(clusterNum_Pre<=2 && clusterNum>2)
+        {
+            record_Bool = true;
+            begin = ros::Time::now();
+            clusterNum_max = 0;
+            peakNum_max = 0;
+            counter += 1;
+        }
+
+        if(clusterNum_Pre>2 && clusterNum_Pre<=2)
+        {
+            record_Bool = false;
+            ros::Duration duration = ros::Time::now()-begin;
+            interval = duration.toSec();
+
+            if(interval<2)
+            {
+                //持续时间小，视为杂波，剔除位置信息
+                while(keyPoints.back().first == counter)
+                {
+                    keyPoints.pop_back();
+                }
+                counter -= 1;
+            }
+            else
+            {
+                //保存预测数值和聚类数值
+                numOfIntersection.push_back(std::pair<uint8_t,uint8_t>(peakNum_max,clusterNum_max));
+            }
+        }
+        ROS_INFO("judge");
+    }
+
+    void recordKeyPoint()
+    {
+        keyPoints.push_back(std::pair<uint8_t,pcl::PointXYZ>(counter,thisKeyPoint));
+        if(clusterNum_max<clusterNum) clusterNum_max = clusterNum;
+        if(peakNum_max<peakNum) peakNum_max = peakNum;
+
+        ROS_INFO("recordKeyPoint");
+    }
+
+    void update()
+    {
+        peakNum_Pre = clusterNum;
+        clusterNum_Pre = clusterNum;
+        
+        ROS_INFO("update");
+    }
+    
+    void pointSave()
+    {
+        std::ofstream outfile;
+    
+        outfile.open(path+save_Name);
+
+        for (std::vector<std::pair<uint8_t,uint8_t> >::iterator iter=numOfIntersection.begin();iter!=numOfIntersection.end();++iter)  
+        {  
+            // char tmp1[5],tmp2[5];
+            // itoa(iter->first,tmp1,10);     //将10进制的数转换成string类型  
+            // message.append(iter->first);
+            // message.append("    ");
+            // itoa(iter->second,tmp2,10);     //将10进制的数转换成string类型  
+            // message.append(iter->second);
+
+            outfile << iter->first << "    ";
+            outfile << iter->second << std::endl;
+        }
+
+        outfile.close();
+
+        ROS_INFO("pointSave");
+    }
+
+    void run()
+    {
+        getDynamicParameter();
+
+        judge();
+
+        if(record_Bool) recordKeyPoint();
+
+        if(save_Bool)
+        {
+            pointSave();
+            ros::param::set("/intersection/bool_save",false);
+        }
+
+        update();
+
+    }
+
+    void getDynamicParameter()
+    {
+        ros::param::get("/intersection/save_name",save_Name);
+        ros::param::get("/intersection/bool_save",save_Bool);
+
+        ROS_INFO("getDynamicParameter");
+    }
 };
+
+//动态调参
+void callback(preception::param_Config &config, uint32_t level)
+{
+    ROS_INFO("Reconfigure Request: %s %s",
+             config.save_name.c_str(),
+             config.bool_save ? "True" : "False");
+}
 
 int main(int argc, char **argv)
 {
     ros::init(argc,argv,"keyPointSave");
+    
+    //动态参数调节
+    dynamic_reconfigure::Server<preception::param_Config> server;
+    dynamic_reconfigure::Server<preception::param_Config>::CallbackType f;
+    f = boost::bind(&callback, _1, _2);
+    server.setCallback(f);
     
     ROS_INFO("\033[1;32m---->\033[0m Key Point Save Started.");
 
@@ -37,7 +221,7 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         ros::spinOnce();
-        // KP.run();
+        KP.run();
         rate.sleep();
     }
 
