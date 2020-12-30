@@ -285,6 +285,19 @@ gtest/fast:
 .PHONY : gtest/fast
 
 #=============================================================================
+# Target rules for targets named pcd_write
+
+# Build rule for target.
+pcd_write: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 pcd_write
+.PHONY : pcd_write
+
+# fast build rule for target.
+pcd_write/fast:
+	$(MAKE) -f preception/CMakeFiles/pcd_write.dir/build.make preception/CMakeFiles/pcd_write.dir/build
+.PHONY : pcd_write/fast
+
+#=============================================================================
 # Target rules for targets named keyPointSave
 
 # Build rule for target.
@@ -387,6 +400,19 @@ actionlib_msgs_generate_messages_cpp: cmake_check_build_system
 actionlib_msgs_generate_messages_cpp/fast:
 	$(MAKE) -f preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/build.make preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/build
 .PHONY : actionlib_msgs_generate_messages_cpp/fast
+
+#=============================================================================
+# Target rules for targets named pcd_visual
+
+# Build rule for target.
+pcd_visual: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 pcd_visual
+.PHONY : pcd_visual
+
+# fast build rule for target.
+pcd_visual/fast:
+	$(MAKE) -f preception/CMakeFiles/pcd_visual.dir/build.make preception/CMakeFiles/pcd_visual.dir/build
+.PHONY : pcd_visual/fast
 
 #=============================================================================
 # Target rules for targets named actionlib_generate_messages_py
@@ -948,6 +974,19 @@ roscpp_generate_messages_lisp/fast:
 .PHONY : roscpp_generate_messages_lisp/fast
 
 #=============================================================================
+# Target rules for targets named pcd_read
+
+# Build rule for target.
+pcd_read: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 pcd_read
+.PHONY : pcd_read
+
+# fast build rule for target.
+pcd_read/fast:
+	$(MAKE) -f preception/CMakeFiles/pcd_read.dir/build.make preception/CMakeFiles/pcd_read.dir/build
+.PHONY : pcd_read/fast
+
+#=============================================================================
 # Target rules for targets named tf_generate_messages_eus
 
 # Build rule for target.
@@ -1385,6 +1424,7 @@ help:
 	@echo "... gmock"
 	@echo "... gtest_main"
 	@echo "... gtest"
+	@echo "... pcd_write"
 	@echo "... keyPointSave"
 	@echo "... laneDetection"
 	@echo "... intersection"
@@ -1393,6 +1433,7 @@ help:
 	@echo "... tf2_msgs_generate_messages_lisp"
 	@echo "... actionlib_msgs_generate_messages_py"
 	@echo "... actionlib_msgs_generate_messages_cpp"
+	@echo "... pcd_visual"
 	@echo "... actionlib_generate_messages_py"
 	@echo "... actionlib_generate_messages_nodejs"
 	@echo "... actionlib_generate_messages_lisp"
@@ -1436,6 +1477,7 @@ help:
 	@echo "... std_srvs_generate_messages_cpp"
 	@echo "... _catkin_empty_exported_target"
 	@echo "... roscpp_generate_messages_lisp"
+	@echo "... pcd_read"
 	@echo "... tf_generate_messages_eus"
 	@echo "... rosgraph_msgs_generate_messages_lisp"
 	@echo "... dynamic_reconfigure_generate_messages_eus"

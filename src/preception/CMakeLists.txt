@@ -69,3 +69,27 @@ add_dependencies(keyPointSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPOR
 target_link_libraries(keyPointSave
   ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
 )
+
+add_executable(pcd_write
+  src/pcd_write.cpp
+)
+add_dependencies(pcd_write ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pcd_write
+  ${catkin_LIBRARIES}
+)
+
+add_executable(pcd_read
+  src/pcd_read.cpp
+)
+add_dependencies(pcd_read ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pcd_read
+  ${catkin_LIBRARIES}
+)
+
+add_executable(pcd_visual
+  src/pcd_visual.cpp
+)
+add_dependencies(pcd_visual ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pcd_visual
+  ${catkin_LIBRARIES} ${PCL_LIBRARIES} 
+)

@@ -136,10 +136,13 @@ gtest/googletest/clean: gtest/googletest/CMakeFiles/gtest.dir/clean
 # Directory level rules for directory preception
 
 # Recursive "all" directory target.
+preception/all: preception/CMakeFiles/pcd_write.dir/all
 preception/all: preception/CMakeFiles/keyPointSave.dir/all
 preception/all: preception/CMakeFiles/laneDetection.dir/all
 preception/all: preception/CMakeFiles/intersection.dir/all
 preception/all: preception/CMakeFiles/preception_gencfg.dir/all
+preception/all: preception/CMakeFiles/pcd_visual.dir/all
+preception/all: preception/CMakeFiles/pcd_read.dir/all
 
 .PHONY : preception/all
 
@@ -149,6 +152,7 @@ preception/preinstall:
 .PHONY : preception/preinstall
 
 # Recursive "clean" directory target.
+preception/clean: preception/CMakeFiles/pcd_write.dir/clean
 preception/clean: preception/CMakeFiles/keyPointSave.dir/clean
 preception/clean: preception/CMakeFiles/laneDetection.dir/clean
 preception/clean: preception/CMakeFiles/intersection.dir/clean
@@ -157,6 +161,7 @@ preception/clean: preception/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/cl
 preception/clean: preception/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/clean
 preception/clean: preception/CMakeFiles/actionlib_msgs_generate_messages_py.dir/clean
 preception/clean: preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/clean
+preception/clean: preception/CMakeFiles/pcd_visual.dir/clean
 preception/clean: preception/CMakeFiles/actionlib_generate_messages_py.dir/clean
 preception/clean: preception/CMakeFiles/actionlib_generate_messages_nodejs.dir/clean
 preception/clean: preception/CMakeFiles/actionlib_generate_messages_lisp.dir/clean
@@ -200,6 +205,7 @@ preception/clean: preception/CMakeFiles/std_msgs_generate_messages_cpp.dir/clean
 preception/clean: preception/CMakeFiles/std_srvs_generate_messages_cpp.dir/clean
 preception/clean: preception/CMakeFiles/_catkin_empty_exported_target.dir/clean
 preception/clean: preception/CMakeFiles/roscpp_generate_messages_lisp.dir/clean
+preception/clean: preception/CMakeFiles/pcd_read.dir/clean
 preception/clean: preception/CMakeFiles/tf_generate_messages_eus.dir/clean
 preception/clean: preception/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/clean
 preception/clean: preception/CMakeFiles/dynamic_reconfigure_generate_messages_eus.dir/clean
@@ -478,6 +484,111 @@ gtest: gtest/googletest/CMakeFiles/gtest.dir/rule
 gtest/googletest/CMakeFiles/gtest.dir/clean:
 	$(MAKE) -f gtest/googletest/CMakeFiles/gtest.dir/build.make gtest/googletest/CMakeFiles/gtest.dir/clean
 .PHONY : gtest/googletest/CMakeFiles/gtest.dir/clean
+
+#=============================================================================
+# Target rules for target preception/CMakeFiles/pcd_write.dir
+
+# All Build rule for target.
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/preception_gencfg.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/nodelet_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/dynamic_reconfigure_gencfg.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_srvs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/pcl_ros_gencfg.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/roscpp_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/topic_tools_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/roscpp_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/roscpp_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/topic_tools_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/roscpp_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/actionlib_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_srvs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_srvs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/roscpp_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/topic_tools_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/nodelet_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/nodelet_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/nodelet_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/bond_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/bond_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/bond_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/bond_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/nodelet_topic_tools_gencfg.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/bond_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/topic_tools_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_srvs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/nodelet_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/std_srvs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_write.dir/all: preception/CMakeFiles/topic_tools_generate_messages_lisp.dir/all
+	$(MAKE) -f preception/CMakeFiles/pcd_write.dir/build.make preception/CMakeFiles/pcd_write.dir/depend
+	$(MAKE) -f preception/CMakeFiles/pcd_write.dir/build.make preception/CMakeFiles/pcd_write.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lsj/dev/Mine_WS/build/CMakeFiles --progress-num=19,20 "Built target pcd_write"
+.PHONY : preception/CMakeFiles/pcd_write.dir/all
+
+# Build rule for subdir invocation for target.
+preception/CMakeFiles/pcd_write.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lsj/dev/Mine_WS/build/CMakeFiles 3
+	$(MAKE) -f CMakeFiles/Makefile2 preception/CMakeFiles/pcd_write.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lsj/dev/Mine_WS/build/CMakeFiles 0
+.PHONY : preception/CMakeFiles/pcd_write.dir/rule
+
+# Convenience name for target.
+pcd_write: preception/CMakeFiles/pcd_write.dir/rule
+
+.PHONY : pcd_write
+
+# clean rule for target.
+preception/CMakeFiles/pcd_write.dir/clean:
+	$(MAKE) -f preception/CMakeFiles/pcd_write.dir/build.make preception/CMakeFiles/pcd_write.dir/clean
+.PHONY : preception/CMakeFiles/pcd_write.dir/clean
 
 #=============================================================================
 # Target rules for target preception/CMakeFiles/keyPointSave.dir
@@ -801,7 +912,7 @@ preception/CMakeFiles/intersection.dir/clean:
 preception/CMakeFiles/preception_gencfg.dir/all:
 	$(MAKE) -f preception/CMakeFiles/preception_gencfg.dir/build.make preception/CMakeFiles/preception_gencfg.dir/depend
 	$(MAKE) -f preception/CMakeFiles/preception_gencfg.dir/build.make preception/CMakeFiles/preception_gencfg.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lsj/dev/Mine_WS/build/CMakeFiles --progress-num=15 "Built target preception_gencfg"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lsj/dev/Mine_WS/build/CMakeFiles --progress-num=21 "Built target preception_gencfg"
 .PHONY : preception/CMakeFiles/preception_gencfg.dir/all
 
 # Build rule for subdir invocation for target.
@@ -928,6 +1039,111 @@ actionlib_msgs_generate_messages_cpp: preception/CMakeFiles/actionlib_msgs_gener
 preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/clean:
 	$(MAKE) -f preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/build.make preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/clean
 .PHONY : preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/clean
+
+#=============================================================================
+# Target rules for target preception/CMakeFiles/pcd_visual.dir
+
+# All Build rule for target.
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/preception_gencfg.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/nodelet_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/dynamic_reconfigure_gencfg.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_srvs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/pcl_ros_gencfg.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/roscpp_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/topic_tools_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/roscpp_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/roscpp_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/topic_tools_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/roscpp_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/actionlib_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_srvs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_srvs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/roscpp_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/topic_tools_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/nodelet_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/nodelet_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/nodelet_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/bond_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/bond_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/bond_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/bond_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/nodelet_topic_tools_gencfg.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/bond_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/topic_tools_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_srvs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/nodelet_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/std_srvs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_visual.dir/all: preception/CMakeFiles/topic_tools_generate_messages_lisp.dir/all
+	$(MAKE) -f preception/CMakeFiles/pcd_visual.dir/build.make preception/CMakeFiles/pcd_visual.dir/depend
+	$(MAKE) -f preception/CMakeFiles/pcd_visual.dir/build.make preception/CMakeFiles/pcd_visual.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lsj/dev/Mine_WS/build/CMakeFiles --progress-num=17,18 "Built target pcd_visual"
+.PHONY : preception/CMakeFiles/pcd_visual.dir/all
+
+# Build rule for subdir invocation for target.
+preception/CMakeFiles/pcd_visual.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lsj/dev/Mine_WS/build/CMakeFiles 3
+	$(MAKE) -f CMakeFiles/Makefile2 preception/CMakeFiles/pcd_visual.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lsj/dev/Mine_WS/build/CMakeFiles 0
+.PHONY : preception/CMakeFiles/pcd_visual.dir/rule
+
+# Convenience name for target.
+pcd_visual: preception/CMakeFiles/pcd_visual.dir/rule
+
+.PHONY : pcd_visual
+
+# clean rule for target.
+preception/CMakeFiles/pcd_visual.dir/clean:
+	$(MAKE) -f preception/CMakeFiles/pcd_visual.dir/build.make preception/CMakeFiles/pcd_visual.dir/clean
+.PHONY : preception/CMakeFiles/pcd_visual.dir/clean
 
 #=============================================================================
 # Target rules for target preception/CMakeFiles/actionlib_generate_messages_py.dir
@@ -2089,6 +2305,111 @@ roscpp_generate_messages_lisp: preception/CMakeFiles/roscpp_generate_messages_li
 preception/CMakeFiles/roscpp_generate_messages_lisp.dir/clean:
 	$(MAKE) -f preception/CMakeFiles/roscpp_generate_messages_lisp.dir/build.make preception/CMakeFiles/roscpp_generate_messages_lisp.dir/clean
 .PHONY : preception/CMakeFiles/roscpp_generate_messages_lisp.dir/clean
+
+#=============================================================================
+# Target rules for target preception/CMakeFiles/pcd_read.dir
+
+# All Build rule for target.
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/preception_gencfg.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/nodelet_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/dynamic_reconfigure_gencfg.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_srvs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/pcl_ros_gencfg.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/roscpp_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/topic_tools_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/roscpp_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/roscpp_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/topic_tools_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/roscpp_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/actionlib_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_srvs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_srvs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/roscpp_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/geometry_msgs_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/topic_tools_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/nodelet_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/nodelet_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/nodelet_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/bond_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/tf2_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/dynamic_reconfigure_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/bond_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/bond_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/bond_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/nodelet_topic_tools_gencfg.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/sensor_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/bond_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/topic_tools_generate_messages_cpp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_lisp.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/pcl_msgs_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_srvs_generate_messages_eus.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/nodelet_generate_messages_py.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/std_srvs_generate_messages_nodejs.dir/all
+preception/CMakeFiles/pcd_read.dir/all: preception/CMakeFiles/topic_tools_generate_messages_lisp.dir/all
+	$(MAKE) -f preception/CMakeFiles/pcd_read.dir/build.make preception/CMakeFiles/pcd_read.dir/depend
+	$(MAKE) -f preception/CMakeFiles/pcd_read.dir/build.make preception/CMakeFiles/pcd_read.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/lsj/dev/Mine_WS/build/CMakeFiles --progress-num=15,16 "Built target pcd_read"
+.PHONY : preception/CMakeFiles/pcd_read.dir/all
+
+# Build rule for subdir invocation for target.
+preception/CMakeFiles/pcd_read.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lsj/dev/Mine_WS/build/CMakeFiles 3
+	$(MAKE) -f CMakeFiles/Makefile2 preception/CMakeFiles/pcd_read.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lsj/dev/Mine_WS/build/CMakeFiles 0
+.PHONY : preception/CMakeFiles/pcd_read.dir/rule
+
+# Convenience name for target.
+pcd_read: preception/CMakeFiles/pcd_read.dir/rule
+
+.PHONY : pcd_read
+
+# clean rule for target.
+preception/CMakeFiles/pcd_read.dir/clean:
+	$(MAKE) -f preception/CMakeFiles/pcd_read.dir/build.make preception/CMakeFiles/pcd_read.dir/clean
+.PHONY : preception/CMakeFiles/pcd_read.dir/clean
 
 #=============================================================================
 # Target rules for target preception/CMakeFiles/tf_generate_messages_eus.dir
