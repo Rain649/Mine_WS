@@ -70,6 +70,14 @@ target_link_libraries(keyPointSave
   ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
 )
 
+add_executable(segmentationSave
+  src/segmentationSave.cpp
+)
+add_dependencies(segmentationSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(segmentationSave
+  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
+)
+
 add_executable(pcd_write
   src/pcd_write.cpp
 )

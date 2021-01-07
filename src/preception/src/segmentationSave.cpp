@@ -3,253 +3,177 @@
 #include <iomanip>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string> 
 
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/console/time.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/search/kdtree.h> // 包含kdtree头文件
+#include <pcl/kdtree/kdtree_flann.h>    //kdtree搜索
 
-#include <std_msgs/UInt8.h>
-#include <std_msgs/Bool.h>
-#include <nav_msgs/Odometry.h>
 
 #include <vector>
 #include <string>
 
-#include <dynamic_reconfigure/server.h>
-#include <preception/param_Config.h>
+pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudAll;
+std::vector<pcl::PointCloud<pcl::PointXYZI>> segCloud_Vec;
 
-class segmentationSave
+void segmentation(int index, pcl::PointXYZI thisKeyPoint, int cluster_Num, int segmentationRadius)
 {
-private:
-    short int clusterNum = 0;
-    short int peakNum = 0;
-    short int clusterNum_Pre = -1;
-    short int peakNum_Pre = -1;
-    short int counter = 0;
-    short int clusterNum_max = 0;
-    short int peakNum_max = 0;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_0(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_1(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_2(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_5(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudAfterCondition(new pcl::PointCloud<pcl::PointXYZI>());
 
-    double interval;
+    // pcl::ConditionOr<pcl::PointXYZI>::Ptr range_Condition(new pcl::ConditionOr<pcl::PointXYZI>());  //条件滤波
+    // pcl::Filter<pcl::PointCloud>:: afterFilter;
+    // pcl::ConditionalRemoval<pcl::PointXYZI> condition(true);
+    // condition.setCondition(range_Condition);
+    // condition.setInputCloud(laserCloudAll);
+    // condition.setKeepOrganized(false);
+    // condition.filter(*cloudAfterCondition);
 
-    bool record_Bool = false;
-    bool save_Bool = false;
-
-    std::string save_Name;
-
-    std::vector<pcl::PointXYZ> thisKeyPoint_Vec;
-    std::vector<std::pair<short int, pcl::PointXYZ>> keyPoints_Vec;
-    std::vector<std::pair<short int, short int>> numOfIntersection_Vec;
-
-    pcl::PointXYZ thisKeyPoint;
-
-    ros::NodeHandle nh;
-    ros::Time begin;
-    ros::Subscriber subPeakNum;
-    ros::Subscriber subClusterNum;
-    ros::Subscriber subOdomAftMapped;
-
-public:
-    segmentationSave() : nh("~")
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+	kdtree.setInputCloud(laserCloudAll); // 设置要搜索的点云，建立KDTree
+    std::vector<int> pointIdxRadiusSearch;  //保存每个近邻点的索引
+	std::vector<float> pointRadiusSquaredDistance;  //保存每个近邻点与查找点之间的欧式距离平方
+    pcl::PointCloud<pcl::PointXYZI>::Ptr keyPoint_Neighbor(new pcl::PointCloud<pcl::PointXYZI>());
+    
+    if (kdtree.radiusSearch(thisKeyPoint, segmentationRadius+5, pointIdxRadiusSearch, pointRadiusSquaredDistance)==0)
     {
-        subPeakNum = nh.subscribe<std_msgs::UInt8>("/intersection/peakNum", 1, &segmentationSave::peakNumHandler, this);
-        subClusterNum = nh.subscribe<std_msgs::UInt8>("/intersection/clusterNum", 1, &segmentationSave::clusterNumHandler, this);
-        subOdomAftMapped = nh.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 1, &segmentationSave::odomAftMapped, this);
-
-        allocateMemory();
+        return;
     }
 
-    void allocateMemory()
+    for (size_t i = 0; i < pointIdxRadiusSearch.size (); ++i)
     {
-        ROS_DEBUG("allocateMemory");
+        keyPoint_Neighbor->push_back(laserCloudAll->points[pointIdxRadiusSearch[i]]);
     }
 
-    void peakNumHandler(std_msgs::UInt8 msg)
-    {
-        peakNum = msg.data;
+    std::string fileName;
+    fileName = "/home/lsj/dev/Mine_WS/data/"+std::to_string(index)+".pcd";
+    pcl::io::savePCDFileASCII(fileName, *keyPoint_Neighbor); //将点云保存到PCD文件中
+    ROS_INFO("[%s]", fileName.c_str());
+    
+    std::vector<pcl::PointCloud<pcl::PointXYZI>> result;
+    result.push_back(*keyPoint_Neighbor);
 
-        // ROS_INFO_STREAM("Peak Number  =    " << peakNum);
-    }
 
-    void clusterNumHandler(std_msgs::UInt8 msg)
-    {
-        clusterNum = msg.data;
+    ROS_INFO("====================================================");
+    
+}
 
-        // ROS_INFO_STREAM("Cluster Number  =    " << clusterNum);
-    }
-
-    void odomAftMapped(nav_msgs::Odometry msg)
-    {
-        thisKeyPoint.x = msg.pose.pose.position.x;
-        thisKeyPoint.y = msg.pose.pose.position.y;
-        thisKeyPoint.z = msg.pose.pose.position.z;
-
-        // ROS_INFO_STREAM("This Key Point: x = " << thisKeyPoint.x << " y = " << thisKeyPoint.y << " z = " << thisKeyPoint.z);
-    }
-
-    void judge()
-    {
-        //初次赋值
-        if (peakNum_Pre == -1)
-            peakNum_Pre = peakNum;
-        if (clusterNum_Pre == -1)
-            clusterNum_Pre = clusterNum;
-
-        //判断变化
-        if (clusterNum_Pre <= 2 && clusterNum > 2)
-        {
-            record_Bool = true;
-            begin = ros::Time::now();
-            clusterNum_max = 0;
-            peakNum_max = 0;
-            counter += 1;
-
-            ROS_INFO("Start Recording Key Points.");
-        }
-
-        if (clusterNum_Pre > 2 && clusterNum <= 2)
-        {
-            record_Bool = false;
-            ros::Duration duration = ros::Time::now() - begin;
-            interval = duration.toSec();
-
-            if (interval < 2)
-            {
-                thisKeyPoint_Vec.clear();
-                ROS_INFO("Cancel Recording Key Points.");
-                counter -= 1;
-            }
-            else
-            {
-                //保存预测数值和聚类数值
-                keyPoints_Vec.push_back(std::pair<short int, pcl::PointXYZ>(counter, thisKeyPoint_Vec[(thisKeyPoint_Vec.size()+1)/2]));
-                numOfIntersection_Vec.push_back(std::pair<short int, short int>(clusterNum_max , peakNum_max));
-
-                ROS_INFO_STREAM("End Recording Key Points:  " << counter);
-            }
-        }
-        ROS_DEBUG("judge");
-    }
-
-    void recordKeyPoint()
-    {
-        if (!thisKeyPoint_Vec.empty())
-        {
-            if (getDistanceOf2Point(thisKeyPoint, thisKeyPoint_Vec.back())<0.005) return;
-        }
-
-        thisKeyPoint_Vec.push_back(thisKeyPoint);
-        if (clusterNum_max < clusterNum)
-            clusterNum_max = clusterNum;
-        if (peakNum_max < peakNum)
-            peakNum_max = peakNum;
-
-        ROS_DEBUG("recordKeyPoint");
-    }
-
-    float getDistanceOf2Point(pcl::PointXYZ point1,pcl::PointXYZ point2)
-    {
-        float distance = sqrt(pow(point1.x - point2.x,2) + pow(point1.y - point2.y,2) + pow(point1.z - point2.z,2));
-        return distance;
-    }
-
-    void update()
-    {
-        peakNum_Pre = clusterNum;
-        clusterNum_Pre = clusterNum;
-
-        ROS_DEBUG("update");
-    }
-
-    void pointsSave()
-    {
-        ROS_INFO("============== pointsSave ==============");
-        std::ofstream outfile;
-
-        outfile.open("/home/lsj/dev/Mine_WS/data/" + save_Name + ".txt");
-
-        outfile << std::setiosflags(std::ios::left) << std::setw(10) << "index" << std::setw(15) << "keyPoint.x" << std::setw(15) << "keyPoint.y"  
-        << std::setw(15) << "keyPoint.z" << std::setw(20) << "peak_number" << std::setw(20) << "cluster_number" << std::endl;
-
-        std::vector<std::pair<short int, short int>>::iterator iterNum = numOfIntersection_Vec.begin();
-        for (std::vector<std::pair<short int, pcl::PointXYZ>>::iterator iter = keyPoints_Vec.begin(); iter != keyPoints_Vec.end(); ++iter)
-        {
-            ROS_INFO("====================================================");
-            ROS_INFO_STREAM("index == " << iter->first << std::endl);
-            ROS_INFO_STREAM("keyPointPosition == " << iter-> second << std::endl);
-            ROS_INFO_STREAM("peak_number == " << iterNum->first << std::endl);
-            ROS_INFO_STREAM("cluster_number == " << iterNum-> second << std::endl);
-
-            outfile << std::setiosflags(std::ios::left) << std::setw(10) << iter->first<< std::setprecision(3) << std::setw(15) << iter->second.x << std::setw(15) << iter->second.y 
-            << std::setw(15) << iter->second.z << std::setw(20) << iterNum->first << std::setw(20) << iterNum->second << std::endl;
-
-            ++iterNum;
-        }
-
-        ROS_INFO("====================================================");
-        ROS_INFO_STREAM("Size of numOfIntersection_Vec == " << numOfIntersection_Vec.size());
-        ROS_INFO_STREAM("Size of keyPoints_Vec == " << keyPoints_Vec.size());
-
-        outfile.close();
-        ROS_INFO("============== pointsSave ==============");
-    }
-
-    void run()
-    {
-        getDynamicParameter();
-
-        judge();
-
-        if (record_Bool)
-            recordKeyPoint();
-
-        if (save_Bool)
-        {
-            pointsSave();
-            ros::param::set("/intersection/bool_save",false);
-        }
-
-        update();
-    }
-
-    void getDynamicParameter()
-    {
-        // ros::param::get("/intersection/save_name", save_Name);
-        // ros::param::get("/intersection/bool_save", save_Bool);
-
-        ROS_DEBUG("getDynamicParameter");
-    }
-};
-
-//动态调参
-void callback(preception::param_Config &config, uint32_t level)
+void save()
 {
-    // ROS_INFO("Reconfigure Request: %s %s",
-    //          config.save_name.c_str(),
-    //          config.bool_save ? "True" : "False");
+
 }
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "segmentationSave");
 
-    //动态参数调节
-    dynamic_reconfigure::Server<preception::param_Config> server;
-    dynamic_reconfigure::Server<preception::param_Config>::CallbackType f;
-    f = boost::bind(&callback, _1, _2);
-    server.setCallback(f);
+    ros::init(argc, argv, "segmentationSave");
+	ros::NodeHandle nh;
 
     ROS_INFO("\033[1;32m---->\033[0m Segmentation Save Started.");
 
-    segmentationSave SS;
+/***********************读取点云***********************/
+    std::string fileName;
+    ROS_INFO("Please Drag The PCD File In:");
+    getline(std::cin,fileName);
+    laserCloudAll.reset(new pcl::PointCloud<pcl::PointXYZI>);
+	if (pcl::io::loadPCDFile<pcl::PointXYZI>("/home/lsj/dev/Mine_WS/data/CLOUD_All.pcd", *laserCloudAll) == -1)//*打开点云文件。
+	{                                                                           //带路径的格式【注意路径的反斜杠与电脑自己的不同】
+		PCL_ERROR("Couldn't read laserCloudAll.pcd\n");                             // //不带路径的格式【只是把路径删掉即可】
+		return(-1);
+	}
+    else ROS_INFO_STREAM("The Number of Points of This PCD File is :  " << laserCloudAll->size());
+/***********************读取点云***********************/
 
-    ros::Rate rate(5);
-    while (ros::ok())
+/***********************读取文件***********************/
+    std::ifstream infile;  //infile是一个文件流，因此其实还是对流进行的操作
+    fileName.clear();
+    ROS_INFO("Please Drag The Intersection Information File In:");
+    getline(std::cin,fileName);
+    // std::cout << fileName.substr(1, fileName.length() - 3) << std::endl;
+    infile.open(fileName.substr(1, fileName.length() - 3));
+    if (!infile) //判断是否存在ifstream infile
     {
-        ros::spinOnce();
-        SS.run();
-        rate.sleep();
+        ROS_ERROR("-----------No such File-----------");
     }
+    else
+    {
+        ROS_INFO("-----------Read File Successfully-----------");
+    }
+
+    std::vector<float> data_Vec;
+    if (infile.is_open()) //判断文件流是否处于打开状态
+    {   
+        std::string firstLine;
+        std::getline(infile, firstLine);
+        while (infile.good() && !infile.eof())
+        {
+            float temp;
+            infile >> temp;
+            data_Vec.push_back(temp); //将数据读入到data_vector
+        }
+    }
+/***********************读取文件***********************/
+
+/***********************数据处理***********************/
+    int index;
+    pcl::PointXYZI thisKeyPoint;
+    int clusterNum;
+    int peakNum;
+    int segmentationRadius;
+    int i = 0;
+    for (std::vector<float>::iterator iter = data_Vec.begin(); iter != data_Vec.end(); ++iter)
+    {   
+        ++i;
+        switch(i%7)
+        {
+            case 1:
+                index = *iter;
+                segCloud_Vec.clear();
+
+                break;
+            case 2:
+                thisKeyPoint.x = *iter;
+
+                break;
+            case 3:
+                thisKeyPoint.y = *iter;
+
+                break;
+            case 4:
+                thisKeyPoint.z = *iter;
+
+                break;
+            case 5:
+                clusterNum = *iter;
+
+                break;
+            case 6:
+                peakNum = *iter;
+
+                break;
+            case 0:
+                segmentationRadius = *iter;
+                segmentation(index, thisKeyPoint, clusterNum, segmentationRadius);
+
+                break;
+        }
+
+
+    }
+/***********************数据处理***********************/
+
+    infile.close();
+
+	ROS_INFO("Segmentation Save");
 
     return 0;
 }

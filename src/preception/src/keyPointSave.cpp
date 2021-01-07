@@ -24,6 +24,7 @@ class keyPointSave
 private:
     short int clusterNum = 0;
     short int peakNum = 0;
+    short int segmentationRadius = 0;
     short int clusterNum_Pre = -1;
     short int peakNum_Pre = -1;
     short int counter = 0;
@@ -36,8 +37,8 @@ private:
     bool save_Bool = false;
 
     std::string save_Name;
-
-    std::vector<pcl::PointXYZ> thisKeyPoint_Vec;
+    std::vector<short int> radius_Vec;
+    std::vector<std::pair<pcl::PointXYZ, short int>> thisKeyPoint_Vec;
     std::vector<std::pair<short int, pcl::PointXYZ>> keyPoints_Vec;
     std::vector<std::pair<short int, short int>> numOfIntersection_Vec;
 
@@ -48,12 +49,13 @@ private:
     ros::Subscriber subPeakNum;
     ros::Subscriber subClusterNum;
     ros::Subscriber subOdomAftMapped;
-
+    ros::Subscriber subSegmentationRadius;
 public:
     keyPointSave() : nh("~")
     {
         subPeakNum = nh.subscribe<std_msgs::UInt8>("/intersection/peakNum", 1, &keyPointSave::peakNumHandler, this);
         subClusterNum = nh.subscribe<std_msgs::UInt8>("/intersection/clusterNum", 1, &keyPointSave::clusterNumHandler, this);
+        subSegmentationRadius = nh.subscribe<std_msgs::UInt8>("/intersection/segmentationRadius", 1, &keyPointSave::segmentationRadiusHandler, this);
         subOdomAftMapped = nh.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 1, &keyPointSave::odomAftMapped, this);
 
         allocateMemory();
@@ -74,6 +76,13 @@ public:
     void clusterNumHandler(std_msgs::UInt8 msg)
     {
         clusterNum = msg.data;
+
+        // ROS_INFO_STREAM("Cluster Number  =    " << clusterNum);
+    }
+
+    void segmentationRadiusHandler(std_msgs::UInt8 msg)
+    {
+        segmentationRadius = msg.data;
 
         // ROS_INFO_STREAM("Cluster Number  =    " << clusterNum);
     }
@@ -122,7 +131,8 @@ public:
             else
             {
                 //保存预测数值和聚类数值
-                keyPoints_Vec.push_back(std::pair<short int, pcl::PointXYZ>(counter, thisKeyPoint_Vec[(thisKeyPoint_Vec.size()+1)/2]));
+                keyPoints_Vec.push_back(std::pair<short int, pcl::PointXYZ>(counter, thisKeyPoint_Vec[(thisKeyPoint_Vec.size()+1)/2].first));
+                radius_Vec.push_back(thisKeyPoint_Vec[(thisKeyPoint_Vec.size()+1)/2].second);
                 numOfIntersection_Vec.push_back(std::pair<short int, short int>(clusterNum_max , peakNum_max));
 
                 ROS_INFO_STREAM("End Recording Key Points:  " << counter);
@@ -135,10 +145,16 @@ public:
     {
         if (!thisKeyPoint_Vec.empty())
         {
-            if (getDistanceOf2Point(thisKeyPoint, thisKeyPoint_Vec.back())<0.005) return;
+            if (getDistanceOf2Point(thisKeyPoint, thisKeyPoint_Vec.back().first)<0.005) return;
+        }
+        
+        if(segmentationRadius>16)
+        {
+            return;
         }
 
-        thisKeyPoint_Vec.push_back(thisKeyPoint);
+        thisKeyPoint_Vec.push_back(std::pair<pcl::PointXYZ, short int>(thisKeyPoint, segmentationRadius));
+
         if (clusterNum_max < clusterNum)
             clusterNum_max = clusterNum;
         if (peakNum_max < peakNum)
@@ -169,9 +185,10 @@ public:
         outfile.open("/home/lsj/dev/Mine_WS/data/" + save_Name + ".txt");
 
         outfile << std::setiosflags(std::ios::left) << std::setw(10) << "index" << std::setw(15) << "keyPoint.x" << std::setw(15) << "keyPoint.y"  
-        << std::setw(15) << "keyPoint.z" << std::setw(20) << "peak_number" << std::setw(20) << "cluster_number" << std::endl;
+        << std::setw(15) << "keyPoint.z" << std::setw(20) << "cluster_number" << std::setw(20) << "peak_number" << std::setw(10) << "radius" << std::endl;
 
         std::vector<std::pair<short int, short int>>::iterator iterNum = numOfIntersection_Vec.begin();
+        std::vector<short int>::iterator iterRadius = radius_Vec.begin();
         for (std::vector<std::pair<short int, pcl::PointXYZ>>::iterator iter = keyPoints_Vec.begin(); iter != keyPoints_Vec.end(); ++iter)
         {
             ROS_INFO("====================================================");
@@ -181,7 +198,7 @@ public:
             ROS_INFO_STREAM("cluster_number == " << iterNum-> second << std::endl);
 
             outfile << std::setiosflags(std::ios::left) << std::setw(10) << iter->first<< std::setprecision(3) << std::setw(15) << iter->second.x << std::setw(15) << iter->second.y 
-            << std::setw(15) << iter->second.z << std::setw(20) << iterNum->first << std::setw(20) << iterNum->second << std::endl;
+            << std::setw(15) << iter->second.z << std::setw(20) << iterNum->first << std::setw(20) << iterNum->second << std::setw(10) << *iterRadius << std::endl;
 
             ++iterNum;
         }

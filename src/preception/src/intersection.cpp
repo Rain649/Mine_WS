@@ -63,8 +63,6 @@ class Detection
     bool outlier_Bool;
     bool medianFilter_Bool;
 
-    std::vector<int> pointSearchInd;    //聚类索引
-    std::vector<float> pointSearchSqDis;    //聚类距离
     std::vector<std::pair<int,double> > beam_Invalid;   //有效laser列索引、距离
 
     std_msgs::Bool intersectionDetected;
@@ -112,6 +110,7 @@ class Detection
     ros::Publisher pubEdgeLane;
     ros::Publisher pubPeakNum;
     ros::Publisher pubClusterNum;
+    ros::Publisher pubSegmentationRadius;
     ros::Publisher pubCluster_1;
     ros::Publisher pubCluster_2;
     ros::Publisher pubCluster_3;
@@ -128,13 +127,14 @@ class Detection
         pubCloudWithInfo = nh.advertise<sensor_msgs::PointCloud2>("cloudWithInfo", 10);
         pubCloudFar = nh.advertise<sensor_msgs::PointCloud2>("cloudFar", 5);
         pubCloudAfterCondition = nh.advertise<sensor_msgs::PointCloud2>("cloudAfterCondition", 5);
-        pubIntersectionDetected = nh.advertise<std_msgs::Bool>("intersectionDetected", 5);
-        pubIntersectionVerified = nh.advertise<std_msgs::Bool>("intersectionVerified", 5);
+        pubIntersectionDetected = nh.advertise<std_msgs::Bool>("intersectionDetected", 1);
+        pubIntersectionVerified = nh.advertise<std_msgs::Bool>("intersectionVerified", 1);
         pubBeamDistance = nh.advertise<std_msgs::Float32MultiArray>("beamDistance", 1);
         pubLaserLane = nh.advertise<visualization_msgs::Marker>("laserLane", 1);
         pubEdgeLane = nh.advertise<visualization_msgs::Marker>("edgeLane", 1);
         pubPeakNum = nh.advertise<std_msgs::UInt8>("peakNum", 1);
         pubClusterNum = nh.advertise<std_msgs::UInt8>("clusterNum", 1);
+        pubSegmentationRadius = nh.advertise<std_msgs::UInt8>("segmentationRadius", 1);
         pubCluster_1 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_1", 5);
         pubCluster_2 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_2", 5);
         pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 5);
@@ -612,15 +612,6 @@ class Detection
         condition.filter(*cloudAfterCondition);
     }
 
-    // void set_Condition(pcl::PointXYZI>::Ptr msg)
-    // {
-    //         int x = msg->points.x;
-    //         int y = msg->points.y;
-    //         int dis = pow(x,2) + pow(y,2);
-    //         if(dis>pow(xy_Condition,2)) return true;
-    //         else return false;
-    // }
-
     void intersectionCluster()
     {
         // if(cloudAfterCondition->width == 0) return;
@@ -804,6 +795,10 @@ class Detection
                 beam_Dis.data.push_back(beam_Distance[i]);
             }
             pubBeamDistance.publish(beam_Dis);
+
+            std_msgs::UInt8 segmentationRadius;
+            segmentationRadius.data = xy_Condition;
+            pubSegmentationRadius.publish(segmentationRadius);
         }
     }
 
@@ -816,10 +811,10 @@ class Detection
             getCloudWithInfo();
             laser_Visualizaton();
             intersectionDetection();
-            if(intersectionVerified.data || true)
+            if(intersectionVerified.data)
             {
                 loop:
-                    ROS_INFO_STREAM("Condition  ===========    " << xy_Condition);
+                    ROS_INFO_STREAM("xy_Condition  ===========    " << xy_Condition);
                     intersectionDivide();
                     intersectionCluster();
                     

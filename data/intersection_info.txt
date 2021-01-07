@@ -1,0 +1,8 @@
+index     keyPoint.x     keyPoint.y     keyPoint.z     cluster_number      peak_number         radius    
+1         -354           -24.9          157            3                   3                   12        
+2         -391           -22.6          159            3                   2                   12        
+3         -399           -21.9          160            3                   3                   12        
+4         -530           -4.7           198            6                   5                   12        
+5         -645           14.8           246            3                   3                   12        
+6         -639           17.3           263            3                   3                   12        
+7         -630           19.1           275            4                   3                   12        

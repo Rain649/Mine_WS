@@ -183,6 +183,21 @@ pcd_write/fast:
 .PHONY : pcd_write/fast
 
 # Convenience name for target.
+preception/CMakeFiles/segmentationSave.dir/rule:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f CMakeFiles/Makefile2 preception/CMakeFiles/segmentationSave.dir/rule
+.PHONY : preception/CMakeFiles/segmentationSave.dir/rule
+
+# Convenience name for target.
+segmentationSave: preception/CMakeFiles/segmentationSave.dir/rule
+
+.PHONY : segmentationSave
+
+# fast build rule for target.
+segmentationSave/fast:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/segmentationSave.dir/build.make preception/CMakeFiles/segmentationSave.dir/build
+.PHONY : segmentationSave/fast
+
+# Convenience name for target.
 preception/CMakeFiles/keyPointSave.dir/rule:
 	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f CMakeFiles/Makefile2 preception/CMakeFiles/keyPointSave.dir/rule
 .PHONY : preception/CMakeFiles/keyPointSave.dir/rule
@@ -1619,6 +1634,33 @@ src/pcd_write.cpp.s:
 	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/pcd_write.dir/build.make preception/CMakeFiles/pcd_write.dir/src/pcd_write.cpp.s
 .PHONY : src/pcd_write.cpp.s
 
+src/segmentationSave.o: src/segmentationSave.cpp.o
+
+.PHONY : src/segmentationSave.o
+
+# target to build an object file
+src/segmentationSave.cpp.o:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/segmentationSave.dir/build.make preception/CMakeFiles/segmentationSave.dir/src/segmentationSave.cpp.o
+.PHONY : src/segmentationSave.cpp.o
+
+src/segmentationSave.i: src/segmentationSave.cpp.i
+
+.PHONY : src/segmentationSave.i
+
+# target to preprocess a source file
+src/segmentationSave.cpp.i:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/segmentationSave.dir/build.make preception/CMakeFiles/segmentationSave.dir/src/segmentationSave.cpp.i
+.PHONY : src/segmentationSave.cpp.i
+
+src/segmentationSave.s: src/segmentationSave.cpp.s
+
+.PHONY : src/segmentationSave.s
+
+# target to generate assembly for a file
+src/segmentationSave.cpp.s:
+	cd /home/lsj/dev/Mine_WS/build && $(MAKE) -f preception/CMakeFiles/segmentationSave.dir/build.make preception/CMakeFiles/segmentationSave.dir/src/segmentationSave.cpp.s
+.PHONY : src/segmentationSave.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -1631,6 +1673,7 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... pcd_write"
+	@echo "... segmentationSave"
 	@echo "... keyPointSave"
 	@echo "... laneDetection"
 	@echo "... intersection"
@@ -1736,6 +1779,9 @@ help:
 	@echo "... src/pcd_write.o"
 	@echo "... src/pcd_write.i"
 	@echo "... src/pcd_write.s"
+	@echo "... src/segmentationSave.o"
+	@echo "... src/segmentationSave.i"
+	@echo "... src/segmentationSave.s"
 .PHONY : help
 
 

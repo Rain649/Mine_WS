@@ -298,6 +298,19 @@ pcd_write/fast:
 .PHONY : pcd_write/fast
 
 #=============================================================================
+# Target rules for targets named segmentationSave
+
+# Build rule for target.
+segmentationSave: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 segmentationSave
+.PHONY : segmentationSave
+
+# fast build rule for target.
+segmentationSave/fast:
+	$(MAKE) -f preception/CMakeFiles/segmentationSave.dir/build.make preception/CMakeFiles/segmentationSave.dir/build
+.PHONY : segmentationSave/fast
+
+#=============================================================================
 # Target rules for targets named keyPointSave
 
 # Build rule for target.
@@ -1425,6 +1438,7 @@ help:
 	@echo "... gtest_main"
 	@echo "... gtest"
 	@echo "... pcd_write"
+	@echo "... segmentationSave"
 	@echo "... keyPointSave"
 	@echo "... laneDetection"
 	@echo "... intersection"
