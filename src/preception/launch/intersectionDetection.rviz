@@ -7,8 +7,6 @@ Panels:
         - /Global Options1
         - /Status1
         - /Edge2/Namespaces1
-        - /Corner1/Status1
-        - /Surf1/Status1
       Splitter Ratio: 0.49117645621299744
     Tree Height: 746
   - Class: rviz/Selection
@@ -256,7 +254,7 @@ Visualization Manager:
       Marker Topic: /intersection/edgeLane
       Name: Edge
       Namespaces:
-        {}
+        intersection: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -533,7 +531,7 @@ Visualization Manager:
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: /camera
+    Fixed Frame: velodyne
     Frame Rate: 30
   Name: root
   Tools:
@@ -557,7 +555,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 612.6927490234375
+      Distance: 127.81556701660156
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -565,9 +563,9 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -124.54714965820312
-        Y: -38.932212829589844
-        Z: 1.4217185707821045e-05
+        X: -2.0606131553649902
+        Y: 15.467412948608398
+        Z: 6.517672773043159e-06
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

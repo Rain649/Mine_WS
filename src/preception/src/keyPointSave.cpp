@@ -38,6 +38,7 @@ private:
 
     std::string save_Name;
     std::vector<short int> radius_Vec;
+    std::vector<std::pair<short int, short int>> thisNum_Vec;
     std::vector<std::pair<pcl::PointXYZ, short int>> thisKeyPoint_Vec;
     std::vector<std::pair<short int, pcl::PointXYZ>> keyPoints_Vec;
     std::vector<std::pair<short int, short int>> numOfIntersection_Vec;
@@ -111,6 +112,8 @@ public:
             begin = ros::Time::now();
             clusterNum_max = 0;
             peakNum_max = 0;
+            thisNum_Vec.clear();
+            thisKeyPoint_Vec.clear();
             counter += 1;
 
             ROS_INFO("Start Recording Key Points.");
@@ -124,18 +127,55 @@ public:
 
             if (interval < 2)
             {
-                thisKeyPoint_Vec.clear();
                 ROS_INFO("Cancel Recording Key Points.");
                 counter -= 1;
             }
             else
             {
                 //保存预测数值和聚类数值
+                // std::vector<int>::iterator index_NumMax = find(thisNum_Vec.begin(), thisNum_Vec.end(), clusterNum_max); //查找target
+                // std::vector<std::pair<short int，short int>>::iterator iterNum = thisNum_Vec.begin();
+                // std::vector<short int> Max_Vec;
+                // std::vector<std::pair<pcl::PointXYZ, short int>>::iterator iterKeyPoint = thisKeyPoint_Vec.begin();
+                // while ((iterNum = std::find_if(iterNum, thisNum_Vec.end(), (clusterNum_max, peakNum_max))) != thisNum_Vec.end())  //当iter等于A.end()时，意味着处理完毕，退出循环
+                // {
+                //     // indexOfMax_Vec.push_back()
+                //     push_back
+                    
+                //     iterKeyPoint++;
+                //     iterNum++;  //iter加1，作为下次查找的起点。
+                // }
+
+                std::vector<std::pair<short int,short int>>::iterator iterNum = thisNum_Vec.begin();
+                std::vector<std::pair<pcl::PointXYZ,short int>>::iterator iterKeyPoint = thisKeyPoint_Vec.begin();
+                while(iterNum!= thisNum_Vec.end())
+                {
+                    if(iterNum->first!=clusterNum_max||iterNum->second!=peakNum_max)
+                    {
+                        iterNum = thisNum_Vec.erase(iterNum);
+                        iterKeyPoint = thisKeyPoint_Vec.erase(iterKeyPoint);
+                    }
+                    else
+                    {
+                        iterNum++;
+                        iterKeyPoint++;
+                    }
+                }
+
+                if(thisKeyPoint_Vec.size() == 0)
+                {
+                    ROS_ERROR("thisKeyPoint_Vec has no data!!!!!!!!!");
+                    ROS_ERROR("Cancel Recording Key Points.");
+                    counter -= 1;
+
+                    return;
+                }
+
                 keyPoints_Vec.push_back(std::pair<short int, pcl::PointXYZ>(counter, thisKeyPoint_Vec[(thisKeyPoint_Vec.size()+1)/2].first));
                 radius_Vec.push_back(thisKeyPoint_Vec[(thisKeyPoint_Vec.size()+1)/2].second);
                 numOfIntersection_Vec.push_back(std::pair<short int, short int>(clusterNum_max , peakNum_max));
 
-                ROS_INFO_STREAM("End Recording Key Points:  " << counter);
+                ROS_INFO_STREAM("\033[1;32m---->\033[0m End Recording Key Points:  " << counter);
             }
         }
         ROS_DEBUG("judge");
@@ -154,11 +194,14 @@ public:
         }
 
         thisKeyPoint_Vec.push_back(std::pair<pcl::PointXYZ, short int>(thisKeyPoint, segmentationRadius));
+        thisNum_Vec.push_back(std::pair<short int,short int>(clusterNum,peakNum));
 
-        if (clusterNum_max < clusterNum)
-            clusterNum_max = clusterNum;
         if (peakNum_max < peakNum)
+        {
             peakNum_max = peakNum;
+            if (clusterNum_max < clusterNum)
+                clusterNum_max = clusterNum;
+        }
 
         ROS_DEBUG("recordKeyPoint");
     }
