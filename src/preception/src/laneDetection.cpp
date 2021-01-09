@@ -184,7 +184,7 @@ public:
         cloudCluster_3->clear();
         cloudCluster_4->clear();
 
-        Distance.data = NULL;
+        Distance.data = -1;
         B_array.data.clear();
 
         receivePoints = false;

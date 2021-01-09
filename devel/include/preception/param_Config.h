@@ -239,7 +239,7 @@ class DEFAULT
         boost::any val;
         (*_i)->getValue(config, val);
 
-        if("xy_condition"==(*_i)->name){xy_condition = boost::any_cast<int>(val);}
+        if("segmentation_radius"==(*_i)->name){segmentation_radius = boost::any_cast<int>(val);}
         if("width_threshold"==(*_i)->name){width_threshold = boost::any_cast<int>(val);}
         if("distance_threshold"==(*_i)->name){distance_threshold = boost::any_cast<int>(val);}
         if("col_minus_threshold"==(*_i)->name){col_minus_threshold = boost::any_cast<int>(val);}
@@ -254,7 +254,7 @@ class DEFAULT
       }
     }
 
-    int xy_condition;
+    int segmentation_radius;
 int width_threshold;
 int distance_threshold;
 int col_minus_threshold;
@@ -276,7 +276,7 @@ std::string save_name;
 
 
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      int xy_condition;
+      int segmentation_radius;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       int width_threshold;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -438,15 +438,15 @@ std::string save_name;
     {
 param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Default", "", 0, 0, true, &param_Config::groups);
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __min__.xy_condition = 0;
+      __min__.segmentation_radius = 0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __max__.xy_condition = 20;
+      __max__.segmentation_radius = 16;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __default__.xy_condition = 8;
+      __default__.segmentation_radius = 8;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("xy_condition", "int", 0, "An Integer parameter", "", &param_Config::xy_condition)));
+      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("segmentation_radius", "int", 0, "An Integer parameter", "", &param_Config::segmentation_radius)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("xy_condition", "int", 0, "An Integer parameter", "", &param_Config::xy_condition)));
+      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("segmentation_radius", "int", 0, "An Integer parameter", "", &param_Config::segmentation_radius)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.width_threshold = 0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -478,11 +478,11 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("col_minus_threshold", "int", 0, "An Integer parameter", "", &param_Config::col_minus_threshold)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __min__.median_size = 3;
+      __min__.median_size = 1;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __max__.median_size = 15;
+      __max__.median_size = 10;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __default__.median_size = 5;
+      __default__.median_size = 3;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("median_size", "int", 0, "An Integer parameter", "", &param_Config::median_size)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"

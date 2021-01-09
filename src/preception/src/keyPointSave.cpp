@@ -293,11 +293,12 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "keyPointSave");
 
-    //动态参数调节
+/*动态参数调节*/
     dynamic_reconfigure::Server<preception::param_Config> server;
     dynamic_reconfigure::Server<preception::param_Config>::CallbackType f;
     f = boost::bind(&callback, _1, _2);
     server.setCallback(f);
+/*动态参数调节*/
 
     ROS_INFO("\033[1;32m---->\033[0m Key Point Save Started.");
 

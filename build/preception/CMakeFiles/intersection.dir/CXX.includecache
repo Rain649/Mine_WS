@@ -53,11 +53,13 @@ pcl/filters/voxel_grid.h
 -
 pcl/filters/statistical_outlier_removal.h
 -
-pcl/filters/conditional_removal.h
--
 pcl/kdtree/kdtree_flann.h
 -
 pcl/segmentation/extract_clusters.h
+-
+pcl/filters/extract_indices.h
+-
+pcl/filters/passthrough.h
 -
 cmath
 -
@@ -2912,14 +2914,10 @@ boost/fusion/sequence/intrinsic/at_key.hpp
 boost/optional.hpp
 -
 
-/usr/include/pcl-1.10/pcl/filters/conditional_removal.h
-pcl/pcl_macros.h
+/usr/include/pcl-1.10/pcl/filters/extract_indices.h
+pcl/filters/filter_indices.h
 -
-pcl/common/eigen.h
--
-pcl/filters/filter.h
--
-pcl/filters/impl/conditional_removal.hpp
+pcl/filters/impl/extract_indices.hpp
 -
 
 /usr/include/pcl-1.10/pcl/filters/filter.h
@@ -2944,12 +2942,10 @@ pcl/filters/filter.h
 pcl/filters/impl/filter_indices.hpp
 -
 
-/usr/include/pcl-1.10/pcl/filters/impl/conditional_removal.hpp
+/usr/include/pcl-1.10/pcl/filters/impl/extract_indices.hpp
+pcl/filters/extract_indices.h
+-
 pcl/common/io.h
--
-pcl/common/copy_point.h
--
-pcl/filters/conditional_removal.h
 -
 
 /usr/include/pcl-1.10/pcl/filters/impl/filter.hpp
@@ -2962,6 +2958,12 @@ pcl/filters/filter.h
 pcl/pcl_macros.h
 -
 pcl/filters/filter_indices.h
+-
+
+/usr/include/pcl-1.10/pcl/filters/impl/passthrough.hpp
+pcl/filters/passthrough.h
+-
+pcl/common/io.h
 -
 
 /usr/include/pcl-1.10/pcl/filters/impl/statistical_outlier_removal.hpp
@@ -2978,6 +2980,12 @@ pcl/common/common.h
 pcl/common/io.h
 -
 pcl/filters/voxel_grid.h
+-
+
+/usr/include/pcl-1.10/pcl/filters/passthrough.h
+pcl/filters/filter_indices.h
+-
+pcl/filters/impl/passthrough.hpp
 -
 
 /usr/include/pcl-1.10/pcl/filters/statistical_outlier_removal.h

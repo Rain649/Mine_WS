@@ -3,10 +3,10 @@ param {
 group.0 {
 name=Dynamically Reconfigurable Parameters
 desc=See the [[dynamic_reconfigure]] package for details on dynamically reconfigurable parameters.
-0.name= ~xy_condition
+0.name= ~segmentation_radius
 0.default= 8
 0.type= int
-0.desc=An Integer parameter Range: 0 to 20
+0.desc=An Integer parameter Range: 0 to 16
 1.name= ~width_threshold
 1.default= 4
 1.type= int
@@ -20,9 +20,9 @@ desc=See the [[dynamic_reconfigure]] package for details on dynamically reconfig
 3.type= int
 3.desc=An Integer parameter Range: 0 to 80
 4.name= ~median_size
-4.default= 5
+4.default= 3
 4.type= int
-4.desc=An Integer parameter Range: 3 to 15
+4.desc=An Integer parameter Range: 1 to 10
 5.name= ~cluster_radius
 5.default= 8
 5.type= int

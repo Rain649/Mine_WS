@@ -2,11 +2,11 @@
 
 Reads and maintains the following parameters on the ROS server
 
-- \b "~xy_condition" : \b [int] An Integer parameter min: 0, default: 8, max: 20
+- \b "~segmentation_radius" : \b [int] An Integer parameter min: 0, default: 8, max: 16
 - \b "~width_threshold" : \b [int] An Integer parameter min: 0, default: 4, max: 20
 - \b "~distance_threshold" : \b [int] An Integer parameter min: 0, default: 15, max: 80
 - \b "~col_minus_threshold" : \b [int] An Integer parameter min: 0, default: 80, max: 80
-- \b "~median_size" : \b [int] An Integer parameter min: 3, default: 5, max: 15
+- \b "~median_size" : \b [int] An Integer parameter min: 1, default: 3, max: 10
 - \b "~cluster_radius" : \b [int] An Integer parameter min: 0, default: 8, max: 20
 - \b "~cluster_size_min" : \b [int] An Integer parameter min: 10, default: 30, max: 100
 - \b "~median_coefficient" : \b [double] A double parameter min: 0.0, default: 1.0, max: 1.0
