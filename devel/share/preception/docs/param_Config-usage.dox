@@ -5,8 +5,8 @@
   <param name="width_threshold" type="int" value="4" />
   <param name="distance_threshold" type="int" value="15" />
   <param name="col_minus_threshold" type="int" value="80" />
-  <param name="median_size" type="int" value="9" />
-  <param name="cluster_radius" type="int" value="6" />
+  <param name="median_size" type="int" value="5" />
+  <param name="cluster_radius" type="int" value="8" />
   <param name="cluster_size_min" type="int" value="30" />
   <param name="median_coefficient" type="double" value="1.0" />
   <param name="bool_outlier_removal" type="bool" value="True" />

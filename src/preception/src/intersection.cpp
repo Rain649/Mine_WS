@@ -25,23 +25,11 @@
 #include "std_msgs/Float32MultiArray.h"
 #include <pcl/visualization/pcl_plotter.h>
 #include <visualization_msgs/Marker.h>
-
-const int Horizon_SCAN = 360/2;
+#include <utility.h>
 
 class Detection
 {
     private:
-    // const int kernelSize = 5;
-    const int N_SCAN = 16;
-    // const float ang_res_x = 0.2;
-    const float ang_res_y = 2.0;
-    const float ang_bottom = 15.0;
-    const int groundScanInd = 0;
-    const int aboveScanInd = 16;
-    const int colFL = 0;
-    // const int colBL = 120;
-    // const int colBR = 240;
-    const int colFR = Horizon_SCAN;
     int xy_Condition;
     int width_Thre;
     int median_Size;
@@ -256,8 +244,8 @@ class Detection
         for (int k = 0; k < laserCloudNewDS->points.size(); k++)
         {
             ExistPoint = laserCloudNewDS->points[k];
-            if (ExistPoint.intensity < 1)
-                continue;
+            // if (ExistPoint.intensity < 1)
+            //     continue;
             // if (ExistPoint.z > 1.5 || ExistPoint.z < -2)
             //     continue;
             laserCloudNewTFDS->push_back(ExistPoint);
@@ -275,47 +263,41 @@ class Detection
         receivePoints = true;
     }
 
-    void getCloudWithInfo()
+    pcl::PointCloud<pcl::PointXYZI>::Ptr getCloudWithInfo(pcl::PointCloud<pcl::PointXYZI>::Ptr input_Cloud, int row_Min, int row_Max, int horizon_Num)
     {
         float verticalAngle, horizonAngle;
         pcl::PointXYZI thisPoint;
+        pcl::PointCloud<pcl::PointXYZI>::Ptr result(new pcl::PointCloud<pcl::PointXYZI>());
 
-        int num = 0;
-        for (int i = 0; i < laserCloudNewTFDS->points.size(); i++)
+        for (int i = 0; i < input_Cloud->points.size(); i++)
         {
             int rowIdn, columnIdn, index;
-            thisPoint.x = laserCloudNewTFDS->points[i].x;
-            thisPoint.y = laserCloudNewTFDS->points[i].y;
-            thisPoint.z = laserCloudNewTFDS->points[i].z;
-            thisPoint.intensity = laserCloudNewTFDS->points[i].intensity;
+            thisPoint.x = input_Cloud->points[i].x;
+            thisPoint.y = input_Cloud->points[i].y;
+            thisPoint.z = input_Cloud->points[i].z;
+            thisPoint.intensity = input_Cloud->points[i].intensity;
 
             verticalAngle = atan2(thisPoint.z, sqrt(thisPoint.x * thisPoint.x + thisPoint.y * thisPoint.y)) * 180 / M_PI;
             rowIdn = (verticalAngle + ang_bottom) / ang_res_y;
 
-            // std::cout<<"rowIdn = "<< rowIdn << std::endl;
-
-            if (rowIdn < groundScanInd || rowIdn >= aboveScanInd)
+            if (rowIdn < row_Min || rowIdn >= row_Max)
                 continue;
 
             horizonAngle = atan2(thisPoint.y, thisPoint.x) * 180 / M_PI;
             if (thisPoint.y < 0)
                 horizonAngle += 360;
-            // std::cout<<"horizonAngle = "<< horizonAngle << std::endl;
 
-            columnIdn = round(horizonAngle*Horizon_SCAN/360);
-            if (columnIdn >= Horizon_SCAN)
-                columnIdn -= Horizon_SCAN;
-
-            // if (columnIdn < colFL || columnIdn > colFR || columnIdn > colBL && columnIdn < colBR)
-            //     continue;
+            columnIdn = round(horizonAngle*horizon_Num/360);
+            if (columnIdn >= horizon_Num)
+                columnIdn -= horizon_Num;
 
             float range = sqrt(thisPoint.x * thisPoint.x + thisPoint.y * thisPoint.y + thisPoint.z * thisPoint.z);
 
-            index = columnIdn + rowIdn * Horizon_SCAN;
-            cloudWithInfo->points[index] = thisPoint;
-
-            num += 1;
-        }       
+            index = columnIdn + rowIdn * horizon_Num;
+            result->points[index] = thisPoint;
+        }
+        
+        return result;
     }
 
     void laser_Visualizaton()
@@ -808,7 +790,7 @@ class Detection
         {
             over = false;
             getDynamicParameter();
-            getCloudWithInfo();
+            cloudWithInfo = getCloudWithInfo(laserCloudNew,groundScanInd,aboveScanInd,Horizon_SCAN);
             laser_Visualizaton();
             intersectionDetection();
             if(intersectionVerified.data)
