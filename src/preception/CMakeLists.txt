@@ -1,3 +1,4 @@
+##此程序由北京理工大学*刘仕杰*编写##
 cmake_minimum_required(VERSION 3.0.2)
 project(preception)
 
@@ -51,7 +52,7 @@ add_executable(intersection
 )
 add_dependencies(intersection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(intersection
-  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
+  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  ${OpenCV_LIBS}
 )
 
 add_executable(laneDetection

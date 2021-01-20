@@ -244,8 +244,8 @@ class DEFAULT
         if("distance_threshold"==(*_i)->name){distance_threshold = boost::any_cast<int>(val);}
         if("col_minus_threshold"==(*_i)->name){col_minus_threshold = boost::any_cast<int>(val);}
         if("median_size"==(*_i)->name){median_size = boost::any_cast<int>(val);}
-        if("cluster_radius"==(*_i)->name){cluster_radius = boost::any_cast<int>(val);}
         if("cluster_size_min"==(*_i)->name){cluster_size_min = boost::any_cast<int>(val);}
+        if("cluster_radius"==(*_i)->name){cluster_radius = boost::any_cast<double>(val);}
         if("median_coefficient"==(*_i)->name){median_coefficient = boost::any_cast<double>(val);}
         if("bool_outlier_removal"==(*_i)->name){bool_outlier_removal = boost::any_cast<bool>(val);}
         if("bool_median_filter"==(*_i)->name){bool_median_filter = boost::any_cast<bool>(val);}
@@ -259,8 +259,8 @@ int width_threshold;
 int distance_threshold;
 int col_minus_threshold;
 int median_size;
-int cluster_radius;
 int cluster_size_min;
+double cluster_radius;
 double median_coefficient;
 bool bool_outlier_removal;
 bool bool_median_filter;
@@ -286,9 +286,9 @@ std::string save_name;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       int median_size;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      int cluster_radius;
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       int cluster_size_min;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      double cluster_radius;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       double median_coefficient;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -440,7 +440,7 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.segmentation_radius = 0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __max__.segmentation_radius = 16;
+      __max__.segmentation_radius = 15;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __default__.segmentation_radius = 8;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
@@ -488,25 +488,25 @@ param_Config::GroupDescription<param_Config::DEFAULT, param_Config> Default("Def
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("median_size", "int", 0, "An Integer parameter", "", &param_Config::median_size)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __min__.cluster_radius = 0;
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __max__.cluster_radius = 20;
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __default__.cluster_radius = 8;
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_radius", "int", 0, "An Integer parameter", "", &param_Config::cluster_radius)));
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_radius", "int", 0, "An Integer parameter", "", &param_Config::cluster_radius)));
-//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.cluster_size_min = 10;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __max__.cluster_size_min = 100;
+      __max__.cluster_size_min = 800;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
-      __default__.cluster_size_min = 30;
+      __default__.cluster_size_min = 400;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_size_min", "int", 0, "An Integer parameter", "", &param_Config::cluster_size_min)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<int>("cluster_size_min", "int", 0, "An Integer parameter", "", &param_Config::cluster_size_min)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __min__.cluster_radius = 0.0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __max__.cluster_radius = 5.0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __default__.cluster_radius = 1.0;
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      Default.abstract_parameters.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<double>("cluster_radius", "double", 0, "An Integer parameter", "", &param_Config::cluster_radius)));
+//#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
+      __param_descriptions__.push_back(param_Config::AbstractParamDescriptionConstPtr(new param_Config::ParamDescription<double>("cluster_radius", "double", 0, "An Integer parameter", "", &param_Config::cluster_radius)));
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"
       __min__.median_coefficient = 0.0;
 //#line 291 "/opt/ros/noetic/lib/python3/dist-packages/dynamic_reconfigure/parameter_generator_catkin.py"

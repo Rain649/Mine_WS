@@ -26,7 +26,6 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/home/lsj/dev/Mine_WS/src/preception/include"
   "/opt/ros/noetic/include"
   "/opt/ros/noetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp"
-  "/usr/local/include/opencv4"
   "/home/lsj/dev/Mine_WS/src/preception/BEFORE"
   "/home/lsj/dev/Mine_WS/devel/include"
   "/usr/include/vtk-7.1"
@@ -35,6 +34,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/include/pcl-1.10"
   "/usr/include/ni"
   "/usr/include/openni2"
+  "/usr/local/include/opencv4"
   )
 
 # Targets to which this target links.

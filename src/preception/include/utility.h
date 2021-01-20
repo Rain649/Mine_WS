@@ -13,4 +13,7 @@ extern const int colFL = 0;
 //extern  const int colBR = 240;
 extern const int colFR = Horizon_SCAN;
 
+
+extern const int segmentationRadius_Max = 15;
+
 #endif

@@ -1,3 +1,4 @@
+/*此程序由北京理工大学*刘仕杰*编写*/
 #include <ros/ros.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <iostream>
