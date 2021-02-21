@@ -5,18 +5,15 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl_conversions/pcl_conversions.h>
+// #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/registration/icp.h>
-#include <pcl/console/time.h>
 #include <pcl/filters/filter.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h> //统计滤波
 #include <pcl/filters/conditional_removal.h>    //条件滤波
 #include <pcl/kdtree/kdtree_flann.h>    //kdtree搜索
 #include <pcl/segmentation/extract_clusters.h>  //分割聚类
-#include <cmath>
 #include <vector>
-#include <stdio.h>
 #include <thread>
 #include <std_msgs/Bool.h>
 #include <dynamic_reconfigure/server.h>
