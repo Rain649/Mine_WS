@@ -1,19 +1,12 @@
-#include <iostream>
 #include <fstream>
-#include <iomanip>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include <ros/ros.h>
-#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/console/time.h>
 
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Bool.h>
 #include <nav_msgs/Odometry.h>
 
-#include <vector>
 #include <string>
 
 #include <dynamic_reconfigure/server.h>

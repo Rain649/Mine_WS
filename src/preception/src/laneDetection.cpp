@@ -1,35 +1,18 @@
 #include <ros/ros.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <limits>
-#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl_conversions/pcl_conversions.h>
-#include <pcl/registration/icp.h>
-#include <pcl/console/time.h>
-#include <pcl/filters/filter.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/filters/voxel_grid.h>                  //体素滤波
 #include <pcl/filters/passthrough.h>                 //直通滤波
 #include <pcl/ModelCoefficients.h>                   //投影滤波
 #include <pcl/filters/project_inliers.h>             //投影
 #include <pcl/filters/statistical_outlier_removal.h> //统计滤波
-
 #include <pcl/filters/extract_indices.h>
-#include <pcl/features/normal_3d.h>
-#include <pcl/kdtree/kdtree.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 
 #include <opencv2/opencv.hpp>
-#include <iostream>
-#include <vector>
 
-#include <cmath>
-#include <stdio.h>
-#include <thread>
 #include <std_msgs/Bool.h>
 #include "std_msgs/Float32.h"
 #include "std_msgs/Float32MultiArray.h"
@@ -76,7 +59,6 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
 
-    pcl::console::TicToc time;
     pcl::PassThrough<pcl::PointXYZI> pass_z;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_1;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_2;
@@ -184,7 +166,7 @@ public:
         cloudCluster_3->clear();
         cloudCluster_4->clear();
 
-        Distance.data = NULL;
+        Distance.data = 0;
         B_array.data.clear();
 
         receivePoints = false;
