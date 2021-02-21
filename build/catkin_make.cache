@@ -1,2 +1,0 @@
-preception
--DCATKIN_DEVEL_PREFIX=/home/lsj/dev/Mine_WS/devel -DCMAKE_INSTALL_PREFIX=/home/lsj/dev/Mine_WS/install -G Unix Makefiles
