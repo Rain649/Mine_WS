@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(preception)
 
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3")
 #set(PCL_INCLUDE_DIRS "/usr/include/pcl-1.9")
 #set(PCL_LIBRARY_DIRS "/usr/local/lib" )
 # set(OpenCV_INCLUDE_DIRS "/usr/include")
@@ -37,7 +37,7 @@ include_directories(
 	${catkin_INCLUDE_DIRS}
 	${PCL_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIR}
-  #${OpenCV_INCLUDE_DIRS} 
+  #${OpenCV_INCLUDE_DIRS}
 )
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
@@ -101,4 +101,12 @@ add_executable(pcd_visual
 add_dependencies(pcd_visual ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(pcd_visual
   ${catkin_LIBRARIES} ${PCL_LIBRARIES} 
+)
+
+add_executable(topoMap
+  src/topoMap.cpp
+)
+add_dependencies(topoMap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(topoMap
+  ${catkin_LIBRARIES} yaml-cpp
 )

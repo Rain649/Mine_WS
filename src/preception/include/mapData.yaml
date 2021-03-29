@@ -1,0 +1,47 @@
+- index: 1
+  position: [-356, -24.9, 156]
+  cluster_number: 3
+  peak_number: 2
+  search_radius: 8
+- index: 2
+  position: [-478, -13.5, 180]
+  cluster_number: 4
+  peak_number: 2
+  search_radius: 8
+
+- index: 3
+  position: [-529, -4.81, 198]
+  cluster_number: 5
+  peak_number: 5
+  search_radius: 8
+
+- index: 4
+  position: [-644, 13.6, 241]
+  cluster_number: 3
+  peak_number: 3
+  search_radius: 8
+
+- index: 5
+  position: [-633, 19.1, 274]
+  cluster_number: 4
+  peak_number: 3
+  search_radius: 8
+
+- index: 6
+  position: [-576, 8.64, 255]
+  cluster_number: 4
+  peak_number: 2
+  search_radius: 8
+
+- index: 7
+  position: [-536, 0.746, 237]
+  cluster_number: 4
+  peak_number: 2
+  search_radius: 8
+
+- index: 8
+  position: [-519, -5.28, 200]
+  cluster_number: 5
+  peak_number: 4
+  search_radius: 8
+  
