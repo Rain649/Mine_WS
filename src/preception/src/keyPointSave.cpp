@@ -50,7 +50,6 @@ private:
 
     std::string save_Name;
     std::vector<short int> radius_Vec;
-    // std::vector<std::pair<int> thisSum_Vec;
     std::vector<std::pair<short int, short int>> thisNum_Vec;
     std::vector<std::pair<pcl::PointXYZ, short int>> currentPosition_Vec;
     std::vector<std::pair<short int, pcl::PointXYZ>> keyPoints_Vec;
@@ -75,7 +74,6 @@ public:
         subSegmentationRadius = nh.subscribe<std_msgs::UInt8>("/intersection/segmentationRadius", 1, &keyPointSave::segmentationRadiusHandler, this);
         subOdomAftMapped = nh.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 1, &keyPointSave::odomAftMapped, this);
         subIntersectionVerified = nh.subscribe<std_msgs::Bool>("/intersection/intersectionVerified", 1, &keyPointSave::intersectionVerifiedHandler, this);
-
         subPeakDistanceSum = nh.subscribe<std_msgs::Float32>("/intersection/peakDistance_Max", 1, &keyPointSave::peakDistanceSumHandler, this);
         allocateMemory();
     }
@@ -161,34 +159,6 @@ public:
                 }
                 else
                 {
-                    // std::vector<std::pair<short int,short int>>::iterator iterNum = thisNum_Vec.begin();
-                    // std::vector<std::pair<pcl::PointXYZ,short int>>::iterator iterKeyPoint = currentPosition_Vec.begin();
-                    // while(iterNum!= thisNum_Vec.end())
-                    // {
-                    //     if(iterNum->first!=clusterNum_max||iterNum->second!=peakNum_max)
-                    //     {
-                    //         iterNum = thisNum_Vec.erase(iterNum);
-                    //         iterKeyPoint = currentPosition_Vec.erase(iterKeyPoint);
-                    //     }
-                    //     else
-                    //     {
-                    //         iterNum++;
-                    //         iterKeyPoint++;
-                    //     }
-                    // }
-
-                    // if(currentPosition_Vec.size() == 0)
-                    // {
-                    //     ROS_ERROR("currentPosition_Vec has no data!!!!!!!!!");
-                    //     ROS_ERROR("Cancel Recording Key Points.");
-                    //     counter -= 1;
-
-                    //     return;
-                    // }
-
-                    // keyPoints_Vec.push_back(std::pair<short int, pcl::PointXYZ>(counter, currentPosition_Vec[(currentPosition_Vec.size()+1)/2].first));
-                    // radius_Vec.push_back(currentPosition_Vec[(currentPosition_Vec.size()+1)/2].second);
-                    
                     keyPoints_Vec.push_back(std::pair<short int, pcl::PointXYZ>(counter, thisKeyPoint));
                     radius_Vec.push_back(segmentationRadius_max);
 
@@ -203,25 +173,12 @@ public:
 
     void recordKeyPoint()
     {
-        if (!currentPosition_Vec.empty())
-        {
-            if (getDistanceOf2Point(currentPosition, currentPosition_Vec.back().first)<0.005) return;
-        }
+        if (!currentPosition_Vec.empty() && getDistanceOf2Point(currentPosition, currentPosition_Vec.back().first)<0.005) return;
         
-        if(segmentationRadius>segmentationRadius_Max)
-        {
-            return;
-        }
+        if(segmentationRadius>segmentationRadius_Max) return;
 
         currentPosition_Vec.push_back(std::pair<pcl::PointXYZ, short int>(currentPosition, segmentationRadius));
         thisNum_Vec.push_back(std::pair<short int,short int>(clusterNum,peakNum));
-
-        // if (clusterNum_max <= clusterNum)
-        // {
-        //     clusterNum_max = clusterNum;
-        //     if (peakNum_max < peakNum)
-        //         peakNum_max = peakNum;
-        // }
 
         if (clusterNum_max <= clusterNum)
         {

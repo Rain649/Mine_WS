@@ -831,7 +831,7 @@ class Detection
             pubIntersectionVerified.publish(intersectionVerified);
         }
 
-        if (1)
+        if (true)
         {
             pubLaserLane.publish(laser_Lane);
             pubEdgeLane.publish(Edge_Lane);

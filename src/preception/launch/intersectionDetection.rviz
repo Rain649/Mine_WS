@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /withInfo1
         - /Edge2/Namespaces1
       Splitter Ratio: 0.49117645621299744
     Tree Height: 787
@@ -27,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: CloudOrigin
+    SyncSource: Cluster_1
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -68,9 +69,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: true
       Max Color: 255; 255; 255
-      Max Intensity: 128
       Min Color: 0; 0; 0
-      Min Intensity: 0
       Name: OutlierRemove
       Position Transformer: XYZ
       Queue Size: 10
@@ -98,9 +97,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 111
       Min Color: 0; 0; 0
-      Min Intensity: 0
       Name: CloudOrigin
       Position Transformer: XYZ
       Queue Size: 10
@@ -128,9 +125,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 6.006999969482422
       Min Color: 0; 0; 0
-      Min Intensity: 0.024900000542402267
       Name: Ground
       Position Transformer: XYZ
       Queue Size: 10
@@ -158,9 +153,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: -999999
       Min Color: 0; 0; 0
-      Min Intensity: 999999
       Name: Edge
       Position Transformer: XYZ
       Queue Size: 10
@@ -176,33 +169,31 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: -0.07779119163751602
-        Min Value: -1.5746843814849854
+        Max Value: 2.3592867851257324
+        Min Value: -2.2563846111297607
         Value: true
       Axis: Z
       Channel Name: intensity
       Class: rviz/PointCloud2
       Color: 255; 255; 255
-      Color Transformer: Intensity
+      Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
-      Invert Rainbow: true
+      Enabled: true
+      Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 34
       Min Color: 0; 0; 0
-      Min Intensity: 0
       Name: withInfo
       Position Transformer: XYZ
-      Queue Size: 10
+      Queue Size: 1
       Selectable: true
-      Size (Pixels): 6
+      Size (Pixels): 2
       Size (m): 2
       Style: Points
       Topic: /intersection/cloudWithInfo
       Unreliable: false
       Use Fixed Frame: true
-      Use rainbow: true
-      Value: false
+      Use rainbow: false
+      Value: true
     - Alpha: 1
       Class: rviz/Axes
       Enabled: true
@@ -226,9 +217,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 63
       Min Color: 0; 0; 0
-      Min Intensity: 63
       Name: Far
       Position Transformer: XYZ
       Queue Size: 10
@@ -272,9 +261,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 60
       Min Color: 0; 0; 0
-      Min Intensity: 1
       Name: Intersection
       Position Transformer: XYZ
       Queue Size: 10
@@ -302,9 +289,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 63
       Min Color: 73; 168; 53
-      Min Intensity: 1
       Name: Cluster_1
       Position Transformer: XYZ
       Queue Size: 10
@@ -332,9 +317,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 6
       Min Color: 0; 0; 0
-      Min Intensity: 1
       Name: Cluster_2
       Position Transformer: XYZ
       Queue Size: 10
@@ -362,9 +345,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 63
       Min Color: 0; 0; 0
-      Min Intensity: 63
       Name: Cluster_3
       Position Transformer: XYZ
       Queue Size: 10
@@ -392,9 +373,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 63
       Min Color: 0; 0; 0
-      Min Intensity: 63
       Name: Cluster_4
       Position Transformer: XYZ
       Queue Size: 10
@@ -422,9 +401,7 @@ Visualization Manager:
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: -999999
       Min Color: 0; 0; 0
-      Min Intensity: 999999
       Name: Cluster_5
       Position Transformer: XYZ
       Queue Size: 10
@@ -452,9 +429,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0.987135648727417
       Min Color: 0; 0; 0
-      Min Intensity: 0.9000006318092346
       Name: Corner
       Position Transformer: XYZ
       Queue Size: 10
@@ -482,9 +457,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 7.1795501708984375
       Min Color: 0; 0; 0
-      Min Intensity: 0.0013000000035390258
       Name: Ground
       Position Transformer: XYZ
       Queue Size: 10
@@ -512,9 +485,7 @@ Visualization Manager:
       Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 0.9867502450942993
       Min Color: 0; 0; 0
-      Min Intensity: 0.900000810623169
       Name: Surf
       Position Transformer: XYZ
       Queue Size: 10
@@ -555,7 +526,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 59.35127258300781
+      Distance: 82.26251220703125
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -563,17 +534,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -4.727105617523193
-        Y: 7.276561737060547
-        Z: 4.256406100466847e-06
+        X: 0.2033994197845459
+        Y: -0.1342782974243164
+        Z: 6.163754733279347e-06
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4097965955734253
+      Pitch: 0.879797101020813
       Target Frame: <Fixed Frame>
-      Yaw: 1.6654026508331299
+      Yaw: 2.840399742126465
     Saved: ~
 Window Geometry:
   Displays:
@@ -592,4 +563,4 @@ Window Geometry:
     collapsed: true
   Width: 1001
   X: 75
-  Y: 534
+  Y: 497

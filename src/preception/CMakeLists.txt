@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 generate_dynamic_reconfigure_options(
   cfg/param.cfg
+  cfg/topoMap.cfg
 )
 
 find_package(Boost COMPONENTS thread filesystem date_time system REQUIRED)
@@ -108,5 +109,5 @@ add_executable(topoMap
 )
 add_dependencies(topoMap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(topoMap
-  ${catkin_LIBRARIES} yaml-cpp
+  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp
 )

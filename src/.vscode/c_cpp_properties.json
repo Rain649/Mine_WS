@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/lsj/dev/Mine_WS/devel/include",
+        "/opt/ros/noetic/include",
+        "/home/lsj/dev/Mine_WS/src/preception/include",
+        "/usr/include"
+      ],
+      "name": "Linux"
+    }
+  ]
+}
