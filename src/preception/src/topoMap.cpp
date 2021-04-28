@@ -1,6 +1,8 @@
 /*此程序由北京理工大学*刘仕杰*编写*/
 #include <iostream>
+#include <stdio.h>
 #include <ros/ros.h>
+#include <thread>
 #include <dynamic_reconfigure/server.h>
 #include <preception/topoMap_Config.h>
 #include <yaml-cpp/yaml.h>
@@ -10,17 +12,30 @@
 #include <map>
 #include <stack>
 #include <algorithm>
+#include <thread>
+#include <mutex>
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Bool.h>
 #include <nav_msgs/Odometry.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/filters/filter.h>
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/registration/ndt.h>
+#include <pcl/filters/approximate_voxel_grid.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <boost/thread/thread.hpp>
+#include <pcl/kdtree/kdtree_flann.h>    //kdtree搜索
 
 #define SIZE 10
 
 using namespace std;
+
+std::string filePath = "/home/lsj/dev/Mine_WS/data/";
 
 /********yaml数据********/
     struct Position
@@ -79,6 +94,8 @@ using namespace std;
     {
         int length;
         int width;
+        float begin_Angle;
+        float end_Angle;
     };
 
     struct Vertex
@@ -147,8 +164,9 @@ using namespace std;
             VertexTable[NumVertex++].search_Radius = search_radius;
         }
 
-        void insert_Edge(const int v1, const int v2)
+        void insert_Edge(const int v1, const int v2, const float begin_Angle = 0, const float end_Angle = 0)
         {
+            if(v1 == v2) return;
             int p1 = getVertexIndex(v1);
             int p2 = getVertexIndex(v2);
             if (p1 == -1 || p2 == -1) return;
@@ -160,7 +178,8 @@ using namespace std;
             int length(5);
             Edge e;
             e.width = width;
-            e.length = length;
+            e.begin_Angle = begin_Angle;
+            e.end_Angle = end_Angle;
             Edge_Map.insert(make_pair(edge_Index(min(v1, v2), max(v1, v2)), e));
         }
 
@@ -201,7 +220,8 @@ using namespace std;
             for (const auto edge : Edge_Map)
             {
                 cout << "(" << edge.first.first << ", " << edge.first.second << ") : " << 
-                "length = " << edge.second.length << ", width = " << edge.second.width << endl;
+                "length = " << edge.second.length << ", width = " << edge.second.width <<
+                ", begin_Angle = " << edge.second.begin_Angle << ", end_Angle = " << edge.second.end_Angle << endl;
             }
         }
 
@@ -268,19 +288,34 @@ class topoMap
 private:
     int current_Vertex{1};
     int next_Vertex{0};
+    int v1{0}, v2{1};   //设置左右窗口
     edge_Index current_Edge{0,0};
 
     int clusterNum{0};
     int peakNum{0};
     int segmentationRadius{0};
     
-    float coeff[3]{0.5, 0.3, 0.2};
+    // float coeff[3]{0.6, 0.3, 0.1};
+    float coeff[3]{1, 0, 0};
 
     bool intersectionVerified = false;
+    bool wait = false;
+    bool intersectionVerifiedPre = false;
 
+    std::string fin = "/home/lsj/dev/Mine_WS/src/preception/include/ndtData.yaml";
+    
     stack<int> trajectory;
 
+    map<int,int> currentVertex_Times;
+
+    pcl::visualization::PCLVisualizer viewer {"ndt"};   // 初始化点云可视化界面
+    
     pcl::PointXYZ currentPosition;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOrigin;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud;
+    pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;    //初始化正态分布变换（NDT）
 
     ros::NodeHandle nh;
 
@@ -289,8 +324,11 @@ private:
     ros::Subscriber subIntersectionVerified;
     ros::Subscriber subOdomAftMapped;
     ros::Subscriber subSegmentationRadius;
+    ros::Subscriber subCloudOrigin;
 
     ros::Publisher pubVertex;
+
+    mutex mtx;
 public:
     topoMap() : nh("~")
     {
@@ -299,40 +337,67 @@ public:
         subSegmentationRadius = nh.subscribe<std_msgs::UInt8>("/intersection/segmentationRadius", 1, &topoMap::segmentationRadiusHandler, this);
         subOdomAftMapped = nh.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 1, &topoMap::odomAftMapped, this);
         subIntersectionVerified = nh.subscribe<std_msgs::Bool>("/intersection/intersectionVerified", 1, &topoMap::intersectionVerifiedHandler, this);
+        subCloudOrigin = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_ma", 1, &topoMap::cloudOriginHandler, this);
         
         pubVertex = nh.advertise<std_msgs::Int32>("Vertex", 1);
+
+        viewer.createViewPort(0.0, 0.0, 0.5, 1, v1); 
+        viewer.setBackgroundColor(0, 0, 0, v1);
+        viewer.createViewPort(0.5, 0.0, 1, 1, v2);
+        viewer.setBackgroundColor(0.5, 0.5, 0.5, v2);
+        viewer.addCoordinateSystem (0.05);
+        viewer.initCameraParameters();
+
+        cloudOrigin.reset(new pcl::PointCloud<pcl::PointXYZ>);
+        target_cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
+        output_cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
+        filtered_cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
+
     }
     
+    /********读取数据********/
+    void configLoad()
+    {
+    }
+    /********读取数据********/
+
     /********接收topics********/
-        void intersectionVerifiedHandler(std_msgs::Bool msg)
+        void intersectionVerifiedHandler(const std_msgs::Bool msg)
         {
+            intersectionVerifiedPre = intersectionVerified;
             intersectionVerified = msg.data;
         }
 
-        void clusterNumHandler(std_msgs::UInt8 msg)
+        void clusterNumHandler(const std_msgs::UInt8 msg)
         {
             clusterNum = static_cast<int>(msg.data);
             ROS_DEBUG_STREAM("Cluster Number  =    " << clusterNum);
         }
 
-        void peakNumHandler(std_msgs::UInt8 msg)
+        void peakNumHandler(const std_msgs::UInt8 msg)
         {
             peakNum = static_cast<int>(msg.data);
             ROS_DEBUG_STREAM("Peak Number  =    " << peakNum);
         }
 
-        void segmentationRadiusHandler(std_msgs::UInt8 msg)
+        void segmentationRadiusHandler(const std_msgs::UInt8 msg)
         {
             segmentationRadius = static_cast<int>(msg.data);
             ROS_DEBUG_STREAM("Cluster Number  =    " << clusterNum);
         }
         
-        void odomAftMapped(nav_msgs::Odometry msg)
+        void odomAftMapped(const nav_msgs::Odometry msg)
         {
             currentPosition.x = msg.pose.pose.position.x;
             currentPosition.y = msg.pose.pose.position.y;
             currentPosition.z = msg.pose.pose.position.z;
             ROS_DEBUG_STREAM("This Key Point: x = " << currentPosition.x << " y = " << currentPosition.y << " z = " << currentPosition.z);
+        }
+
+        void cloudOriginHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
+        {
+            pcl::fromROSMsg(*msg, *cloudOrigin);
+            ROS_DEBUG_STREAM("cloudOrigin  " << cloudOrigin->size());
         }
     /********接收topics********/
 
@@ -345,9 +410,18 @@ public:
             if(linked_Vertexes.empty()) return;
             vector<float> compatibility_Vec;
             map<float,int,greater_equal<float>> compatibility_Map;
+
+            if(!intersectionVerifiedPre)
+            {
+                for(const int i:linked_Vertexes)
+                {
+                    GL.show_VertexInfo(i);
+                }
+            }
+            cout << clusterNum << " " << peakNum << " " << segmentationRadius << endl;
+
             for(const int i:linked_Vertexes)
             {
-                GL.show_VertexInfo(i);
                 float compatibility = info_Matching(GL.get_Vertex(i));
                 ROS_INFO("Compatibility : Name %d Value %f",i,compatibility);
                 // compatibility_Vec.push_back(compatibility);
@@ -355,16 +429,39 @@ public:
             }
             if(compatibility_Map.begin()->first>=0.8)
             {
-                current_Vertex = compatibility_Map.begin()->second;
-                ROS_ERROR("Transfer to Vertex %d",current_Vertex);
-                trajectory.push(current_Vertex);
+                ++currentVertex_Times[compatibility_Map.begin()->second];
+                cout << " currentVertex_Times " << compatibility_Map.begin()->second <<
+                "  value " << currentVertex_Times[compatibility_Map.begin()->second] << endl;
+            }
+            for(auto i:currentVertex_Times)
+            {
+                cout << i.first << " f s " << i.second << endl;
+            }
+            if(!currentVertex_Times.empty()&&(--currentVertex_Times.end())->second>=3)
+            {   
+                ROS_ERROR("PCD MATCHING!!!!!!!");
+                float score = pcd_Matching((--currentVertex_Times.end())->first);
+                cout << "score" << score << endl;
+                if(score < 1.2)
+                {
+                    current_Vertex = (--currentVertex_Times.end())->first;
+                    ROS_ERROR("Transfer to Vertex %d",current_Vertex);
+                    if(trajectory.empty()||trajectory.top()!=current_Vertex)
+                    trajectory.push(current_Vertex);
+                }    
             }
         }
+        else
+        {   
+            if(intersectionVerifiedPre)
+            {
+                currentVertex_Times.clear();
+            }
+        } 
     }
 
     float info_Matching(const Vertex v)
     {
-        // Position position;
         if(!clusterNum||!peakNum||!segmentationRadius) return 0;
         float res{0};
         switch(abs(clusterNum-v.cluster_Number))
@@ -418,11 +515,152 @@ public:
             default:
                 break;
         }
+        
         // float res = coeff[0]*(abs(clusterNum-v.cluster_Number)/clusterNum)
         //     + coeff[1]*(abs(peakNum-v.peak_Number)/peakNum)
         //     + coeff[2]*(abs(segmentationRadius-v.search_Radius)/segmentationRadius);
 
         return res;
+    }
+
+    float pcd_Matching(int target_Index)
+    {
+        YAML::Node config = YAML::LoadFile(fin);
+
+        float maximumIterations = config["maximumIterations"].as<float>();
+        float resolution = config["resolution"].as<float>();
+        float stepSize = config["stepSize"].as<float>();
+        float transformationEpsilon = config["transformationEpsilon"].as<float>();
+        float yaw_pre = config["yaw_pre"].as<float>()*M_PI/180;
+        float x_pre = config["x_pre"].as<float>();
+        float y_pre = config["y_pre"].as<float>();
+        cout << "______________" << yaw_pre <<endl;
+        std::string test2File = config["test2File"].as<std::string>();
+        //加载目标点云pcd
+        std::string fileName = filePath + std::to_string(target_Index) + "_whole.pcd";
+        if (pcl::io::loadPCDFile<pcl::PointXYZ> (fileName, *target_cloud) == -1)
+        {
+            PCL_ERROR ("Couldn't read file target_cloud.pcd \n");
+            return (-1);
+        }
+
+        for(const auto p:*target_cloud)
+        {
+            pcl::PointXYZ p1;
+            p1.x = p.z;
+            p1.y = p.x;
+            p1.z = p.y;
+            filtered_cloud->push_back(p1);
+        }
+        filtered_cloud->swap(*target_cloud);
+        filtered_cloud->clear();
+        
+        std::vector<int> indices;
+        *filtered_cloud += *target_cloud;
+        target_cloud->clear();
+        pcl::removeNaNFromPointCloud(*filtered_cloud, *target_cloud, indices);
+        filtered_cloud->clear();
+        // std::cout << "target_cloud " << target_cloud->size () << " data points from pcd" << std::endl;
+        
+        // 将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
+        // pcl::ApproximateVoxelGrid<pcl::PointXYZ> approximate_voxel_filter;
+        // approximate_voxel_filter.setLeafSize (0.09, 0.09, 0.09);
+        // approximate_voxel_filter.setInputCloud (cloudOrigin);
+        // approximate_voxel_filter.filter (*filtered_cloud);
+        // std::cout << "Filtered cloud contains " << filtered_cloud->size ()
+        //             << " data points from test2.pcd" << std::endl;
+
+        pcl::removeNaNFromPointCloud(*cloudOrigin, *cloudOrigin, indices);
+        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+        kdtree.setInputCloud(cloudOrigin); // 设置要搜索的点云，建立KDTree
+        std::vector<int> pointIdxRadiusSearch;  //保存每个近邻点的索引
+        std::vector<float> pointRadiusSquaredDistance;  //保存每个近邻点与查找点之间的欧式距离平方
+        if (kdtree.radiusSearch(pcl::PointXYZ(0,0,0), 25, pointIdxRadiusSearch, pointRadiusSquaredDistance)==0)
+        {
+            return -1;
+        }
+        for (size_t i = 0; i < pointIdxRadiusSearch.size (); ++i)
+        {
+            filtered_cloud->push_back(cloudOrigin->points[pointIdxRadiusSearch[i]]);
+        }
+        
+        // std::cout << "filtered_cloud " << filtered_cloud->size () << " data points from pcd" << std::endl;
+
+        //将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
+        pcl::ApproximateVoxelGrid<pcl::PointXYZ> approximate_voxel_filter;
+        approximate_voxel_filter.setLeafSize (0.2, 0.2, 0.2);
+        approximate_voxel_filter.setInputCloud (filtered_cloud);
+        approximate_voxel_filter.filter (*filtered_cloud);
+        // std::cout << "Filtered cloud contains " << filtered_cloud->size ()
+        //     << " data points from filtered_cloud.pcd" << std::endl;
+
+        //设置依赖尺度NDT参数
+        //为终止条件设置最小转换差异
+        ndt.setTransformationEpsilon (transformationEpsilon);//定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
+        //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
+        ndt.setStepSize (stepSize);
+        //设置NDT网格结构的分辨率（VoxelGridCovariance）
+        ndt.setResolution (resolution);//ND体素的大小，单位为m,越小越准确，但占用内存越多
+        //设置匹配迭代的最大次数
+        ndt.setMaximumIterations (maximumIterations);
+        //设置要配准的点云
+        ndt.setInputCloud (filtered_cloud);
+        //设置点云配准目标
+        ndt.setInputTarget (target_cloud);
+        //设置使用机器人测距法得到的初始对准估计结果
+        Eigen::AngleAxisf init_rotation (yaw_pre, Eigen::Vector3f::UnitZ());
+        Eigen::Translation3f init_translation (x_pre, y_pre, 0);
+        Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix ();
+        //计算需要的刚体变换以便将输入的点云匹配到目标点云
+        ndt.align (*output_cloud, init_guess);//这一步是将降采样之后的点云经过变换后得到output_cloud
+        std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged ()
+                    << "; score: " << ndt.getFitnessScore () << std::endl;//欧式适合度评分
+        //使用创建的变换对未过滤的输入点云进行变换
+        //ndt.getFinalTransformation (）即最终变换
+        Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+        pcl::transformPointCloud (*filtered_cloud, *output_cloud, ndt.getFinalTransformation ());
+        Eigen::Matrix3f transformation_3f;
+        for(int i=0;i<3;++i)
+            for(int j=0;j<3;++j)
+                transformation_3f(i,j) = transformation(i,j);
+        Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2,1,0)*180/M_PI;
+        cout << "roll, pitch, yaw : " << eulerAngle[0] <<", "<< eulerAngle[1] <<", "<< eulerAngle[2] <<", "<< endl;
+
+        //对目标点云着色（红色）并可视化
+        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
+            target_color (target_cloud, 255, 0, 0);
+        //对转换后的目标点云着色（绿色）并可视化
+        pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
+            output_color (filtered_cloud, 0, 255, 0);
+
+        mtx.lock();
+        viewer.removeAllPointClouds();
+
+        viewer.addPointCloud<pcl::PointXYZ> (target_cloud, target_color, "target cloud0", v1);
+        viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
+            1, "target cloud0");
+        viewer.addPointCloud<pcl::PointXYZ> (filtered_cloud, output_color, "output cloud0", v1);
+        viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
+            2, "output cloud0");
+        viewer.addPointCloud<pcl::PointXYZ> (target_cloud, target_color, "target cloud", v2);
+        viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
+            1, "target cloud");
+        viewer.addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "output cloud", v2);
+        viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
+            2, "output cloud");
+        mtx.unlock();
+
+        return ndt.getFitnessScore ();
+    }
+
+    void matching_Visualization()
+    {
+        while (ros::ok()&&!viewer.wasStopped())
+        {
+            mtx.lock();
+            viewer.spinOnce(10);
+            mtx.unlock();
+        }
     }
     /********Vertex匹配********/
 
@@ -438,6 +676,13 @@ public:
 
     /********发布当前Vertex相link的Edge信息********/
     /********发布当前Vertex相link的Edge信息********/
+
+    void pcl_clear()
+    {
+        target_cloud->clear();
+        output_cloud->clear();
+        filtered_cloud->clear();
+    }
 
     void getDynamicParameter()
     {
@@ -471,39 +716,66 @@ int main(int argc, char **argv)
     /*动态参数调节*/
 
     /********读取拓扑地图信息，构建拓扑地图********/
-        std::string fin = "/home/lsj/dev/Mine_WS/src/preception/include/mapData.yaml";
-        YAML::Node map = YAML::LoadFile(fin);
+        std::string fin = "/home/lsj/dev/Mine_WS/src/preception/include/Vertex.yaml";
+        YAML::Node vertex_YN = YAML::LoadFile(fin);
         GraphLink map_Graph;
-        for(YAML::const_iterator it=map.begin();it!=map.end();++it)
+        vector<int> notExistIndex;
+        for(YAML::const_iterator it=vertex_YN.begin();it!=vertex_YN.end();++it)
         {
             Intersection j;
             *it >> j;
             print(j);
             map_Graph.insert_Vertex(j.index, j.position,
-             j.cluster_number, j.peak_number, j.search_radius);
+                j.cluster_number, j.peak_number, j.search_radius);
+            std::string fileName = filePath + std::to_string(j.index) + "_whole.pcd";
+            if(access(fileName.c_str(), 0))
+                notExistIndex.push_back(j.index);
         }
-        for(YAML::const_iterator it=map.begin();it!=map.end();++it)
+        if(!notExistIndex.empty())
+        {
+            ROS_ERROR("Cannot Find the Following Vertex Pcd !!!");
+            for(const auto& i:notExistIndex)
+                ROS_ERROR_STREAM("Vertex : " << i);
+            exit(EXIT_FAILURE);
+        }
+        for(YAML::const_iterator it=vertex_YN.begin();it!=vertex_YN.end();++it)
         {
             Intersection j;
             *it >> j;
             for(const auto k : j.adjacent_index)
                 map_Graph.insert_Edge(j.index, k);
         }
+        fin = "/home/lsj/dev/Mine_WS/src/preception/include/Edge.yaml";
+        YAML::Node Edge_YN = YAML::LoadFile(fin);
+        for(YAML::const_iterator it=Edge_YN.begin();it!=Edge_YN.end();++it)
+        {
+            
+        }
+        
         map_Graph.show_Vertex();
         map_Graph.show_Edge();
     /********读取拓扑地图信息，构建拓扑地图********/
     
     topoMap tpM;
+
+    thread visual(&topoMap::matching_Visualization,&tpM);
     
     ros::Rate rate(1);
     while(ros::ok())
     {
         ros::spinOnce();
 
+        tpM.configLoad();
+
         tpM.vertex_Matching(map_Graph);
+
+        tpM.pcl_clear();
         
         rate.sleep();
     }
+
+    visual.join();
+
 
     return 0;
 }

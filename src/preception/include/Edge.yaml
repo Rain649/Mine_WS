@@ -1,0 +1,46 @@
+- index: 1
+  link:
+    - link_index: 3
+      begin_angle: 0
+      end_angle: -70
+
+# - index: 2
+#   link:
+#     - link_index: 1
+      # begin_angle: 0
+      # end_angle: 0
+#     - link_index: 3
+      # begin_angle: 0
+      # end_angle: 0
+      
+- index: 3
+  link:
+    - link_index: 4
+      begin_angle: 0
+      end_angle: -40
+      
+    - link_index: 7
+      begin_angle: 0
+      end_angle: 0
+      
+- index: 4
+  link:
+    - link_index: 5
+      begin_angle: 0
+      end_angle: 0
+      
+- index: 5
+  link:
+    - link_index: 6
+      begin_angle: 0
+      end_angle: 0
+      
+- index: 6
+  link:
+    - link_index: 7
+      begin_angle: 0
+      end_angle: 0
+      
+- index: 7
+  link:
+    

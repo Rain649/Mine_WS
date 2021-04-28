@@ -44,7 +44,7 @@ void segmentation_1(int index, pcl::PointXYZI thisKeyPoint, int segmentationRadi
     std::vector<int> pointIdxRadiusSearch;  //保存每个近邻点的索引
 	std::vector<float> pointRadiusSquaredDistance;  //保存每个近邻点与查找点之间的欧式距离平方
     
-    if (kdtree.radiusSearch(thisKeyPoint, 1.8*segmentationRadius, pointIdxRadiusSearch, pointRadiusSquaredDistance)==0)
+    if (kdtree.radiusSearch(thisKeyPoint, 3*segmentationRadius, pointIdxRadiusSearch, pointRadiusSquaredDistance)==0)
     {
         return;
     }

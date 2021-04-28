@@ -26,10 +26,11 @@ generate_dynamic_reconfigure_options(
 
 find_package(Boost COMPONENTS thread filesystem date_time system REQUIRED)
 find_package(PCL REQUIRED QUIET)
-find_package( OpenCV REQUIRED )
+find_package(OpenCV REQUIRED )
+find_package(Eigen3 REQUIRED)
 
 catkin_package(
-  DEPENDS PCL
+  DEPENDS PCL EIGEN3
 )
 
 include_directories(
@@ -39,6 +40,7 @@ include_directories(
 	${PCL_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIR}
   #${OpenCV_INCLUDE_DIRS}
+	${EIGEN3_INCLUDE_DIR} 
 )
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
@@ -111,3 +113,7 @@ add_dependencies(topoMap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_T
 target_link_libraries(topoMap
   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp
 )
+
+add_executable(ndt src/ndt.cpp)
+add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
