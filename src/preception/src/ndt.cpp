@@ -43,6 +43,8 @@ int main (int argc, char** argv)
     float yaw_pre = config["yaw_pre"].as<float>()*M_PI/180;
     float x_pre = config["x_pre"].as<float>();
     float y_pre = config["y_pre"].as<float>();
+    float bol = config["bol"].as<bool>();
+    
   /********读取数据********/
 
   //加载目标点云pcd
@@ -128,8 +130,17 @@ int main (int argc, char** argv)
   for(int i=0;i<3;++i)
     for(int j=0;j<3;++j)
       transformation_3f(i,j) = transformation(i,j);
-  Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2,1,0)*180/M_PI;
-  cout << "x, y, z : " << eulerAngle[0] <<", "<< eulerAngle[1] <<", "<< eulerAngle[2] <<", "<< endl;
+  if(bol)
+  {
+    Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2,1,0)*180/M_PI;
+    cout << "roll, pitch, yaw : " << eulerAngle[0] <<", "<< eulerAngle[1] <<", "<< eulerAngle[2] <<"."<< endl;
+  }
+  else
+  {
+    Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(0,1,2)*180/M_PI;
+    cout << "roll, pitch, yaw : " << eulerAngle[0] <<", "<< eulerAngle[1] <<", "<< eulerAngle[2] <<"."<< endl;
+  }
+  
 
   // 初始化点云可视化界面
   int v1(0);   //设置左右窗口
@@ -139,6 +150,9 @@ int main (int argc, char** argv)
   viewer.setBackgroundColor(0, 0, 0, v1);
   viewer.createViewPort(0.5, 0.0, 1, 1, v2);
   viewer.setBackgroundColor(0.5, 0.5, 0.5, v2);
+  viewer.addCoordinateSystem (5);
+  viewer.initCameraParameters();
+  viewer.setCameraPosition(30,40,50,-3,-4,-5,0);
 
   //对目标点云着色（红色）并可视化
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
@@ -161,10 +175,7 @@ int main (int argc, char** argv)
   viewer.addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "output cloud", v2);
   viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
                                                   2, "output cloud");
-  // 启动可视化
-  viewer.addCoordinateSystem (1.0);
-  viewer.initCameraParameters ();
-  //等待直到可视化窗口关闭。
+  // 启动可视化、等待直到可视化窗口关闭。
   while (!viewer.wasStopped ())
   {
     viewer.spinOnce (100);

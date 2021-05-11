@@ -32,91 +32,96 @@
 #include <utility.h>
 #include <opencv2/opencv.hpp>
 #include <numeric>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
 
 class Detection
 {
-    private:
-        int segmentationRadius;
-        int width_Thre;
-        int median_Size;
-        int distance_Thre;
-        int col_minus_Thre;
-        int clusterSize_min;
-        int index_Array[Horizon_SCAN];
-        double clusterRadius;
-        double median_Coefficient;
-        double timeLaserCloudNew;
-        double Cols[Horizon_SCAN];
-        double beamDistance_Vec[Horizon_SCAN];
+private:
+    int segmentationRadius;
+    int width_Thre;
+    int median_Size;
+    int distance_Thre;
+    int col_minus_Thre;
+    int clusterSize_min;
+    int index_Array[Horizon_SCAN];
+    double clusterRadius;
+    double median_Coefficient;
+    double timeLaserCloudNew;
+    double Cols[Horizon_SCAN];
+    double beamDistance_Vec[Horizon_SCAN];
 
-        bool receivePoints = false;
-        bool over = true;
-        bool outlier_Bool;
-        bool medianFilter_Bool;
+    bool receivePoints = false;
+    bool over = true;
+    bool outlier_Bool;
+    bool medianFilter_Bool;
 
-        std::vector<std::pair<int,double> > beam_Invalid;   //有效laser列索引、距离
+    std::vector<std::pair<int,double> > beam_Invalid;   //有效laser列索引、距离
 
-        std_msgs::Bool intersectionDetected;
-        std_msgs::Bool intersectionVerified;
-        std_msgs::UInt8 peak_Num;
-        std_msgs::UInt8 cluster_Num;
-        std_msgs::Float32 peakDistance_Max;
+    std_msgs::Bool intersectionDetected;
+    std_msgs::Bool intersectionVerified;
+    std_msgs::UInt8 peak_Num;
+    std_msgs::UInt8 cluster_Num;
+    std_msgs::Float32 peakDistance_Max;
 
-        ros::NodeHandle nh;
+    ros::NodeHandle nh;
 
-        ros::Subscriber subLaserCloudNew;
+    ros::Subscriber subLaserCloudNew;
 
-        geometry_msgs::Point endPoint;
-        
-        visualization_msgs::Marker laser_Lane,Edge_Lane, circle_Lane;
-        
-        pcl::PointXYZI ExistPoint;
-        pcl::PointXYZI nanPoint;
-        pcl::PointXYZI thisKeyPoint;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr laserOrigin_Cloud;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr outlierRemove_Cloud;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudNewTFDS;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr straightLine;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudWithInfo;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudFar;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudIntersections;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_1;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_2;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
-        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_5;
-        pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter;
-        pcl::StatisticalOutlierRemoval<pcl::PointXYZI> cloud_after_StatisticalRemoval;  //统计滤波
-        pcl::ConditionAnd<pcl::PointXYZI>::Ptr longitudinal_Condition;  //条件滤波
-        pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition;  //条件滤波
-        pcl::ConditionalRemoval<pcl::PointXYZI> condition;
-        pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang");    //定义绘图器
-        pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kd_first;
-        pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
-        pcl::ExtractIndices<pcl::PointXYZI> extract;
+    geometry_msgs::Point endPoint;
+    
+    visualization_msgs::Marker laser_Lane,Edge_Lane, circle_Lane;
 
-        ros::Publisher pubCloudOutlierRemove;
-        ros::Publisher pubCloudWithInfo;
-        ros::Publisher pubCloudIntersection;
-        ros::Publisher pubCloudFar;
-        ros::Publisher pubIntersectionDetected;
-        ros::Publisher pubIntersectionVerified;
-        ros::Publisher pubBeamDistance;
-        ros::Publisher pubLaserLane;
-        ros::Publisher pubEdgeLane;
-        ros::Publisher peakDistanceMax;
-        ros::Publisher pubPeakNum;
-        ros::Publisher pubClusterNum;
-        ros::Publisher pubSegmentationRadius;
-        ros::Publisher pubCluster_1;
-        ros::Publisher pubCluster_2;
-        ros::Publisher pubCluster_3;
-        ros::Publisher pubCluster_4;
-        ros::Publisher pubCluster_5;
+    tf::TransformBroadcaster tfBroadcaster;
+    tf::StampedTransform fixedTrans;
+    
+    pcl::PointXYZI ExistPoint;
+    pcl::PointXYZI nanPoint;
+    pcl::PointXYZI thisKeyPoint;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr laserOrigin_Cloud;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr outlierRemove_Cloud;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudNewTFDS;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr straightLine;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudWithInfo;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudFar;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudIntersections;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_1;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_2;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_5;
+    pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter;
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZI> cloud_after_StatisticalRemoval;  //统计滤波
+    pcl::ConditionAnd<pcl::PointXYZI>::Ptr longitudinal_Condition;  //条件滤波
+    pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition;  //条件滤波
+    pcl::ConditionalRemoval<pcl::PointXYZI> condition;
+    pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang");    //定义绘图器
+    pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kd_first;
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    pcl::ExtractIndices<pcl::PointXYZI> extract;
+
+    ros::Publisher pubCloudOutlierRemove;
+    ros::Publisher pubCloudWithInfo;
+    ros::Publisher pubCloudIntersection;
+    ros::Publisher pubCloudFar;
+    ros::Publisher pubIntersectionDetected;
+    ros::Publisher pubIntersectionVerified;
+    ros::Publisher pubBeamDistance;
+    ros::Publisher pubLaserLane;
+    ros::Publisher pubEdgeLane;
+    ros::Publisher peakDistanceMax;
+    ros::Publisher pubPeakNum;
+    ros::Publisher pubClusterNum;
+    ros::Publisher pubSegmentationRadius;
+    ros::Publisher pubCluster_1;
+    ros::Publisher pubCluster_2;
+    ros::Publisher pubCluster_3;
+    ros::Publisher pubCluster_4;
+    ros::Publisher pubCluster_5;
 
 
-    public:
-    Detection() : nh("~")
+public:
+    Detection() : nh()
     {
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_ma", 1, &Detection::laserCloudNewHandler, this);
 
@@ -138,6 +143,7 @@ class Detection
         pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 1);
         pubCluster_4 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_4", 1);
         pubCluster_5 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_5", 1);
+
         nanPoint.x = std::numeric_limits<float>::quiet_NaN();
         nanPoint.y = std::numeric_limits<float>::quiet_NaN();
         nanPoint.z = std::numeric_limits<float>::quiet_NaN();
@@ -159,7 +165,7 @@ class Detection
             Cols[i] = i+1;
         }
 
-        laser_Lane.header.frame_id = Edge_Lane.header.frame_id = circle_Lane.header.frame_id = "velodyne";
+        laser_Lane.header.frame_id = Edge_Lane.header.frame_id = circle_Lane.header.frame_id = "base_link";
         laser_Lane.ns = Edge_Lane.ns = circle_Lane.ns = "intersection";
         laser_Lane.action = Edge_Lane.action = circle_Lane.action = visualization_msgs::Marker::ADD;
         laser_Lane.pose.orientation.w = Edge_Lane.pose.orientation.w = circle_Lane.pose.orientation.w = 1.0;
@@ -204,6 +210,11 @@ class Detection
         cloudCluster_5.reset(new pcl::PointCloud<pcl::PointXYZI>());
         longitudinal_Condition.reset(new pcl::ConditionAnd<pcl::PointXYZI>());
         lateral_Condition.reset(new pcl::ConditionOr<pcl::PointXYZI>());
+
+        fixedTrans.frame_id_ = "/velodyne";
+        fixedTrans.child_frame_id_ = "/base_link";
+        fixedTrans.setRotation(tf::Quaternion(0,0,0,1));
+        fixedTrans.setOrigin(tf::Vector3(0, 0, 0));
 
         ROS_DEBUG("Allocate Memory Success !!!");
     }
@@ -745,7 +756,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*outlierRemove_Cloud, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCloudOutlierRemove.publish(cloudMsgTemp);
         }
 
@@ -754,7 +765,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudWithInfo, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCloudWithInfo.publish(cloudMsgTemp);
         }
 
@@ -763,7 +774,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudFar, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCloudFar.publish(cloudMsgTemp);
         }
 
@@ -772,7 +783,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudIntersections, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCloudIntersection.publish(cloudMsgTemp);
         }
 
@@ -781,7 +792,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCluster_1.publish(cloudMsgTemp);
         }
 
@@ -790,7 +801,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCluster_2.publish(cloudMsgTemp);
         }
 
@@ -799,7 +810,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCluster_3.publish(cloudMsgTemp);
         }
 
@@ -808,7 +819,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCluster_4.publish(cloudMsgTemp);
         }
 
@@ -817,7 +828,7 @@ class Detection
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_5, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "velodyne";
+            cloudMsgTemp.header.frame_id = "base_link";
             pubCluster_5.publish(cloudMsgTemp);
         }
 
@@ -839,6 +850,9 @@ class Detection
             pubPeakNum.publish(peak_Num);
             pubClusterNum.publish(cluster_Num);
             peakDistanceMax.publish(peakDistance_Max);
+
+            fixedTrans.stamp_ = ros::Time().fromSec(timeLaserCloudNew);
+            tfBroadcaster.sendTransform(fixedTrans);
             
             std_msgs::Float32MultiArray beam_Dis;
             for (int i = 0; i < Horizon_SCAN; i++)

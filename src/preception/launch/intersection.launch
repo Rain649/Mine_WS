@@ -1,6 +1,9 @@
 <launch>
 
   <node name="intersection" pkg="preception" type="intersection" output="screen" ></node>
+  
+  <!--- TF -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="velodyne2base_link"  args="0 0 0 0 0 0 /velodyne /base_link 100" /> -->
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find preception)/launch/intersectionDetection.rviz"/>
   

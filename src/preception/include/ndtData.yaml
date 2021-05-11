@@ -1,27 +1,33 @@
 yaw : 15
 
-x : 10
+x : 5
 
 y : 2
 
 # resolution : 5
 
-resolution : 6
+resolution : 5
 
-maximumIterations : 5000
+maximumIterations : 100
 
 stepSize : 0.3
 
-transformationEpsilon : 0.00001
+transformationEpsilon : 0.0001
 
-test1File : test1.pcd
+# test1File : test1.pcd
 
-# test1File : 4_whole.pcd
+# test2File : test2.pcd
 
-test2File : test2.pcd
+test1File : 4_whole.pcd
 
-yaw_pre : -40
+test2File : 4_whole.pcd
+
+yaw_pre : 120
 
 x_pre : 0
 
 y_pre : 0
+
+menu_bool : n
+
+bol: y

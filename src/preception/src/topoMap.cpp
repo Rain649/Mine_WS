@@ -166,7 +166,14 @@ std::string filePath = "/home/lsj/dev/Mine_WS/data/";
 
         void insert_Edge(const int v1, const int v2, const float begin_Angle = 0, const float end_Angle = 0)
         {
-            if(v1 == v2) return;
+            auto it = Edge_Map.find(edge_Index(min(v1, v2), max(v1, v2)));
+            if(it!=Edge_Map.end())
+            {
+                it->second.begin_Angle = begin_Angle;
+                it->second.end_Angle = end_Angle;
+                return;
+            }
+
             int p1 = getVertexIndex(v1);
             int p2 = getVertexIndex(v2);
             if (p1 == -1 || p2 == -1) return;
@@ -181,6 +188,13 @@ std::string filePath = "/home/lsj/dev/Mine_WS/data/";
             e.begin_Angle = begin_Angle;
             e.end_Angle = end_Angle;
             Edge_Map.insert(make_pair(edge_Index(min(v1, v2), max(v1, v2)), e));
+        }
+
+        Edge get_Edge(const int v1, const int v2) const
+        {
+            const auto iter = Edge_Map.find(edge_Index(min(v1, v2), max(v1, v2)));
+            if(iter!=Edge_Map.end()) return iter->second;
+            else return {};
         }
 
         void delete_Edge(const int& v1, const int& v2)
@@ -286,10 +300,10 @@ std::string filePath = "/home/lsj/dev/Mine_WS/data/";
 class topoMap
 {
 private:
-    int current_Vertex{1};
-    int next_Vertex{0};
+    int current_Vertex{5};
+    // int next_Vertex{0};
     int v1{0}, v2{1};   //设置左右窗口
-    edge_Index current_Edge{0,0};
+    // edge_Index current_Edge{0,0};
 
     int clusterNum{0};
     int peakNum{0};
@@ -299,7 +313,7 @@ private:
     float coeff[3]{1, 0, 0};
 
     bool intersectionVerified = false;
-    bool wait = false;
+    bool transferComplete = false;
     bool intersectionVerifiedPre = false;
 
     std::string fin = "/home/lsj/dev/Mine_WS/src/preception/include/ndtData.yaml";
@@ -330,13 +344,13 @@ private:
 
     mutex mtx;
 public:
-    topoMap() : nh("~")
+    topoMap() : nh()
     {
-        subPeakNum = nh.subscribe<std_msgs::UInt8>("/intersection/peakNum", 1, &topoMap::peakNumHandler, this);
-        subClusterNum = nh.subscribe<std_msgs::UInt8>("/intersection/clusterNum", 1, &topoMap::clusterNumHandler, this);
-        subSegmentationRadius = nh.subscribe<std_msgs::UInt8>("/intersection/segmentationRadius", 1, &topoMap::segmentationRadiusHandler, this);
+        subPeakNum = nh.subscribe<std_msgs::UInt8>("/peakNum", 1, &topoMap::peakNumHandler, this);
+        subClusterNum = nh.subscribe<std_msgs::UInt8>("/clusterNum", 1, &topoMap::clusterNumHandler, this);
+        subSegmentationRadius = nh.subscribe<std_msgs::UInt8>("/segmentationRadius", 1, &topoMap::segmentationRadiusHandler, this);
         subOdomAftMapped = nh.subscribe<nav_msgs::Odometry>("/aft_mapped_to_init", 1, &topoMap::odomAftMapped, this);
-        subIntersectionVerified = nh.subscribe<std_msgs::Bool>("/intersection/intersectionVerified", 1, &topoMap::intersectionVerifiedHandler, this);
+        subIntersectionVerified = nh.subscribe<std_msgs::Bool>("/intersectionVerified", 1, &topoMap::intersectionVerifiedHandler, this);
         subCloudOrigin = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_ma", 1, &topoMap::cloudOriginHandler, this);
         
         pubVertex = nh.advertise<std_msgs::Int32>("Vertex", 1);
@@ -345,20 +359,20 @@ public:
         viewer.setBackgroundColor(0, 0, 0, v1);
         viewer.createViewPort(0.5, 0.0, 1, 1, v2);
         viewer.setBackgroundColor(0.5, 0.5, 0.5, v2);
-        viewer.addCoordinateSystem (0.05);
+        viewer.addCoordinateSystem (5);
         viewer.initCameraParameters();
+        viewer.setCameraPosition(30,40,50,-3,-4,-5,0);
 
         cloudOrigin.reset(new pcl::PointCloud<pcl::PointXYZ>);
         target_cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
         output_cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
         filtered_cloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
-
     }
     
     /********读取数据********/
-    void configLoad()
-    {
-    }
+        void configLoad()
+        {
+        }
     /********读取数据********/
 
     /********接收topics********/
@@ -404,60 +418,46 @@ public:
     /********Vertex匹配********/
     void vertex_Matching(const GraphLink& GL)
     {
-        if(intersectionVerified)
+        if(intersectionVerified&&!transferComplete)
         {
             set<int> linked_Vertexes = GL.get_linkedVertex(current_Vertex);
             if(linked_Vertexes.empty()) return;
-            vector<float> compatibility_Vec;
             map<float,int,greater_equal<float>> compatibility_Map;
 
             if(!intersectionVerifiedPre)
-            {
                 for(const int i:linked_Vertexes)
-                {
                     GL.show_VertexInfo(i);
-                }
-            }
             cout << clusterNum << " " << peakNum << " " << segmentationRadius << endl;
 
+            map<int,double> transfer_Map;
             for(const int i:linked_Vertexes)
             {
                 float compatibility = info_Matching(GL.get_Vertex(i));
                 ROS_INFO("Compatibility : Name %d Value %f",i,compatibility);
-                // compatibility_Vec.push_back(compatibility);
                 compatibility_Map[compatibility] = i;
-            }
-            if(compatibility_Map.begin()->first>=0.8)
-            {
-                ++currentVertex_Times[compatibility_Map.begin()->second];
-                cout << " currentVertex_Times " << compatibility_Map.begin()->second <<
-                "  value " << currentVertex_Times[compatibility_Map.begin()->second] << endl;
-            }
-            for(auto i:currentVertex_Times)
-            {
-                cout << i.first << " f s " << i.second << endl;
-            }
-            if(!currentVertex_Times.empty()&&(--currentVertex_Times.end())->second>=3)
-            {   
-                ROS_ERROR("PCD MATCHING!!!!!!!");
-                float score = pcd_Matching((--currentVertex_Times.end())->first);
-                cout << "score" << score << endl;
-                if(score < 1.2)
+                if(compatibility>=0.8)
                 {
-                    current_Vertex = (--currentVertex_Times.end())->first;
-                    ROS_ERROR("Transfer to Vertex %d",current_Vertex);
-                    if(trajectory.empty()||trajectory.top()!=current_Vertex)
-                    trajectory.push(current_Vertex);
-                }    
+                    ROS_ERROR("PCD MATCHING!!!!!!!");
+                    double score = pcd_Matching(i, GL.get_Edge(current_Vertex, i));
+                    cout << "score = " << score << endl;
+                    if(score < 0.6)
+                        transfer_Map[score] = i;
+                }
             }
+            if(!transfer_Map.empty())
+            {    
+                current_Vertex = transfer_Map.begin()->second;
+                transferComplete = true;
+                ROS_ERROR("Transfer to Vertex %d",current_Vertex);
+            }
+            if(trajectory.empty()||trajectory.top()!=current_Vertex)
+                trajectory.push(current_Vertex);
         }
-        else
-        {   
-            if(intersectionVerifiedPre)
-            {
-                currentVertex_Times.clear();
-            }
-        } 
+        else if(!intersectionVerified&&intersectionVerifiedPre)
+        { 
+            currentVertex_Times.clear();
+            transferComplete = false;
+        }
     }
 
     float info_Matching(const Vertex v)
@@ -522,8 +522,8 @@ public:
 
         return res;
     }
-
-    float pcd_Matching(int target_Index)
+ 
+    double pcd_Matching(const int target_Index,const Edge this_Edge)
     {
         YAML::Node config = YAML::LoadFile(fin);
 
@@ -534,8 +534,8 @@ public:
         float yaw_pre = config["yaw_pre"].as<float>()*M_PI/180;
         float x_pre = config["x_pre"].as<float>();
         float y_pre = config["y_pre"].as<float>();
-        cout << "______________" << yaw_pre <<endl;
-        std::string test2File = config["test2File"].as<std::string>();
+        float menu_Bool = config["menu_bool"].as<bool>();
+
         //加载目标点云pcd
         std::string fileName = filePath + std::to_string(target_Index) + "_whole.pcd";
         if (pcl::io::loadPCDFile<pcl::PointXYZ> (fileName, *target_cloud) == -1)
@@ -555,46 +555,29 @@ public:
         filtered_cloud->swap(*target_cloud);
         filtered_cloud->clear();
         
-        std::vector<int> indices;
         *filtered_cloud += *target_cloud;
         target_cloud->clear();
+        std::vector<int> indices;
         pcl::removeNaNFromPointCloud(*filtered_cloud, *target_cloud, indices);
         filtered_cloud->clear();
-        // std::cout << "target_cloud " << target_cloud->size () << " data points from pcd" << std::endl;
-        
-        // 将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
-        // pcl::ApproximateVoxelGrid<pcl::PointXYZ> approximate_voxel_filter;
-        // approximate_voxel_filter.setLeafSize (0.09, 0.09, 0.09);
-        // approximate_voxel_filter.setInputCloud (cloudOrigin);
-        // approximate_voxel_filter.filter (*filtered_cloud);
-        // std::cout << "Filtered cloud contains " << filtered_cloud->size ()
-        //             << " data points from test2.pcd" << std::endl;
 
         pcl::removeNaNFromPointCloud(*cloudOrigin, *cloudOrigin, indices);
         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-        kdtree.setInputCloud(cloudOrigin); // 设置要搜索的点云，建立KDTree
+        kdtree.setInputCloud(cloudOrigin); //设置要搜索的点云，建立KDTree
         std::vector<int> pointIdxRadiusSearch;  //保存每个近邻点的索引
         std::vector<float> pointRadiusSquaredDistance;  //保存每个近邻点与查找点之间的欧式距离平方
         if (kdtree.radiusSearch(pcl::PointXYZ(0,0,0), 25, pointIdxRadiusSearch, pointRadiusSquaredDistance)==0)
-        {
             return -1;
-        }
         for (size_t i = 0; i < pointIdxRadiusSearch.size (); ++i)
-        {
             filtered_cloud->push_back(cloudOrigin->points[pointIdxRadiusSearch[i]]);
-        }
-        
-        // std::cout << "filtered_cloud " << filtered_cloud->size () << " data points from pcd" << std::endl;
 
         //将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
         pcl::ApproximateVoxelGrid<pcl::PointXYZ> approximate_voxel_filter;
         approximate_voxel_filter.setLeafSize (0.2, 0.2, 0.2);
         approximate_voxel_filter.setInputCloud (filtered_cloud);
         approximate_voxel_filter.filter (*filtered_cloud);
-        // std::cout << "Filtered cloud contains " << filtered_cloud->size ()
-        //     << " data points from filtered_cloud.pcd" << std::endl;
 
-        //设置依赖尺度NDT参数
+        /*设置依赖尺度NDT参数*/
         //为终止条件设置最小转换差异
         ndt.setTransformationEpsilon (transformationEpsilon);//定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
         //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
@@ -608,23 +591,35 @@ public:
         //设置点云配准目标
         ndt.setInputTarget (target_cloud);
         //设置使用机器人测距法得到的初始对准估计结果
-        Eigen::AngleAxisf init_rotation (yaw_pre, Eigen::Vector3f::UnitZ());
+
+        float yaw_init;
+        if(!menu_Bool)
+        {
+            if(current_Vertex<target_Index)
+                yaw_init = this_Edge.end_Angle;
+            else yaw_init = this_Edge.begin_Angle;
+            ROS_INFO_STREAM("end Angle = " << yaw_init);
+        }
+        else yaw_init = yaw_pre;
+        Eigen::AngleAxisf init_rotation (yaw_init, Eigen::Vector3f::UnitZ());
         Eigen::Translation3f init_translation (x_pre, y_pre, 0);
         Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix ();
         //计算需要的刚体变换以便将输入的点云匹配到目标点云
         ndt.align (*output_cloud, init_guess);//这一步是将降采样之后的点云经过变换后得到output_cloud
-        std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged ()
-                    << "; score: " << ndt.getFitnessScore () << std::endl;//欧式适合度评分
-        //使用创建的变换对未过滤的输入点云进行变换
+        double res = ndt.getFitnessScore ();
+        if(ndt.hasConverged ())
+        ROS_INFO_STREAM("Normal Distributions Transform Score = " << res);
+        
         //ndt.getFinalTransformation (）即最终变换
         Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+        //使用创建的变换对未过滤的输入点云进行变换
         pcl::transformPointCloud (*filtered_cloud, *output_cloud, ndt.getFinalTransformation ());
         Eigen::Matrix3f transformation_3f;
         for(int i=0;i<3;++i)
             for(int j=0;j<3;++j)
                 transformation_3f(i,j) = transformation(i,j);
-        Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2,1,0)*180/M_PI;
-        cout << "roll, pitch, yaw : " << eulerAngle[0] <<", "<< eulerAngle[1] <<", "<< eulerAngle[2] <<", "<< endl;
+        Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(0,1,2)*180/M_PI;
+        cout << "roll, pitch, yaw : " << eulerAngle[0] <<", "<< eulerAngle[1] <<", "<< eulerAngle[2] <<"."<< endl;
 
         //对目标点云着色（红色）并可视化
         pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
@@ -648,9 +643,13 @@ public:
         viewer.addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "output cloud", v2);
         viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
             2, "output cloud");
+
         mtx.unlock();
 
-        return ndt.getFitnessScore ();
+        target_cloud->clear();
+        filtered_cloud->clear();
+
+        return res;
     }
 
     void matching_Visualization()
@@ -749,7 +748,15 @@ int main(int argc, char **argv)
         YAML::Node Edge_YN = YAML::LoadFile(fin);
         for(YAML::const_iterator it=Edge_YN.begin();it!=Edge_YN.end();++it)
         {
-            
+            int index = (*it)["index"].as<int>();
+            YAML::Node link_YN = (*it)["link"];
+            for(YAML::const_iterator it_link=link_YN.begin();it_link!=link_YN.end();++it_link)
+            {
+                int link_index = (*it_link)["link_index"].as<int>();
+                float begin_Angle = (*it_link)["begin_angle"].as<float>();
+                float end_angle = (*it_link)["end_angle"].as<float>();
+                map_Graph.insert_Edge(index, link_index, begin_Angle, end_angle);
+            }
         }
         
         map_Graph.show_Vertex();
@@ -765,7 +772,7 @@ int main(int argc, char **argv)
     {
         ros::spinOnce();
 
-        tpM.configLoad();
+        // tpM.configLoad();
 
         tpM.vertex_Matching(map_Graph);
 
