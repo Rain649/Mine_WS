@@ -71,7 +71,7 @@ int main(int argc, char **argv)
   // range_filter(*target_cloud,*output_cloud2,4,0.1);
 
   // output_cloud1 = input_cloud;
-  for (const auto p : *input_cloud)
+  for (const auto &p : *input_cloud)
   {
     pcl::PointXYZ thisP;
     float x1 = p.z + x;
