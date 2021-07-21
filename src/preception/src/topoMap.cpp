@@ -242,7 +242,7 @@ public:
     void show_Edge() const
     {
         cout << "------Show Edge------" << endl;
-        for (const auto edge : Edge_Map)
+        for (const auto &edge : Edge_Map)
         {
             cout << "(" << edge.first.first << ", " << edge.first.second << ") : "
                  << "length = " << edge.second.length << ", width = " << edge.second.width << ", begin_Angle = " << edge.second.begin_Angle << ", end_Angle = " << edge.second.end_Angle << endl;
@@ -558,7 +558,7 @@ public:
             return (-1);
         }
 
-        for (const auto p : *target_cloud)
+        for (const auto &p : *target_cloud)
         {
             pcl::PointXYZ p1;
             p1.x = p.z;
@@ -755,7 +755,7 @@ int main(int argc, char **argv)
     {
         Intersection j;
         *it >> j;
-        for (const auto k : j.adjacent_index)
+        for (const auto &k : j.adjacent_index)
             map_Graph.insert_Edge(j.index, k);
     }
     fin = "/home/lsj/dev/Mine_WS/src/perception/include/Edge.yaml";
