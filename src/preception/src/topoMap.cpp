@@ -77,7 +77,7 @@ void print(Intersection &intersection)
 
     cout << "Intersection adjacent_index: (";
     for_each(intersection.adjacent_index.begin(), intersection.adjacent_index.end() - 1,
-             [](const auto &i)
+             [](const int &i)
              { cout << i << ", "; });
     cout << intersection.adjacent_index.back() << ")\n";
     cout << "Intersection cluster_number: " << intersection.cluster_number << endl;
@@ -601,7 +601,7 @@ public:
         //设置匹配迭代的最大次数
         ndt.setMaximumIterations(maximumIterations);
         //设置要配准的点云
-        ndt.setInputCloud(filtered_cloud);
+        ndt.setInputSource(filtered_cloud);
         //设置点云配准目标
         ndt.setInputTarget(target_cloud);
         //设置使用机器人测距法得到的初始对准估计结果

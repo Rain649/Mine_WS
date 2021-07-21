@@ -110,7 +110,8 @@ int main(int argc, char **argv)
   //设置匹配迭代的最大次数
   ndt.setMaximumIterations(maximumIterations);
   // 设置要配准的点云
-  ndt.setInputCloud(filtered_cloud);
+  ndt.setInputSource(filtered_cloud);
+  // ndt.setInputCloud(filtered_cloud);
   //设置点云配准目标
   ndt.setInputTarget(output_cloud2);
   //设置使用机器人测距法得到的初始对准估计结果

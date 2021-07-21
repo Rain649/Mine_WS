@@ -60,7 +60,7 @@ private:
 
     ros::Subscriber subLaserCloudNew;
 
-    pcl::PointXYZI pointOri;
+    pcl::PointXYZI egoPoint;
 
     pcl::PointXY ExistPoint;
     pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudNew;
@@ -112,17 +112,17 @@ private:
     ros::Publisher pubDistance;
 
 public:
-    laneDetection() : nh("~")
+    laneDetection() : nh()
     {
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_ma", 1, &laneDetection::laserCloudNewHandler, this);
 
-        pubCloudTFDS = nh.advertise<sensor_msgs::PointCloud2>("TFDS", 5);
-        pubCloudHigh = nh.advertise<sensor_msgs::PointCloud2>("cloudHigh", 5);
-        pubCloudFinal = nh.advertise<sensor_msgs::PointCloud2>("cloudFinal", 5);
-        pubCluster_1 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_1", 5);
-        pubCluster_2 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_2", 5);
-        pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 5);
-        pubCluster_4 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_4", 5);
+        pubCloudTFDS = nh.advertise<sensor_msgs::PointCloud2>("TFDS", 1);
+        pubCloudHigh = nh.advertise<sensor_msgs::PointCloud2>("cloudHigh", 1);
+        pubCloudFinal = nh.advertise<sensor_msgs::PointCloud2>("cloudFinal", 1);
+        pubCluster_1 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_1", 1);
+        pubCluster_2 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_2", 1);
+        pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 1);
+        pubCluster_4 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_4", 1);
         pubLaneLeft = nh.advertise<sensor_msgs::PointCloud2>("laneLeft", 1);
         pubLaneRight = nh.advertise<sensor_msgs::PointCloud2>("laneRight", 1);
 
@@ -141,9 +141,9 @@ public:
 
     void allocateMemory()
     {
-        pointOri.x = 0;
-        pointOri.y = 0;
-        pointOri.z = 0;
+        egoPoint.x = 0;
+        egoPoint.y = 0;
+        egoPoint.z = 0;
 
         laserCloudNew.reset(new pcl::PointCloud<pcl::PointXYZI>());
         laserCloudNewZ.reset(new pcl::PointCloud<pcl::PointXYZI>());
@@ -250,7 +250,7 @@ public:
             // //创建新的点云数据集cloud_cluster，将所有当前聚类写入到点云数据集中
 
             // std::cout << "PointCloud representing the Cluster: " << cloud_cluster->points.size() << " data points." << std::endl;
-            j++;
+            ++j;
 
             switch (j)
             {
@@ -293,11 +293,11 @@ public:
                 break;
             }
 
-            if (!cloudCluster_1->size())
+            if (cloudCluster_1->empty())
                 break;
+
             kdFirst->setInputCloud(cloudCluster_1);
-            pointSearchSqDis.resize(1);
-            kdFirst->nearestKSearch(pointOri, 1, pointSearchInd, pointSearchSqDis);
+            kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
             if (cloudCluster_1->points[pointSearchInd[0]].y > 0)
             {
                 downSizeFilter_2.setInputCloud(cloudCluster_1);
@@ -328,32 +328,31 @@ public:
             switch (i)
             {
             case 1:
-                if (!cloudCluster_1->size())
+                if (cloudCluster_1->empty())
                     continue;
                 *cloud_cur = *laneLeft;
                 break;
 
             case 2:
-                if (!cloudCluster_2->size())
+                if (cloudCluster_2->empty())
                     continue;
                 *cloud_cur = *laneRight;
                 //距右侧墙壁最近点
                 kdRight->setInputCloud(cloud_cur);
-                pointSearchSqDis.resize(1);
-                kdRight->nearestKSearch(pointOri, 1, pointSearchInd, pointSearchSqDis);
+                kdRight->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
                 distance_Right = sqrt(pow(cloud_cur->points[(pointSearchInd[0])].x, 2) + pow(cloud_cur->points[(pointSearchInd[0])].y, 2));
                 // std::cout << "Distance_Right =  " << distance_Right  << std::endl;
                 Distance.data = distance_Right;
                 break;
 
             case 3:
-                if (!cloudCluster_3->size())
+                if (cloudCluster_3->empty())
                     continue;
                 *cloud_cur = *cloudCluster_3;
                 break;
 
             case 4:
-                if (!cloudCluster_4->size())
+                if (cloudCluster_4->empty())
                     continue;
                 *cloud_cur = *cloudCluster_4;
                 break;
@@ -364,7 +363,7 @@ public:
 
             //输入拟合点
             std::vector<cv::Point> fitPoints;
-            for (int j = 0; j < cloud_cur->size(); j++)
+            for (int j = 0; j < cloud_cur->size(); ++j)
             {
                 float xx = cloud_cur->points[j].x;
                 float yy = cloud_cur->points[j].y;
@@ -402,14 +401,14 @@ public:
                 continue;
             }
 
-            for (int j = 0; j < rank + 1; j++)
+            for (int j = 0; j < rank + 1; ++j)
             {
                 B_array.data.push_back(B.at<double>(j, 0));
             }
             // std::cout << " B_array.data.num = " << B_array.data.size() << std::endl;
 
             //将拟合点绘制到空白图上
-            for (int j = 0; j < fitPoints.size(); j++)
+            for (int j = 0; j < fitPoints.size(); ++j)
             {
                 cv::Point convert;
                 convert.x = times * fitPoints[j].x + 0.5 * y_max;
@@ -422,7 +421,7 @@ public:
 
             std::vector<cv::Point> points_fitted;
 
-            for (int x = -validDistance; x <= validDistance; x++)
+            for (int x = -validDistance; x <= validDistance; ++x)
             {
                 double y;
                 switch (rank)
@@ -471,11 +470,11 @@ public:
 
         //构造矩阵X
         cv::Mat X = cv::Mat::zeros(n + 1, n + 1, CV_64FC1);
-        for (int i = 0; i < n + 1; i++)
+        for (int i = 0; i < n + 1; ++i)
         {
-            for (int j = 0; j < n + 1; j++)
+            for (int j = 0; j < n + 1; ++j)
             {
-                for (int k = 0; k < Num; k++)
+                for (int k = 0; k < Num; ++k)
                 {
                     X.at<double>(i, j) = X.at<double>(i, j) +
                                          std::pow(key_point[k].x, i + j);
@@ -485,9 +484,9 @@ public:
 
         //构造矩阵Y
         cv::Mat Y = cv::Mat::zeros(n + 1, 1, CV_64FC1);
-        for (int i = 0; i < n + 1; i++)
+        for (int i = 0; i < n + 1; ++i)
         {
-            for (int k = 0; k < Num; k++)
+            for (int k = 0; k < Num; ++k)
             {
                 Y.at<double>(i, 0) = Y.at<double>(i, 0) +
                                      std::pow(key_point[k].x, i) * key_point[k].y;
@@ -532,7 +531,7 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         }
 
-        if (pubCluster_1.getNumSubscribers() != 0 && cloudCluster_1->width != 0)
+        if (pubCluster_1.getNumSubscribers() != 0 && !cloudCluster_1->empty())
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
@@ -542,7 +541,7 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         }
 
-        if (pubCluster_2.getNumSubscribers() != 0 && cloudCluster_2->width != 0)
+        if (pubCluster_2.getNumSubscribers() != 0 && !cloudCluster_2->empty())
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
@@ -552,7 +551,7 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         }
 
-        if (pubCluster_3.getNumSubscribers() != 0 && cloudCluster_3->width != 0)
+        if (pubCluster_3.getNumSubscribers() != 0 && !cloudCluster_3->empty())
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
@@ -562,7 +561,7 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         }
 
-        if (pubCluster_4.getNumSubscribers() != 0 && cloudCluster_4->width != 0)
+        if (pubCluster_4.getNumSubscribers() != 0 && !cloudCluster_4->empty())
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
@@ -582,7 +581,7 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m laneLeft Published.");
         }
 
-        if (pubLaneRight.getNumSubscribers() != 0 && laneRight->width != 0)
+        if (pubLaneRight.getNumSubscribers() != 0 && !laneRight->empty())
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*laneRight, cloudMsgTemp);
@@ -598,7 +597,7 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m Distance Published.");
         }
 
-        if (B_array.data.size())
+        if (!B_array.data.empty())
         {
             pubLaneCoefficient.publish(B_array);
             // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
