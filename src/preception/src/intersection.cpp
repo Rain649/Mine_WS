@@ -1,4 +1,4 @@
-/*此程序由北京理工大学*刘仕杰*编写*/
+
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -12,18 +12,18 @@
 #include <pcl/filters/filter.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h> //统计滤波
-#include <pcl/kdtree/kdtree_flann.h>    //kdtree搜索
-#include <pcl/segmentation/extract_clusters.h>  //分割聚类
-#include <pcl/filters/extract_indices.h>    //按索引提取
-#include <pcl/filters/passthrough.h>    //直通滤波
-#include <pcl/filters/conditional_removal.h>    //条件滤波
+#include <pcl/kdtree/kdtree_flann.h>                 //kdtree搜索
+#include <pcl/segmentation/extract_clusters.h>       //分割聚类
+#include <pcl/filters/extract_indices.h>             //按索引提取
+#include <pcl/filters/passthrough.h>                 //直通滤波
+#include <pcl/filters/conditional_removal.h>         //条件滤波
 #include <cmath>
 #include <vector>
 #include <stdio.h>
 #include <thread>
 #include <std_msgs/Bool.h>
 #include <dynamic_reconfigure/server.h>
-#include <preception/param_Config.h>
+#include <perception/param_Config.h>
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
@@ -56,7 +56,7 @@ private:
     bool outlier_Bool;
     bool medianFilter_Bool;
 
-    std::vector<std::pair<int,double> > beam_Invalid;   //有效laser列索引、距离
+    std::vector<std::pair<int, double>> beam_Invalid; //有效laser列索引、距离
 
     std_msgs::Bool intersectionDetected;
     std_msgs::Bool intersectionVerified;
@@ -69,12 +69,12 @@ private:
     ros::Subscriber subLaserCloudNew;
 
     geometry_msgs::Point endPoint;
-    
-    visualization_msgs::Marker laser_Lane,Edge_Lane, circle_Lane;
+
+    visualization_msgs::Marker laser_Lane, Edge_Lane, circle_Lane;
 
     tf::TransformBroadcaster tfBroadcaster;
     tf::StampedTransform fixedTrans;
-    
+
     pcl::PointXYZI ExistPoint;
     pcl::PointXYZI nanPoint;
     pcl::PointXYZI thisKeyPoint;
@@ -91,11 +91,11 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_5;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter;
-    pcl::StatisticalOutlierRemoval<pcl::PointXYZI> cloud_after_StatisticalRemoval;  //统计滤波
-    pcl::ConditionAnd<pcl::PointXYZI>::Ptr longitudinal_Condition;  //条件滤波
-    pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition;  //条件滤波
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZI> cloud_after_StatisticalRemoval; //统计滤波
+    pcl::ConditionAnd<pcl::PointXYZI>::Ptr longitudinal_Condition;                 //条件滤波
+    pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition;                       //条件滤波
     pcl::ConditionalRemoval<pcl::PointXYZI> condition;
-    pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang");    //定义绘图器
+    pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang"); //定义绘图器
     pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kd_first;
     pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
     pcl::ExtractIndices<pcl::PointXYZI> extract;
@@ -118,7 +118,6 @@ private:
     ros::Publisher pubCluster_3;
     ros::Publisher pubCluster_4;
     ros::Publisher pubCluster_5;
-
 
 public:
     Detection() : nh()
@@ -153,16 +152,16 @@ public:
         intersectionVerified.data = false;
 
         downSizeFilter.setLeafSize(0.5, 0.5, 0.5);
-  
+
         //设置特性
         plotter->setShowLegend(true);
         plotter->setXTitle("Beam");
         plotter->setYTitle("Distance");
-        plotter->setXRange(0,Horizon_SCAN);
+        plotter->setXRange(0, Horizon_SCAN);
 
-        for(int i=0;i<Horizon_SCAN;i++)
+        for (int i = 0; i < Horizon_SCAN; i++)
         {
-            Cols[i] = i+1;
+            Cols[i] = i + 1;
         }
 
         laser_Lane.header.frame_id = Edge_Lane.header.frame_id = circle_Lane.header.frame_id = "base_link";
@@ -194,8 +193,8 @@ public:
 
     void allocateMemory()
     {
-        memset(beamDistance_Vec,0,sizeof(beamDistance_Vec));
-        memset(index_Array,0,sizeof(index_Array));
+        memset(beamDistance_Vec, 0, sizeof(beamDistance_Vec));
+        memset(index_Array, 0, sizeof(index_Array));
         laserOrigin_Cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
         outlierRemove_Cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
         laserCloudNewTFDS.reset(new pcl::PointCloud<pcl::PointXYZI>());
@@ -213,16 +212,16 @@ public:
 
         fixedTrans.frame_id_ = "/velodyne";
         fixedTrans.child_frame_id_ = "/base_link";
-        fixedTrans.setRotation(tf::Quaternion(0,0,0,1));
+        fixedTrans.setRotation(tf::Quaternion(0, 0, 0, 1));
         fixedTrans.setOrigin(tf::Vector3(0, 0, 0));
 
         ROS_DEBUG("Allocate Memory Success !!!");
     }
 
     void clearMemory()
-    {   
-        memset(beamDistance_Vec,0,sizeof(beamDistance_Vec));
-        memset(index_Array,0,sizeof(index_Array));
+    {
+        memset(beamDistance_Vec, 0, sizeof(beamDistance_Vec));
+        memset(index_Array, 0, sizeof(index_Array));
         peak_Num.data = 0;
         cluster_Num.data = 0;
 
@@ -257,23 +256,23 @@ public:
         laser_Lane.header.stamp = msg->header.stamp;
         pcl::fromROSMsg(*msg, *laserOrigin_Cloud);
 
-        if(outlier_Bool)
+        if (outlier_Bool)
         {
             //统计滤波
             cloud_after_StatisticalRemoval.setInputCloud(laserOrigin_Cloud);
             cloud_after_StatisticalRemoval.setMeanK(10);
             cloud_after_StatisticalRemoval.setStddevMulThresh(2.0);
             cloud_after_StatisticalRemoval.filter(*outlierRemove_Cloud);
-        } 
+        }
 
         receivePoints = true;
         ROS_DEBUG("laserCloudNewHandler Success !!!");
     }
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr getCloudWithInfo(pcl::PointCloud<pcl::PointXYZI>::Ptr input_Cloud,const int row_Min,const int row_Max,const int horizon_Num)
+    pcl::PointCloud<pcl::PointXYZI>::Ptr getCloudWithInfo(pcl::PointCloud<pcl::PointXYZI>::Ptr input_Cloud, const int row_Min, const int row_Max, const int horizon_Num)
     {
         /*ang_bottom和ang_res_y是全局变量,由外部定义*/
-        
+
         float verticalAngle, horizonAngle;
         pcl::PointXYZI thisPoint;
         pcl::PointCloud<pcl::PointXYZI>::Ptr result(new pcl::PointCloud<pcl::PointXYZI>());
@@ -299,7 +298,7 @@ public:
             if (thisPoint.y < 0)
                 horizonAngle += 360;
 
-            columnIdn = round(horizonAngle*horizon_Num/360);
+            columnIdn = round(horizonAngle * horizon_Num / 360);
             if (columnIdn >= horizon_Num)
                 columnIdn -= horizon_Num;
 
@@ -308,7 +307,7 @@ public:
             index = columnIdn + rowIdn * horizon_Num;
             result->points[index] = thisPoint;
         }
-        
+
         ROS_DEBUG("Get Cloud With Info Success !!!");
         return result;
     }
@@ -316,88 +315,92 @@ public:
     void laser_Visualizaton()
     {
         /*求雷达每列最大距离*/
-            for(int columnIdn = 0; columnIdn < Horizon_SCAN; columnIdn++)
+        for (int columnIdn = 0; columnIdn < Horizon_SCAN; columnIdn++)
+        {
+            int max_Index = -1;
+            for (int rowIdn = 0; rowIdn < N_SCAN; rowIdn++)
             {
-                int max_Index = -1;
-                for( int rowIdn = 0; rowIdn < N_SCAN; rowIdn++)
+                int index = columnIdn + rowIdn * Horizon_SCAN;
+                double distance = sqrt(pow(cloudWithInfo->points[index].x, 2) + pow(cloudWithInfo->points[index].y, 2));
+                if (beamDistance_Vec[columnIdn] < distance)
                 {
-                    int index = columnIdn + rowIdn * Horizon_SCAN;
-                    double distance = sqrt(pow(cloudWithInfo->points[index].x,2) + pow(cloudWithInfo->points[index].y,2));
-                    if(beamDistance_Vec[columnIdn] < distance)
-                        {
-                            beamDistance_Vec[columnIdn] = distance;
-                            max_Index = index;
-                        }
+                    beamDistance_Vec[columnIdn] = distance;
+                    max_Index = index;
                 }
-                if(max_Index == -1) continue;
-                index_Array[columnIdn] = max_Index;
             }
+            if (max_Index == -1)
+                continue;
+            index_Array[columnIdn] = max_Index;
+        }
         /*求雷达每列最大距离*/
 
         /*中值滤波（实际用为扩张）*/
-            if(medianFilter_Bool)
+        if (medianFilter_Bool)
+        {
+            double beam_Distance_0[Horizon_SCAN];
+            for (int i = 0; i < Horizon_SCAN; i++)
             {
-                double beam_Distance_0[Horizon_SCAN];
-                for(int i=0;i<Horizon_SCAN;i++)
+                std::vector<double> beamNeighbor_Vec;
+                int k = 0;
+                for (int j = -median_Size; j <= median_Size; j++)
                 {
-                    std::vector<double> beamNeighbor_Vec;
-                    int k=0;
-                    for(int j=-median_Size;j<=median_Size;j++)
-                    {
-                        int index = i+j;
-                        if(index<0) index += Horizon_SCAN;
-                        if(index>=Horizon_SCAN) index -= Horizon_SCAN;
-                        beamNeighbor_Vec.push_back(beamDistance_Vec[index]);
-                    }
-
-                    //排序
-                    sort(beamNeighbor_Vec.begin(), beamNeighbor_Vec.end());
-
-                    beam_Distance_0[i] = beamNeighbor_Vec[(int)median_Coefficient*(median_Size-1)];
-                }
-                
-                for(int i=0;i<Horizon_SCAN;i++)
-                {
-                    beamDistance_Vec[i] = beam_Distance_0[i];
+                    int index = i + j;
+                    if (index < 0)
+                        index += Horizon_SCAN;
+                    if (index >= Horizon_SCAN)
+                        index -= Horizon_SCAN;
+                    beamNeighbor_Vec.push_back(beamDistance_Vec[index]);
                 }
 
-                ROS_DEBUG("Median Filter Success !!!");
+                //排序
+                sort(beamNeighbor_Vec.begin(), beamNeighbor_Vec.end());
+
+                beam_Distance_0[i] = beamNeighbor_Vec[(int)median_Coefficient * (median_Size - 1)];
             }
+
+            for (int i = 0; i < Horizon_SCAN; i++)
+            {
+                beamDistance_Vec[i] = beam_Distance_0[i];
+            }
+
+            ROS_DEBUG("Median Filter Success !!!");
+        }
         /*中值滤波（实际用为扩张）*/
 
         //进行中心点的计算
-        if(true)
+        if (true)
         {
             // for()
         }
 
         /*laser可视化处理*/
-            for(int columnIdn = 0; columnIdn < Horizon_SCAN; columnIdn++)
-            {
-                if(index_Array[columnIdn] == 0) continue;
-                endPoint.x = endPoint.y = endPoint.z = 0;
-                laser_Lane.points.push_back(endPoint);
+        for (int columnIdn = 0; columnIdn < Horizon_SCAN; columnIdn++)
+        {
+            if (index_Array[columnIdn] == 0)
+                continue;
+            endPoint.x = endPoint.y = endPoint.z = 0;
+            laser_Lane.points.push_back(endPoint);
 
-                endPoint.x = cloudWithInfo->points[index_Array[columnIdn]].x;
-                endPoint.y = cloudWithInfo->points[index_Array[columnIdn]].y;
-                endPoint.z = cloudWithInfo->points[index_Array[columnIdn]].z;
-                laser_Lane.points.push_back(endPoint);
-                beam_Invalid.push_back(std::pair<int,double>(columnIdn,beamDistance_Vec[columnIdn]));
-            }
+            endPoint.x = cloudWithInfo->points[index_Array[columnIdn]].x;
+            endPoint.y = cloudWithInfo->points[index_Array[columnIdn]].y;
+            endPoint.z = cloudWithInfo->points[index_Array[columnIdn]].z;
+            laser_Lane.points.push_back(endPoint);
+            beam_Invalid.push_back(std::pair<int, double>(columnIdn, beamDistance_Vec[columnIdn]));
+        }
         /*laser可视化处理*/
 
         //beam model(距离-角度分布图)
         plotter->addPlotData(Cols, beamDistance_Vec, Horizon_SCAN, "直方图");
         plotter->spinOnce(0);
-             
+
         //距离阈值可视化
         circle_Lane.points.clear();
         circle_Lane.header.stamp = laser_Lane.header.stamp;
-        for(int i=0;i<360;i++)
+        for (int i = 0; i < 360; i++)
         {
             geometry_msgs::Point circle;
-            circle.x = distance_Thre*cos(i/2/M_PI);
-            circle.y = distance_Thre*sin(i/2/M_PI);
+            circle.x = distance_Thre * cos(i / 2 / M_PI);
+            circle.y = distance_Thre * sin(i / 2 / M_PI);
             circle.z = 0;
             circle_Lane.points.push_back(circle);
         }
@@ -411,151 +414,157 @@ public:
         int sizeOfBeamInvalid = beam_Invalid.size();
         std::vector<double> peakPoints_Vec;
         std::vector<double> peakDistance_Vec;
-        std::vector<std::pair<int,int> > startEnd_Vec;
+        std::vector<std::pair<int, int>> startEnd_Vec;
         Edge_Lane.header.stamp = laser_Lane.header.stamp;
 
         /*横向距离阈值判定路口*/
-            longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-                pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -5)));  //GT表示大于等于
-            longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-                pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 5)));  //GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -5))); //GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 5)));  //GT表示大于等于
 
-            lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-                pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 5)));  //LT表示小于等于
-            lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new
-                pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -5)));  //LT表示小于等于        //条件滤波
-            
-            condition.setCondition(longitudinal_Condition);
-            condition.setInputCloud(laserOrigin_Cloud);
-            condition.setKeepOrganized(false);
-            condition.filter(*cloudFar);
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 5)));  //LT表示小于等于
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -5))); //LT表示小于等于        //条件滤波
 
-            condition.setCondition(lateral_Condition);
-            condition.setInputCloud(cloudFar);
-            condition.setKeepOrganized(false);
-            condition.filter(*cloudFar);
+        condition.setCondition(longitudinal_Condition);
+        condition.setInputCloud(laserOrigin_Cloud);
+        condition.setKeepOrganized(false);
+        condition.filter(*cloudFar);
+
+        condition.setCondition(lateral_Condition);
+        condition.setInputCloud(cloudFar);
+        condition.setKeepOrganized(false);
+        condition.filter(*cloudFar);
         /*横向距离阈值判定路口*/
 
         /*从vector提取数组，方便后续使用*/
-            int Cols_plot[sizeOfBeamInvalid];
-            double Distance_plot[sizeOfBeamInvalid];
-            int i_plot = 0;
-            for(std::vector<std::pair<int,double> >::iterator itr=beam_Invalid.begin();itr!=beam_Invalid.end();itr++)
-            {
-                Cols_plot[i_plot] = itr->first;
-                Distance_plot[i_plot++] = itr->second;
-            }
+        int Cols_plot[sizeOfBeamInvalid];
+        double Distance_plot[sizeOfBeamInvalid];
+        int i_plot = 0;
+        for (std::vector<std::pair<int, double>>::iterator itr = beam_Invalid.begin(); itr != beam_Invalid.end(); itr++)
+        {
+            Cols_plot[i_plot] = itr->first;
+            Distance_plot[i_plot++] = itr->second;
+        }
         /*从vector提取数组，方便后续使用*/
 
         /*路口数量检测*/
-            int numOfEdgeLaser = 0;
-            for(int i_left=0;i_left<sizeOfBeamInvalid;i_left++)
+        int numOfEdgeLaser = 0;
+        for (int i_left = 0; i_left < sizeOfBeamInvalid; i_left++)
+        {
+            //跳过最初相位的波峰
+            if (i_left == 0)
+                while (Distance_plot[i_left] > distance_Thre)
+                    i_left++;
+
+            int i_neighbor = i_left + 1;
+            if (i_neighbor >= sizeOfBeamInvalid)
+                i_neighbor -= sizeOfBeamInvalid;
+
+            //满足边界判断条件，选定左边界
+            if (Distance_plot[i_neighbor] > distance_Thre && Distance_plot[i_neighbor] > Distance_plot[i_left])
             {
-                //跳过最初相位的波峰
-                if(i_left==0) while(Distance_plot[i_left]>distance_Thre) i_left++; 
-
-                int i_neighbor = i_left+1;
-                if(i_neighbor >= sizeOfBeamInvalid) i_neighbor -= sizeOfBeamInvalid;
-
-                //满足边界判断条件，选定左边界
-                if(Distance_plot[i_neighbor]>distance_Thre  && Distance_plot[i_neighbor]>Distance_plot[i_left])
+                int i_right = i_neighbor + 1;
+                if (i_right >= sizeOfBeamInvalid)
+                    i_right -= sizeOfBeamInvalid;
+                int colIndexMinus = Cols_plot[i_right] - Cols_plot[i_left];
+                if (colIndexMinus < 0)
+                    colIndexMinus += Horizon_SCAN;
+                while (colIndexMinus <= col_minus_Thre * Horizon_SCAN / 360)
                 {
-                    int i_right = i_neighbor + 1;
-                    if(i_right>=sizeOfBeamInvalid) i_right -= sizeOfBeamInvalid;
-                    int colIndexMinus = Cols_plot[i_right]-Cols_plot[i_left];
-                    if(colIndexMinus<0) colIndexMinus += Horizon_SCAN;
-                    while(colIndexMinus<=col_minus_Thre*Horizon_SCAN/360)
+                    if (Distance_plot[i_right] < distance_Thre)
                     {
-                        if(Distance_plot[i_right]<distance_Thre)
+                        ROS_DEBUG_STREAM("i_left =  =  " << i_left);
+                        ROS_DEBUG_STREAM("i_right =  =  " << i_right);
+
+                        //若满足右边界判断条件，进行可视化处理
+                        if ((Distance_plot[i_right] + Distance_plot[i_left]) * sin(colIndexMinus * M_PI / Horizon_SCAN) > width_Thre)
                         {
-                            ROS_DEBUG_STREAM("i_left =  =  " << i_left);
-                            ROS_DEBUG_STREAM("i_right =  =  " << i_right);
+                            startEnd_Vec.push_back(std::pair<int, int>(i_left, i_right));
 
-                            //若满足右边界判断条件，进行可视化处理
-                            if((Distance_plot[i_right]+Distance_plot[i_left])*sin(colIndexMinus*M_PI/Horizon_SCAN)>width_Thre)
-                            {   
-                                startEnd_Vec.push_back(std::pair<int,int>(i_left,i_right));
-                                
-                                if(index_Array[Cols_plot[i_left]])
-                                {
-                                    //mark this beam
-                                    endPoint.x = endPoint.y = endPoint.z = 0;
-                                    Edge_Lane.points.push_back(endPoint);
+                            if (index_Array[Cols_plot[i_left]])
+                            {
+                                //mark this beam
+                                endPoint.x = endPoint.y = endPoint.z = 0;
+                                Edge_Lane.points.push_back(endPoint);
 
-                                    endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_left]]].x;
-                                    endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_left]]].y;
-                                    endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_left]]].z;
-                                    Edge_Lane.points.push_back(endPoint);
+                                endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_left]]].x;
+                                endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_left]]].y;
+                                endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_left]]].z;
+                                Edge_Lane.points.push_back(endPoint);
 
-                                    numOfEdgeLaser++;
-                                }
-
-                                if(index_Array[Cols_plot[i_right]])
-                                {
-                                    //mark right beam
-                                    endPoint.x = endPoint.y = endPoint.z = 0;
-                                    Edge_Lane.points.push_back(endPoint);
-
-                                    endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_right]]].x;
-                                    endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_right]]].y;
-                                    endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_right]]].z;
-                                    Edge_Lane.points.push_back(endPoint);
-
-                                    numOfEdgeLaser++;
-                                }
-                                
-                                if(index_Array[Cols_plot[i_neighbor]])
-                                {
-                                    //mark this beam
-                                    endPoint.x = endPoint.y = endPoint.z = 0;
-                                    Edge_Lane.points.push_back(endPoint);
-
-                                    endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_neighbor]]].x;
-                                    endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_neighbor]]].y;
-                                    endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_neighbor]]].z;
-                                    Edge_Lane.points.push_back(endPoint);
-
-                                    numOfEdgeLaser++;
-                                }
-
-                                int i_right_neighbor = i_right - 1;
-                                if(i_right_neighbor<0) i_right_neighbor = sizeOfBeamInvalid-1;
-                                if(index_Array[Cols_plot[i_right_neighbor]])
-                                {
-                                    //mark right beam
-                                    endPoint.x = endPoint.y = endPoint.z = 0;
-                                    Edge_Lane.points.push_back(endPoint);
-
-                                    endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_right_neighbor]]].x;
-                                    endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_right_neighbor]]].y;
-                                    endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_right_neighbor]]].z;
-                                    Edge_Lane.points.push_back(endPoint);
-
-                                    numOfEdgeLaser++;
-                                }
-
-                                //统计路口数量
-                                peak_Num.data++;
-
-                                //完成一个周期，跳出本次循环
-                                if(i_left<i_right) i_left = i_right;
-                                    else goto part1;
-                                break;
+                                numOfEdgeLaser++;
                             }
-                        }
 
-                        //右边界索引迭代，计算右边界与左边界水平索引差值
-                        i_right ++;
-                        if(i_right==sizeOfBeamInvalid) i_right = 0;
-                        colIndexMinus = Cols_plot[i_right]-Cols_plot[i_left];
-                        if(colIndexMinus<0) colIndexMinus += Horizon_SCAN;
+                            if (index_Array[Cols_plot[i_right]])
+                            {
+                                //mark right beam
+                                endPoint.x = endPoint.y = endPoint.z = 0;
+                                Edge_Lane.points.push_back(endPoint);
+
+                                endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_right]]].x;
+                                endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_right]]].y;
+                                endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_right]]].z;
+                                Edge_Lane.points.push_back(endPoint);
+
+                                numOfEdgeLaser++;
+                            }
+
+                            if (index_Array[Cols_plot[i_neighbor]])
+                            {
+                                //mark this beam
+                                endPoint.x = endPoint.y = endPoint.z = 0;
+                                Edge_Lane.points.push_back(endPoint);
+
+                                endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_neighbor]]].x;
+                                endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_neighbor]]].y;
+                                endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_neighbor]]].z;
+                                Edge_Lane.points.push_back(endPoint);
+
+                                numOfEdgeLaser++;
+                            }
+
+                            int i_right_neighbor = i_right - 1;
+                            if (i_right_neighbor < 0)
+                                i_right_neighbor = sizeOfBeamInvalid - 1;
+                            if (index_Array[Cols_plot[i_right_neighbor]])
+                            {
+                                //mark right beam
+                                endPoint.x = endPoint.y = endPoint.z = 0;
+                                Edge_Lane.points.push_back(endPoint);
+
+                                endPoint.x = cloudWithInfo->points[index_Array[Cols_plot[i_right_neighbor]]].x;
+                                endPoint.y = cloudWithInfo->points[index_Array[Cols_plot[i_right_neighbor]]].y;
+                                endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_right_neighbor]]].z;
+                                Edge_Lane.points.push_back(endPoint);
+
+                                numOfEdgeLaser++;
+                            }
+
+                            //统计路口数量
+                            peak_Num.data++;
+
+                            //完成一个周期，跳出本次循环
+                            if (i_left < i_right)
+                                i_left = i_right;
+                            else
+                                goto part1;
+                            break;
+                        }
                     }
+
+                    //右边界索引迭代，计算右边界与左边界水平索引差值
+                    i_right++;
+                    if (i_right == sizeOfBeamInvalid)
+                        i_right = 0;
+                    colIndexMinus = Cols_plot[i_right] - Cols_plot[i_left];
+                    if (colIndexMinus < 0)
+                        colIndexMinus += Horizon_SCAN;
                 }
             }
-        /*路口数量检测*/
-        //跳到此处
-        part1:
-            ROS_DEBUG("Jump to Part 1");
+        }
+    /*路口数量检测*/
+    //跳到此处
+    part1:
+        ROS_DEBUG("Jump to Part 1");
 
         //laser可视数量
         ROS_DEBUG_STREAM("Num of Edge Laser =   " << numOfEdgeLaser);
@@ -570,52 +579,55 @@ public:
         }
 
         /*排除检测为岔道线的最大光束距离*/
-        if(startEnd_Vec.size()==0) return;
-        for(std::vector<std::pair<int,int> >::iterator itr=startEnd_Vec.begin();itr!=startEnd_Vec.end();itr++)
+        if (startEnd_Vec.size() == 0)
+            return;
+        for (std::vector<std::pair<int, int>>::iterator itr = startEnd_Vec.begin(); itr != startEnd_Vec.end(); itr++)
         {
             double thisMin = 20.0;
-            std::vector<std::pair<int,int> >::iterator itr_front;
+            std::vector<std::pair<int, int>>::iterator itr_front;
 
-            if(itr==startEnd_Vec.begin())
+            if (itr == startEnd_Vec.begin())
             {
-                itr_front = startEnd_Vec.end()-1;
+                itr_front = startEnd_Vec.end() - 1;
             }
             else
             {
-                itr_front = itr -1;
+                itr_front = itr - 1;
             }
 
-            if(itr->first<itr_front->second)
-            {   
-                for(int i=0;i<sizeOfBeamInvalid;i++)
+            if (itr->first < itr_front->second)
+            {
+                for (int i = 0; i < sizeOfBeamInvalid; i++)
                 {
-                    if(i==itr->first) i = itr_front->second;
+                    if (i == itr->first)
+                        i = itr_front->second;
                     double thisDistance = Distance_plot[i];
-                    if(thisMin>20)
+                    if (thisMin > 20)
                     {
                         ROS_WARN_STREAM("Divide WARNING =  " << thisMin);
                         break;
                     }
-                    if(thisMin>thisDistance) thisMin = thisDistance;
+                    if (thisMin > thisDistance)
+                        thisMin = thisDistance;
                 }
             }
             else
             {
-                for(int i=itr_front->second;i<itr->first;i++)
+                for (int i = itr_front->second; i < itr->first; i++)
                 {
                     double thisDistance = Distance_plot[i];
-                    if(thisMin>20)
+                    if (thisMin > 20)
                     {
                         ROS_WARN_STREAM("Divide WARNING =  " << thisMin);
                         break;
                     }
-                    if(thisMin>thisDistance) thisMin = thisDistance;
+                    if (thisMin > thisDistance)
+                        thisMin = thisDistance;
                 }
             }
             peakDistance_Vec.push_back(thisMin);
         }
         peakDistance_Max.data = *(std::max_element(peakDistance_Vec.begin(), peakDistance_Vec.end()));
-
 
         // if (peak_Num.data > 2)
         // {
@@ -631,8 +643,8 @@ public:
     void intersectionDivide()
     {
 
-        if(outlier_Bool&&false)
-        {   
+        if (outlier_Bool && false)
+        {
             // 创建滤波器对象
             pcl::PassThrough<pcl::PointXYZI> pass;
             pass.setInputCloud(cloudWithInfo);
@@ -645,28 +657,28 @@ public:
             extract.setInputCloud(cloudWithInfo);
         }
         else
-        {   
+        {
             kdtree.setInputCloud(laserOrigin_Cloud);
             extract.setInputCloud(laserOrigin_Cloud);
-        } 
+        }
 
-        std::vector<int> pointIdxRadiusSearch;  //保存每个近邻点的索引
-        std::vector<float> pointRadiusSquaredDistance;  //保存每个近邻点与查找点之间的欧式距离平方
-        
-        if (kdtree.radiusSearch(thisKeyPoint, segmentationRadius, pointIdxRadiusSearch, pointRadiusSquaredDistance)==0)
-        {   
+        std::vector<int> pointIdxRadiusSearch;         //保存每个近邻点的索引
+        std::vector<float> pointRadiusSquaredDistance; //保存每个近邻点与查找点之间的欧式距离平方
+
+        if (kdtree.radiusSearch(thisKeyPoint, segmentationRadius, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
+        {
             ROS_ERROR("There is no point nearby !!!");
             return;
         }
-       
+
         //**分割点云**//
         pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCenter(new pcl::PointCloud<pcl::PointXYZI>());
         boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(pointIdxRadiusSearch);
         extract.setIndices(index_ptr);
-        extract.setNegative(false);//如果设为true,可以提取指定index之外的点云
+        extract.setNegative(false); //如果设为true,可以提取指定index之外的点云
         extract.filter(*cloudCenter);
         ROS_DEBUG_STREAM("Extract Center Success !!! Center Number = " << cloudCenter->size());
-        extract.setNegative(true);//提取指定index之外的点云
+        extract.setNegative(true); //提取指定index之外的点云
         extract.filter(*cloudIntersections);
         ROS_DEBUG_STREAM("Extract Intersection Success !!! Intersection Number = " << cloudIntersections->size());
 
@@ -675,7 +687,8 @@ public:
 
     void intersectionCluster()
     {
-        if(cloudIntersections->size()==0) return;
+        if (cloudIntersections->size() == 0)
+            return;
 
         // Creating the KdTree object for the search method of the extraction
         pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>);
@@ -684,8 +697,8 @@ public:
         std::vector<pcl::PointIndices> cluster_indices;
         pcl::EuclideanClusterExtraction<pcl::PointXYZI> ec;
         ec.setClusterTolerance(clusterRadius); //设置近邻搜索的搜索半径
-        ec.setMinClusterSize(clusterSize_min);    //设置一个聚类需要的最少点数目
-        ec.setSearchMethod(tree);    //设置点云的搜索机制
+        ec.setMinClusterSize(clusterSize_min); //设置一个聚类需要的最少点数目
+        ec.setSearchMethod(tree);              //设置点云的搜索机制
         ec.setInputCloud(cloudIntersections);
         ec.extract(cluster_indices); //从点云中提取聚类，并将点云索引保存在cluster_indices中
 
@@ -695,54 +708,54 @@ public:
         for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
         {
             cluster_Num.data++;
-            
+
             switch (cluster_Num.data)
-            {   
-                case 1:
-                    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                        cloudCluster_1->points.push_back(cloudIntersections->points[*pit]);
-                    cloudCluster_1->width = cloudCluster_1->points.size();
-                    cloudCluster_1->height = 1;
-                    cloudCluster_1->is_dense = true;
-                    
-                    break;
+            {
+            case 1:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_1->points.push_back(cloudIntersections->points[*pit]);
+                cloudCluster_1->width = cloudCluster_1->points.size();
+                cloudCluster_1->height = 1;
+                cloudCluster_1->is_dense = true;
 
-                case 2:
-                    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                        cloudCluster_2->points.push_back(cloudIntersections->points[*pit]);
-                    cloudCluster_2->width = cloudCluster_2->points.size();
-                    cloudCluster_2->height = 1;
-                    cloudCluster_2->is_dense = true;
-                    break;
+                break;
 
-                case 3:
-                    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                        cloudCluster_3->points.push_back(cloudIntersections->points[*pit]);
-                    cloudCluster_3->width = cloudCluster_3->points.size();
-                    cloudCluster_3->height = 1;
-                    cloudCluster_3->is_dense = true;
+            case 2:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_2->points.push_back(cloudIntersections->points[*pit]);
+                cloudCluster_2->width = cloudCluster_2->points.size();
+                cloudCluster_2->height = 1;
+                cloudCluster_2->is_dense = true;
+                break;
 
-                    break;
+            case 3:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_3->points.push_back(cloudIntersections->points[*pit]);
+                cloudCluster_3->width = cloudCluster_3->points.size();
+                cloudCluster_3->height = 1;
+                cloudCluster_3->is_dense = true;
 
-                case 4:
-                    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                        cloudCluster_4->points.push_back(cloudIntersections->points[*pit]);
-                    cloudCluster_4->width = cloudCluster_4->points.size();
-                    cloudCluster_4->height = 1;
-                    cloudCluster_4->is_dense = true;
+                break;
 
-                    break;
+            case 4:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_4->points.push_back(cloudIntersections->points[*pit]);
+                cloudCluster_4->width = cloudCluster_4->points.size();
+                cloudCluster_4->height = 1;
+                cloudCluster_4->is_dense = true;
 
-                case 5:
-                    for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                        cloudCluster_5->points.push_back(cloudIntersections->points[*pit]);
-                    cloudCluster_5->width = cloudCluster_5->points.size();
-                    cloudCluster_5->height = 1;
-                    cloudCluster_5->is_dense = true;
+                break;
 
-                    break;
+            case 5:
+                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+                    cloudCluster_5->points.push_back(cloudIntersections->points[*pit]);
+                cloudCluster_5->width = cloudCluster_5->points.size();
+                cloudCluster_5->height = 1;
+                cloudCluster_5->is_dense = true;
 
-                default:
+                break;
+
+            default:
                 break;
             }
         }
@@ -787,7 +800,7 @@ public:
             pubCloudIntersection.publish(cloudMsgTemp);
         }
 
-        if (pubCluster_1.getNumSubscribers() != 0 )
+        if (pubCluster_1.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
@@ -796,7 +809,7 @@ public:
             pubCluster_1.publish(cloudMsgTemp);
         }
 
-        if (pubCluster_2.getNumSubscribers() != 0 )
+        if (pubCluster_2.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
@@ -805,7 +818,7 @@ public:
             pubCluster_2.publish(cloudMsgTemp);
         }
 
-        if (pubCluster_3.getNumSubscribers() != 0 )
+        if (pubCluster_3.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
@@ -814,7 +827,7 @@ public:
             pubCluster_3.publish(cloudMsgTemp);
         }
 
-        if (pubCluster_4.getNumSubscribers() != 0 )
+        if (pubCluster_4.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
@@ -823,7 +836,7 @@ public:
             pubCluster_4.publish(cloudMsgTemp);
         }
 
-        if (pubCluster_5.getNumSubscribers() != 0 )
+        if (pubCluster_5.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_5, cloudMsgTemp);
@@ -853,7 +866,7 @@ public:
 
             fixedTrans.stamp_ = ros::Time().fromSec(timeLaserCloudNew);
             tfBroadcaster.sendTransform(fixedTrans);
-            
+
             std_msgs::Float32MultiArray beam_Dis;
             for (int i = 0; i < Horizon_SCAN; i++)
             {
@@ -874,19 +887,21 @@ public:
         {
             over = false;
             getDynamicParameter();
-            if(outlier_Bool) cloudWithInfo = getCloudWithInfo(outlierRemove_Cloud,groundScanInd,aboveScanInd,Horizon_SCAN);
-            else cloudWithInfo = getCloudWithInfo(laserOrigin_Cloud,groundScanInd,aboveScanInd,Horizon_SCAN);
+            if (outlier_Bool)
+                cloudWithInfo = getCloudWithInfo(outlierRemove_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
+            else
+                cloudWithInfo = getCloudWithInfo(laserOrigin_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
             laser_Visualizaton();
             intersectionDetection();
-            if(intersectionVerified.data)
+            if (intersectionVerified.data)
             {
-                loop:
-                    ROS_DEBUG_STREAM("segmentationRadius  ===========    " << segmentationRadius);
-                    intersectionDivide();
-                    intersectionCluster();
-                    
-                if(cluster_Num.data<peak_Num.data && segmentationRadius<segmentationRadius_Max)
-                {   
+            loop:
+                ROS_DEBUG_STREAM("segmentationRadius  ===========    " << segmentationRadius);
+                intersectionDivide();
+                intersectionCluster();
+
+                if (cluster_Num.data < peak_Num.data && segmentationRadius < segmentationRadius_Max)
+                {
                     segmentationRadius += 2;
                     cloudIntersections->clear();
                     cloudCluster_1->clear();
@@ -904,21 +919,21 @@ public:
 
     void getDynamicParameter()
     {
-        ros::param::get("/intersection/segmentation_radius",segmentationRadius);
-        ros::param::get("/intersection/width_threshold",width_Thre);
-        ros::param::get("/intersection/distance_threshold",distance_Thre);
-        ros::param::get("/intersection/col_minus_threshold",col_minus_Thre);
-        ros::param::get("/intersection/cluster_radius",clusterRadius);
-        ros::param::get("/intersection/cluster_size_min",clusterSize_min);
-        ros::param::get("/intersection/bool_outlier_removal",outlier_Bool);
-        ros::param::get("/intersection/bool_median_filter",medianFilter_Bool);
-        ros::param::get("/intersection/median_size",median_Size);
-        ros::param::get("/intersection/median_coefficient",median_Coefficient);
+        ros::param::get("/intersection/segmentation_radius", segmentationRadius);
+        ros::param::get("/intersection/width_threshold", width_Thre);
+        ros::param::get("/intersection/distance_threshold", distance_Thre);
+        ros::param::get("/intersection/col_minus_threshold", col_minus_Thre);
+        ros::param::get("/intersection/cluster_radius", clusterRadius);
+        ros::param::get("/intersection/cluster_size_min", clusterSize_min);
+        ros::param::get("/intersection/bool_outlier_removal", outlier_Bool);
+        ros::param::get("/intersection/bool_median_filter", medianFilter_Bool);
+        ros::param::get("/intersection/median_size", median_Size);
+        ros::param::get("/intersection/median_coefficient", median_Coefficient);
     }
 };
 
 //动态调参
-void callback(preception::param_Config &config, uint32_t level)
+void callback(perception::param_Config &config, uint32_t level)
 {
     ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %f %f %s %s",
              config.segmentation_radius,
@@ -938,8 +953,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "intersection");
 
     //动态参数调节
-    dynamic_reconfigure::Server<preception::param_Config> server;
-    dynamic_reconfigure::Server<preception::param_Config>::CallbackType f;
+    dynamic_reconfigure::Server<perception::param_Config> server;
+    dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
     f = boost::bind(&callback, _1, _2);
     server.setCallback(f);
 

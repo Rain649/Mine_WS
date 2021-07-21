@@ -1,4 +1,4 @@
-/*此程序由北京理工大学*刘仕杰*编写*/
+
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -19,7 +19,7 @@
 #include <string>
 
 #include <dynamic_reconfigure/server.h>
-#include <preception/param_Config.h>
+#include <perception/param_Config.h>
 
 #include <utility.h>
 
@@ -34,7 +34,7 @@ private:
     short int counter = 0;
     short int clusterNum_max = 0;
     short int peakNum_max = 0;
-    
+
     double peakDistance_min = 20;
     short int segmentationRadius_max = 0;
     short int clusterNum_final;
@@ -66,6 +66,7 @@ private:
     ros::Subscriber subOdomAftMapped;
     ros::Subscriber subSegmentationRadius;
     ros::Subscriber subPeakDistanceSum;
+
 public:
     keyPointSave() : nh("~")
     {
@@ -104,7 +105,7 @@ public:
         segmentationRadius = msg.data;
         ROS_DEBUG_STREAM("Cluster Number  =    " << clusterNum);
     }
-    
+
     void peakDistanceSumHandler(std_msgs::Float32 msg)
     {
         peakDistance_Max = msg.data;
@@ -128,7 +129,7 @@ public:
             clusterNum_Pre = clusterNum;
 
         //判断变化
-        if(!record_Bool && intersectionVerified && peakNum>2)
+        if (!record_Bool && intersectionVerified && peakNum > 2)
         {
             if (clusterNum_Pre <= 2 && clusterNum > 2)
             {
@@ -144,7 +145,7 @@ public:
                 ROS_INFO("Start Recording Key Points.");
             }
         }
-        else if(record_Bool)
+        else if (record_Bool)
         {
             if (clusterNum_Pre > 2 && clusterNum <= 2 || !intersectionVerified)
             {
@@ -162,42 +163,44 @@ public:
                     keyPoints_Vec.push_back(std::pair<short int, pcl::PointXYZ>(counter, thisKeyPoint));
                     radius_Vec.push_back(segmentationRadius_max);
 
-                    numOfIntersection_Vec.push_back(std::pair<short int, short int>(clusterNum_max , peakNum_max));
+                    numOfIntersection_Vec.push_back(std::pair<short int, short int>(clusterNum_max, peakNum_max));
 
                     ROS_INFO_STREAM("\033[1;32m---->\033[0m End Recording Key Points:  " << counter);
                 }
-            } 
+            }
         }
         ROS_DEBUG("judge");
     }
 
     void recordKeyPoint()
     {
-        if (!currentPosition_Vec.empty() && getDistanceOf2Point(currentPosition, currentPosition_Vec.back().first)<0.005) return;
-        
-        if(segmentationRadius>segmentationRadius_Max) return;
+        if (!currentPosition_Vec.empty() && getDistanceOf2Point(currentPosition, currentPosition_Vec.back().first) < 0.005)
+            return;
+
+        if (segmentationRadius > segmentationRadius_Max)
+            return;
 
         currentPosition_Vec.push_back(std::pair<pcl::PointXYZ, short int>(currentPosition, segmentationRadius));
-        thisNum_Vec.push_back(std::pair<short int,short int>(clusterNum,peakNum));
+        thisNum_Vec.push_back(std::pair<short int, short int>(clusterNum, peakNum));
 
         if (clusterNum_max <= clusterNum)
         {
             clusterNum_max = clusterNum;
             if (peakDistance_min > peakDistance_Max)
-                {
-                    peakDistance_min = peakDistance_Max;
-                    thisKeyPoint = currentPosition;
-                    segmentationRadius_max = segmentationRadius;
-                    peakNum_max = peakNum;
-                }
+            {
+                peakDistance_min = peakDistance_Max;
+                thisKeyPoint = currentPosition;
+                segmentationRadius_max = segmentationRadius;
+                peakNum_max = peakNum;
+            }
         }
 
         ROS_DEBUG("recordKeyPoint");
     }
 
-    float getDistanceOf2Point(pcl::PointXYZ point1,pcl::PointXYZ point2)
+    float getDistanceOf2Point(pcl::PointXYZ point1, pcl::PointXYZ point2)
     {
-        float distance = sqrt(pow(point1.x - point2.x,2) + pow(point1.y - point2.y,2) + pow(point1.z - point2.z,2));
+        float distance = sqrt(pow(point1.x - point2.x, 2) + pow(point1.y - point2.y, 2) + pow(point1.z - point2.z, 2));
         return distance;
     }
 
@@ -216,8 +219,8 @@ public:
 
         outfile.open("/home/lsj/dev/Mine_WS/data/" + save_Name + ".txt");
 
-        outfile << std::setiosflags(std::ios::left) << std::setw(10) << "index" << std::setw(15) << "keyPoint.x" << std::setw(15) << "keyPoint.y"  
-        << std::setw(15) << "keyPoint.z" << std::setw(20) << "cluster_number" << std::setw(20) << "peak_number" << std::setw(10) << "radius" << std::endl;
+        outfile << std::setiosflags(std::ios::left) << std::setw(10) << "index" << std::setw(15) << "keyPoint.x" << std::setw(15) << "keyPoint.y"
+                << std::setw(15) << "keyPoint.z" << std::setw(20) << "cluster_number" << std::setw(20) << "peak_number" << std::setw(10) << "radius" << std::endl;
 
         std::vector<std::pair<short int, short int>>::iterator iterNum = numOfIntersection_Vec.begin();
         std::vector<short int>::iterator iterRadius = radius_Vec.begin();
@@ -225,12 +228,12 @@ public:
         {
             ROS_INFO("====================================================");
             ROS_INFO_STREAM("index == " << iter->first << std::endl);
-            ROS_INFO_STREAM("keyPointPosition == " << iter-> second << std::endl);
+            ROS_INFO_STREAM("keyPointPosition == " << iter->second << std::endl);
             ROS_INFO_STREAM("peak_number == " << iterNum->first << std::endl);
-            ROS_INFO_STREAM("cluster_number == " << iterNum-> second << std::endl);
+            ROS_INFO_STREAM("cluster_number == " << iterNum->second << std::endl);
 
-            outfile << std::setiosflags(std::ios::left) << std::setw(10) << iter->first<< std::setprecision(3) << std::setw(15) << iter->second.x << std::setw(15) << iter->second.y 
-            << std::setw(15) << iter->second.z << std::setw(20) << iterNum->first << std::setw(20) << iterNum->second << std::setw(10) << *iterRadius << std::endl;
+            outfile << std::setiosflags(std::ios::left) << std::setw(10) << iter->first << std::setprecision(3) << std::setw(15) << iter->second.x << std::setw(15) << iter->second.y
+                    << std::setw(15) << iter->second.z << std::setw(20) << iterNum->first << std::setw(20) << iterNum->second << std::setw(10) << *iterRadius << std::endl;
 
             ++iterNum;
         }
@@ -245,9 +248,9 @@ public:
 
     void run()
     {
-        
+
         getDynamicParameter();
-        
+
         judge();
 
         if (record_Bool)
@@ -256,7 +259,7 @@ public:
         if (save_Bool)
         {
             pointsSave();
-            ros::param::set("/intersection/bool_save",false);
+            ros::param::set("/intersection/bool_save", false);
         }
 
         update();
@@ -272,7 +275,7 @@ public:
 };
 
 //动态调参
-void callback(preception::param_Config &config, uint32_t level)
+void callback(perception::param_Config &config, uint32_t level)
 {
     ROS_INFO("Reconfigure Request: %s %s",
              config.save_name.c_str(),
@@ -284,10 +287,10 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "keyPointSave");
 
     /*动态参数调节*/
-        dynamic_reconfigure::Server<preception::param_Config> server;
-        dynamic_reconfigure::Server<preception::param_Config>::CallbackType f;
-        f = boost::bind(&callback, _1, _2);
-        server.setCallback(f);
+    dynamic_reconfigure::Server<perception::param_Config> server;
+    dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
+    f = boost::bind(&callback, _1, _2);
+    server.setCallback(f);
     /*动态参数调节*/
 
     ROS_INFO("\033[1;32m---->\033[0m Key Point Save Started.");

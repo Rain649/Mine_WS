@@ -1,4 +1,4 @@
-/*此程序由北京理工大学*刘仕杰*编写*/
+
 #include <ros/ros.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <iostream>
@@ -8,9 +8,9 @@
 int visualize(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, std::string fileName)
 {
   pcl::visualization::CloudViewer viewer(fileName);
-  viewer.showCloud(cloud,fileName);
+  viewer.showCloud(cloud, fileName);
 
-  while (!viewer.wasStopped ())
+  while (!viewer.wasStopped())
   {
   }
 
@@ -18,28 +18,30 @@ int visualize(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, std::string fileName)
 }
 
 int main()
- {
-    std::string fileName;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
-    cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
+{
+  std::string fileName;
+  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud;
+  cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
 
-    while (true)
-    {
-      fileName.clear();
-      cloud->clear();
-      
-      std::cout << "Please Drag The File In:\n" << std::endl;
-      getline(std::cin,fileName);
-      std::cout << "Input Success\n" << std::endl;
+  while (true)
+  {
+    fileName.clear();
+    cloud->clear();
 
-      fileName = fileName.substr(1, fileName.length() - 3);
-      pcl::io::loadPCDFile (fileName, *cloud);
-      // pcl::io::loadPCDFile ("/home/lsj/dev/Mine_WS/data/CLOUD_All.pcd", *cloud);
-      std::string::size_type iPos = fileName.find_last_of('/') + 1;
-      fileName = fileName.substr(iPos, fileName.length() - iPos);
+    std::cout << "Please Drag The File In:\n"
+              << std::endl;
+    getline(std::cin, fileName);
+    std::cout << "Input Success\n"
+              << std::endl;
 
-      visualize(cloud, fileName);
-    }
+    fileName = fileName.substr(1, fileName.length() - 3);
+    pcl::io::loadPCDFile(fileName, *cloud);
+    // pcl::io::loadPCDFile ("/home/lsj/dev/Mine_WS/data/CLOUD_All.pcd", *cloud);
+    std::string::size_type iPos = fileName.find_last_of('/') + 1;
+    fileName = fileName.substr(iPos, fileName.length() - iPos);
 
-    return 0;
- }
+    visualize(cloud, fileName);
+  }
+
+  return 0;
+}

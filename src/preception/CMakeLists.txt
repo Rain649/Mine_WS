@@ -1,6 +1,6 @@
 ##此程序由北京理工大学*刘仕杰*编写##
 cmake_minimum_required(VERSION 3.0.2)
-project(preception)
+project(perception)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O3")
 #set(PCL_INCLUDE_DIRS "/usr/include/pcl-1.9")

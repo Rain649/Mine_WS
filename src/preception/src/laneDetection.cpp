@@ -1,4 +1,4 @@
-/*此程序由北京理工大学*刘仕杰*编写*/
+
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <limits>
@@ -36,7 +36,7 @@
 #include "std_msgs/Float32MultiArray.h"
 
 #include <dynamic_reconfigure/server.h>
-#include <preception/param_Config.h>
+#include <perception/param_Config.h>
 
 class laneDetection
 {
@@ -61,7 +61,7 @@ private:
     ros::Subscriber subLaserCloudNew;
 
     pcl::PointXYZI pointOri;
-    
+
     pcl::PointXY ExistPoint;
     pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudNew;
     pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudNewZ;
@@ -83,7 +83,7 @@ private:
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_2;
     pcl::ProjectInliers<pcl::PointXYZI> projection;
     pcl::ModelCoefficients::Ptr coefficients_1;
-    pcl::StatisticalOutlierRemoval<pcl::PointXYZI> outrem;    //统计滤波
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZI> outrem; //统计滤波
 
     // Create the segmentation object for the planar model and set all the parameters
     pcl::SACSegmentation<pcl::PointXYZI> seg; //创建分割对象
@@ -362,7 +362,6 @@ public:
                 continue;
             }
 
-
             //输入拟合点
             std::vector<cv::Point> fitPoints;
             for (int j = 0; j < cloud_cur->size(); j++)
@@ -372,7 +371,7 @@ public:
                 fitPoints.push_back(cv::Point(xx, yy));
             }
 
-            cv::Mat A,B,C,D,N;
+            cv::Mat A, B, C, D, N;
 
             polynomial_curve_fit(fitPoints, rank, N);
             // std::cout << " Lane Matrix = " << N << std::endl;
@@ -381,29 +380,29 @@ public:
             {
             case 1:
                 A = N;
-            std::cout << " A = " << N << std::endl;
+                std::cout << " A = " << N << std::endl;
                 break;
 
             case 2:
                 B = N;
-            std::cout << " B = " << N << std::endl;
+                std::cout << " B = " << N << std::endl;
                 break;
 
             case 3:
                 C = N;
-            std::cout << " C = " << N << std::endl;
+                std::cout << " C = " << N << std::endl;
                 break;
 
             case 4:
                 D = N;
-            std::cout << " D = " << N << std::endl;
+                std::cout << " D = " << N << std::endl;
                 break;
 
             default:
                 continue;
             }
 
-            for (int j = 0; j < rank+1; j++)
+            for (int j = 0; j < rank + 1; j++)
             {
                 B_array.data.push_back(B.at<double>(j, 0));
             }
@@ -428,25 +427,25 @@ public:
                 double y;
                 switch (rank)
                 {
-                    case 1:
-                        //一阶
-                        y = N.at<double>(0, 0) + N.at<double>(1, 0) * x;
-                        break;
+                case 1:
+                    //一阶
+                    y = N.at<double>(0, 0) + N.at<double>(1, 0) * x;
+                    break;
 
-                    case 2:
-                        //二阶
-                        y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
-                            N.at<double>(2, 0)*std::pow(x, 2);
-                        break;
+                case 2:
+                    //二阶
+                    y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
+                        N.at<double>(2, 0) * std::pow(x, 2);
+                    break;
 
-                    case 3:
-                        //三阶
-                        y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
-                                N.at<double>(2, 0) * std::pow(x, 2) + N.at<double>(3, 0) * std::pow(x, 3);
-                        break;
+                case 3:
+                    //三阶
+                    y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
+                        N.at<double>(2, 0) * std::pow(x, 2) + N.at<double>(3, 0) * std::pow(x, 3);
+                    break;
 
-                    default:
-                        continue;
+                default:
+                    continue;
                 }
 
                 points_fitted.push_back(cv::Point(times * x + 0.5 * y_max, times * y + 0.5 * x_max));
@@ -620,14 +619,14 @@ public:
     }
 };
 
-void callback(preception::param_Config &config, uint32_t level)
+void callback(perception::param_Config &config, uint32_t level)
 {
-//   ROS_INFO("Reconfigure Request: %d %f %s %s %d", 
-//             config.int_param, 
-//             config.double_param, 
-//             config.str_param.c_str(), 
-//             config.bool_param? "True" : "False", 
-//             config.size);
+    //   ROS_INFO("Reconfigure Request: %d %f %s %s %d",
+    //             config.int_param,
+    //             config.double_param,
+    //             config.str_param.c_str(),
+    //             config.bool_param? "True" : "False",
+    //             config.size);
 }
 
 int main(int argc, char **argv)
@@ -635,9 +634,9 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "laneDetection");
 
-    //动态参数调节 
-    dynamic_reconfigure::Server<preception::param_Config> server;
-    dynamic_reconfigure::Server<preception::param_Config>::CallbackType f;
+    //动态参数调节
+    dynamic_reconfigure::Server<perception::param_Config> server;
+    dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
     f = boost::bind(&callback, _1, _2);
     server.setCallback(f);
 
@@ -652,7 +651,6 @@ int main(int argc, char **argv)
         LD.run();
         rate.sleep();
     }
-
 
     return 0;
 }

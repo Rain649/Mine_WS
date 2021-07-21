@@ -1,6 +1,6 @@
 <launch>
 <!-- 
-  <node name="intersection" pkg="preception" type="intersection" output="screen" ></node> -->
+  <node name="intersection" pkg="perception" type="intersection" output="screen" ></node> -->
   
   <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" ></node>
   
@@ -8,6 +8,6 @@
 
   <node name="rqt_logger_level" pkg="rqt_logger_level" type="rqt_logger_level" ></node>
   
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find preception)/launch/intersectionDetection.rviz"/> -->
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find perception)/launch/intersectionDetection.rviz"/> -->
 
 </launch>
