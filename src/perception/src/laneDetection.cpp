@@ -54,6 +54,7 @@ private:
     bool over = true;
 
     std_msgs::Float32MultiArray B_array;
+    std_msgs::Float32MultiArray Range;
     std_msgs::Float32 Distance;
 
     ros::NodeHandle nh;
@@ -108,6 +109,7 @@ private:
     ros::Publisher pubCluster_4;
     ros::Publisher pubLaneLeft;
     ros::Publisher pubLaneRight;
+    ros::Publisher pubLaneRange;
     ros::Publisher pubLaneCoefficient;
     ros::Publisher pubDistance;
 
@@ -128,6 +130,7 @@ public:
 
         pubDistance = nh.advertise<std_msgs::Float32>("Distance", 1);
         pubLaneCoefficient = nh.advertise<std_msgs::Float32MultiArray>("laneCoefficient", 1);
+        pubLaneRange = nh.advertise<std_msgs::Float32MultiArray>("laneRange", 1);
 
         downSizeFilter_1.setLeafSize(0.5, 0.5, 0.5);
         downSizeFilter_2.setLeafSize(1.0, 1.0, 1.0);
@@ -187,6 +190,7 @@ public:
 
         Distance.data = -1;
         B_array.data.clear();
+        Range.data.clear();
 
         receivePoints = false;
         over = true;
@@ -325,6 +329,9 @@ public:
         for (int i = 2; i <= 2; ++i)
         {
             pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cur(new pcl::PointCloud<pcl::PointXYZI>);
+            pcl::PointXYZI min; //用于存放三个轴的最小值
+            pcl::PointXYZI max; //用于存放三个轴的最大值
+            pcl::getMinMax3D(*cloud_cur, min, max);
             switch (i)
             {
             case 1:
@@ -343,6 +350,9 @@ public:
                 distance_Right = sqrt(pow(cloud_cur->points[(pointSearchInd[0])].x, 2) + pow(cloud_cur->points[(pointSearchInd[0])].y, 2));
                 // std::cout << "Distance_Right =  " << distance_Right  << std::endl;
                 Distance.data = distance_Right;
+                Range.data.push_back(max.x);
+                Range.data.push_back(min.x);
+                ROS_ERROR_STREAM("dis: " << distance_Right << "max: " << max.x << "min: " << min.x);
                 break;
 
             case 3:
@@ -600,6 +610,11 @@ public:
         if (!B_array.data.empty())
         {
             pubLaneCoefficient.publish(B_array);
+            // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
+        }
+        if (!Range.data.empty())
+        {
+            pubLaneRange.publish(Range);
             // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
         }
     }
