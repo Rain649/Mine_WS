@@ -47,7 +47,7 @@ private:
     int x_max = 400;
     int y_max = 800;
     int minClusterSize = 200;
-    double clusterRadius = 0.3;
+    double clusterRadius = 0.25;
     float test_value = 2;
     float distance_Right = -1;
 
@@ -232,9 +232,10 @@ public:
         downSizeFilter_1.filter(*laserCloudNewDS_1);
 
         /*Project to 2D*/
-        projection.setInputCloud(laserCloudNewDS_1);
-        projection.setModelCoefficients(coefficients_1);
-        projection.filter(*laserCloudNewTFDS);
+        // projection.setInputCloud(laserCloudNewDS_1);
+        // projection.setModelCoefficients(coefficients_1);
+        // projection.filter(*laserCloudNewTFDS);
+        *laserCloudNewTFDS = *laserCloudNewDS_1;
 
         /*Down Size Filter*/
         // downSizeFilter_1.setInputCloud(laserCloudNewTFDS);
@@ -328,11 +329,10 @@ public:
             }
 
             if (y1 < y2)
-            {
                 cloudCluster_1->swap(*cloudCluster_2);
-            }
-            downSizeFilter_2.setInputCloud(cloudCluster_1);
-            downSizeFilter_2.filter(*laneLeft);
+
+            // downSizeFilter_2.setInputCloud(cloudCluster_1);
+            // downSizeFilter_2.filter(*laneLeft);
             downSizeFilter_2.setInputCloud(cloudCluster_2);
             downSizeFilter_2.filter(*laneRight);
         }
@@ -343,9 +343,8 @@ public:
 
     void laneDetect()
     {
-
         cv::Mat A, B, C, D, N;
-        for (int i = 2; i <= 2; ++i)
+        for (size_t i = 2; i <= 2; ++i)
         {
             pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cur(new pcl::PointCloud<pcl::PointXYZI>);
             pcl::PointXYZI min; //用于存放三个轴的最小值
@@ -359,7 +358,7 @@ public:
                 break;
 
             case 2:
-                if (cloudCluster_2->empty())
+                if (laneRight->empty())
                     continue;
                 *cloud_cur = *laneRight;
                 //距右侧墙壁最近点
@@ -392,7 +391,7 @@ public:
 
             //输入拟合点
             std::vector<cv::Point> fitPoints;
-            for (int j = 0; j < cloud_cur->size(); ++j)
+            for (size_t j = 0; j < cloud_cur->size(); ++j)
             {
                 float xx = cloud_cur->points[j].x;
                 float yy = cloud_cur->points[j].y;
@@ -428,12 +427,15 @@ public:
                 continue;
             }
         }
-        for (int j = 0; j < rank + 1; ++j)
+        if (B.empty())
+            return;
+            
+        for (size_t j = 0; j < rank + 1; ++j)
             B_array.data.push_back(B.at<double>(j, 0));
         // std::cout << " B_array.data.num = " << B_array.data.size() << std::endl;
 
         //绘制曲线
-        visualize(N);
+        visualize(B);
     }
 
     void visualize(const cv::Mat &N)
@@ -491,18 +493,18 @@ public:
         pubLaneMarker.publish(line_strip);
     }
 
-    bool polynomial_curve_fit(const std::vector<cv::Point> &key_point, int n,cv::Mat &N)
+    bool polynomial_curve_fit(const std::vector<cv::Point> &key_point, int n, cv::Mat &N)
     {
         //Number of key points
-        int Num = key_point.size();
+        size_t Num = key_point.size();
 
         //构造矩阵X
         cv::Mat X = cv::Mat::zeros(n + 1, n + 1, CV_64FC1);
-        for (int i = 0; i < n + 1; ++i)
+        for (size_t i = 0; i < n + 1; ++i)
         {
-            for (int j = 0; j < n + 1; ++j)
+            for (size_t j = 0; j < n + 1; ++j)
             {
-                for (int k = 0; k < Num; ++k)
+                for (size_t k = 0; k < Num; ++k)
                 {
                     X.at<double>(i, j) = X.at<double>(i, j) +
                                          std::pow(key_point[k].x, i + j);
@@ -512,9 +514,9 @@ public:
 
         //构造矩阵Y
         cv::Mat Y = cv::Mat::zeros(n + 1, 1, CV_64FC1);
-        for (int i = 0; i < n + 1; ++i)
+        for (size_t i = 0; i < n + 1; ++i)
         {
-            for (int k = 0; k < Num; ++k)
+            for (size_t k = 0; k < Num; ++k)
             {
                 Y.at<double>(i, 0) = Y.at<double>(i, 0) +
                                      std::pow(key_point[k].x, i) * key_point[k].y;
@@ -609,7 +611,7 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m laneLeft Published.");
         }
 
-        if (pubLaneRight.getNumSubscribers() != 0 && !laneRight->empty())
+        if (pubLaneRight.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*laneRight, cloudMsgTemp);
