@@ -262,8 +262,8 @@ public:
         pcl::EuclideanClusterExtraction<pcl::PointXYZI> ec;
         ec.setClusterTolerance(clusterRadius); //设置近邻搜索的搜索半径
         ec.setMinClusterSize(minClusterSize);  //设置一个聚类需要的最少点数目
-        // ec.setMaxClusterSize(500);   //设置一个聚类需要的最大点数目
-        ec.setSearchMethod(tree); //设置点云的搜索机制
+        ec.setMaxClusterSize(1000);            //设置一个聚类需要的最大点数目
+        ec.setSearchMethod(tree);              //设置点云的搜索机制
         ec.setInputCloud(cloudFinal);
         ec.extract(cluster_indices); //从点云中提取聚类，并将点云索引保存在cluster_indices中
 
@@ -427,262 +427,262 @@ public:
             default:
                 continue;
             }
-
-            for (int j = 0; j < rank + 1; ++j)
-                B_array.data.push_back(B.at<double>(j, 0));
-            // std::cout << " B_array.data.num = " << B_array.data.size() << std::endl;
-
-            //绘制曲线
-            visualize(N);
         }
+        for (int j = 0; j < rank + 1; ++j)
+            B_array.data.push_back(B.at<double>(j, 0));
+        // std::cout << " B_array.data.num = " << B_array.data.size() << std::endl;
 
-        void visualize(const cv::Mat &N)
+        //绘制曲线
+        visualize(N);
+    }
+
+    void visualize(const cv::Mat &N)
+    {
+        visualization_msgs::Marker line_strip;
+        line_strip.header.frame_id = frame_id_;
+        line_strip.header.stamp = ros::Time::now();
+        line_strip.ns = "lanes";
+        line_strip.action = visualization_msgs::Marker::ADD;
+        line_strip.pose.orientation.w = 1.0;
+        line_strip.id = 0;
+        line_strip.type = visualization_msgs::Marker::LINE_STRIP;
+
+        // LINE_STRIP/LINE_LIST markers use only the x component of scale, for the line width
+        line_strip.scale.x = 0.2;
+        // Line strip is blue
+        line_strip.color.b = 1.0;
+        line_strip.color.a = 1.0;
+
+        // Create the vertices for the points and lines
+        for (float x = ceil(Range.data.back()); x <= ceil(Range.data.front()); ++x)
         {
-            visualization_msgs::Marker line_strip;
-            line_strip.header.frame_id = frame_id_;
-            line_strip.header.stamp = ros::Time::now();
-            line_strip.ns = "lanes";
-            line_strip.action = visualization_msgs::Marker::ADD;
-            line_strip.pose.orientation.w = 1.0;
-            line_strip.id = 0;
-            line_strip.type = visualization_msgs::Marker::LINE_STRIP;
-
-            // LINE_STRIP/LINE_LIST markers use only the x component of scale, for the line width
-            line_strip.scale.x = 0.2;
-            // Line strip is blue
-            line_strip.color.b = 1.0;
-            line_strip.color.a = 1.0;
-
-            // Create the vertices for the points and lines
-            for (float x = ceil(Range.data.back()); x <= ceil(Range.data.front()); ++x)
+            float y;
+            switch (rank)
             {
-                float y;
-                switch (rank)
-                {
-                case 1:
-                    //一阶
-                    y = N.at<double>(0, 0) + N.at<double>(1, 0) * x;
-                    break;
+            case 1:
+                //一阶
+                y = N.at<double>(0, 0) + N.at<double>(1, 0) * x;
+                break;
 
-                case 2:
-                    //二阶
-                    y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
-                        N.at<double>(2, 0) * std::pow(x, 2);
-                    break;
+            case 2:
+                //二阶
+                y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
+                    N.at<double>(2, 0) * std::pow(x, 2);
+                break;
 
-                case 3:
-                    //三阶
-                    y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
-                        N.at<double>(2, 0) * std::pow(x, 2) + N.at<double>(3, 0) * std::pow(x, 3);
-                    break;
+            case 3:
+                //三阶
+                y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
+                    N.at<double>(2, 0) * std::pow(x, 2) + N.at<double>(3, 0) * std::pow(x, 3);
+                break;
 
-                default:
-                    continue;
-                }
-
-                geometry_msgs::Point p;
-                p.x = x;
-                p.y = y;
-                p.z = 0;
-
-                line_strip.points.push_back(p);
+            default:
+                continue;
             }
 
-            pubLaneMarker.publish(line_strip);
+            geometry_msgs::Point p;
+            p.x = x;
+            p.y = y;
+            p.z = 0;
+
+            line_strip.points.push_back(p);
         }
 
-        bool polynomial_curve_fit(const std::vector<cv::Point> &key_point, int n, const cv::Mat &N)
+        pubLaneMarker.publish(line_strip);
+    }
+
+    bool polynomial_curve_fit(const std::vector<cv::Point> &key_point, int n,cv::Mat &N)
+    {
+        //Number of key points
+        int Num = key_point.size();
+
+        //构造矩阵X
+        cv::Mat X = cv::Mat::zeros(n + 1, n + 1, CV_64FC1);
+        for (int i = 0; i < n + 1; ++i)
         {
-            //Number of key points
-            int Num = key_point.size();
-
-            //构造矩阵X
-            cv::Mat X = cv::Mat::zeros(n + 1, n + 1, CV_64FC1);
-            for (int i = 0; i < n + 1; ++i)
-            {
-                for (int j = 0; j < n + 1; ++j)
-                {
-                    for (int k = 0; k < Num; ++k)
-                    {
-                        X.at<double>(i, j) = X.at<double>(i, j) +
-                                             std::pow(key_point[k].x, i + j);
-                    }
-                }
-            }
-
-            //构造矩阵Y
-            cv::Mat Y = cv::Mat::zeros(n + 1, 1, CV_64FC1);
-            for (int i = 0; i < n + 1; ++i)
+            for (int j = 0; j < n + 1; ++j)
             {
                 for (int k = 0; k < Num; ++k)
                 {
-                    Y.at<double>(i, 0) = Y.at<double>(i, 0) +
-                                         std::pow(key_point[k].x, i) * key_point[k].y;
+                    X.at<double>(i, j) = X.at<double>(i, j) +
+                                         std::pow(key_point[k].x, i + j);
                 }
             }
-
-            N = cv::Mat::zeros(n + 1, 1, CV_64FC1);
-            //求解矩阵A
-            cv::solve(X, Y, N, cv::DECOMP_LU);
-            return true;
         }
 
-        void publishResult()
+        //构造矩阵Y
+        cv::Mat Y = cv::Mat::zeros(n + 1, 1, CV_64FC1);
+        for (int i = 0; i < n + 1; ++i)
         {
-            if (pubCloudHigh.getNumSubscribers() != 0)
+            for (int k = 0; k < Num; ++k)
             {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*laserCloudNewDS_1, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubCloudHigh.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m cloudWithInfo Published.");
-            }
-
-            if (pubCloudTFDS.getNumSubscribers() != 0)
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*laserCloudNewTFDS, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubCloudTFDS.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m Cloud Published.");
-            }
-
-            if (pubCloudFinal.getNumSubscribers() != 0)
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*cloudFinal, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubCloudFinal.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
-            }
-
-            if (pubCluster_1.getNumSubscribers() != 0)
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubCluster_1.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
-            }
-
-            if (pubCluster_2.getNumSubscribers() != 0)
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubCluster_2.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
-            }
-
-            if (pubCluster_3.getNumSubscribers() != 0)
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubCluster_3.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
-            }
-
-            if (pubCluster_4.getNumSubscribers() != 0)
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubCluster_4.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
-            }
-
-            if (pubLaneLeft.getNumSubscribers() != 0)
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*laneLeft, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubLaneLeft.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m laneLeft Published.");
-            }
-
-            if (pubLaneRight.getNumSubscribers() != 0 && !laneRight->empty())
-            {
-                sensor_msgs::PointCloud2 cloudMsgTemp;
-                pcl::toROSMsg(*laneRight, cloudMsgTemp);
-                cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-                cloudMsgTemp.header.frame_id = frame_id_;
-                pubLaneRight.publish(cloudMsgTemp);
-                // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
-            }
-
-            if (Distance.data)
-            {
-                pubDistance.publish(Distance);
-                // ROS_INFO("\033[1;32m--->\033[0m Distance Published.");
-            }
-
-            if (!B_array.data.empty())
-            {
-                pubLaneCoefficient.publish(B_array);
-                // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
-            }
-            if (!Range.data.empty())
-            {
-                pubLaneRange.publish(Range);
-                // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
+                Y.at<double>(i, 0) = Y.at<double>(i, 0) +
+                                     std::pow(key_point[k].x, i) * key_point[k].y;
             }
         }
 
-        void run()
-        {
-            if (receivePoints && over)
-            {
-                over = false;
-                laneDetect();
-                publishResult();
-                clearMemory();
-
-                std::cout << "---------------------------------------------" << std::endl;
-            }
-        }
-    };
-
-    void callback(perception::param_Config &config, uint32_t level)
-    {
-        //   ROS_INFO("Reconfigure Request: %d %f %s %s %d",
-        //             config.int_param,
-        //             config.double_param,
-        //             config.str_param.c_str(),
-        //             config.bool_param? "True" : "False",
-        //             config.size);
+        N = cv::Mat::zeros(n + 1, 1, CV_64FC1);
+        //求解矩阵A
+        cv::solve(X, Y, N, cv::DECOMP_LU);
+        return true;
     }
 
-    int main(int argc, char **argv)
+    void publishResult()
     {
-
-        ros::init(argc, argv, "laneDetection");
-
-        //动态参数调节
-        dynamic_reconfigure::Server<perception::param_Config> server;
-        dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
-        f = boost::bind(&callback, _1, _2);
-        server.setCallback(f);
-
-        ROS_INFO("\033[1;32m---->\033[0m Lane Detection Started.");
-
-        laneDetection LD;
-
-        ros::Rate rate(5);
-        while (ros::ok())
+        if (pubCloudHigh.getNumSubscribers() != 0)
         {
-            ros::spinOnce();
-            LD.run();
-            rate.sleep();
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*laserCloudNewDS_1, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCloudHigh.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudWithInfo Published.");
         }
 
-        return 0;
+        if (pubCloudTFDS.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*laserCloudNewTFDS, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCloudTFDS.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m Cloud Published.");
+        }
+
+        if (pubCloudFinal.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudFinal, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCloudFinal.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
+        }
+
+        if (pubCluster_1.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCluster_1.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
+        }
+
+        if (pubCluster_2.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCluster_2.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
+        }
+
+        if (pubCluster_3.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCluster_3.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
+        }
+
+        if (pubCluster_4.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCluster_4.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
+        }
+
+        if (pubLaneLeft.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*laneLeft, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubLaneLeft.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m laneLeft Published.");
+        }
+
+        if (pubLaneRight.getNumSubscribers() != 0 && !laneRight->empty())
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(*laneRight, cloudMsgTemp);
+            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubLaneRight.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
+        }
+
+        if (Distance.data)
+        {
+            pubDistance.publish(Distance);
+            // ROS_INFO("\033[1;32m--->\033[0m Distance Published.");
+        }
+
+        if (!B_array.data.empty())
+        {
+            pubLaneCoefficient.publish(B_array);
+            // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
+        }
+        if (!Range.data.empty())
+        {
+            pubLaneRange.publish(Range);
+            // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
+        }
     }
+
+    void run()
+    {
+        if (receivePoints && over)
+        {
+            over = false;
+            laneDetect();
+            publishResult();
+            clearMemory();
+
+            std::cout << "---------------------------------------------" << std::endl;
+        }
+    }
+};
+
+void callback(perception::param_Config &config, uint32_t level)
+{
+    //   ROS_INFO("Reconfigure Request: %d %f %s %s %d",
+    //             config.int_param,
+    //             config.double_param,
+    //             config.str_param.c_str(),
+    //             config.bool_param? "True" : "False",
+    //             config.size);
+}
+
+int main(int argc, char **argv)
+{
+
+    ros::init(argc, argv, "laneDetection");
+
+    //动态参数调节
+    dynamic_reconfigure::Server<perception::param_Config> server;
+    dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
+    f = boost::bind(&callback, _1, _2);
+    server.setCallback(f);
+
+    ROS_INFO("\033[1;32m---->\033[0m Lane Detection Started.");
+
+    laneDetection LD;
+
+    ros::Rate rate(5);
+    while (ros::ok())
+    {
+        ros::spinOnce();
+        LD.run();
+        rate.sleep();
+    }
+
+    return 0;
+}
