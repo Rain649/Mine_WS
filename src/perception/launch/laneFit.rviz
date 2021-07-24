@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /CloudCluster21
       Splitter Ratio: 0.49117645621299744
     Tree Height: 787
   - Class: rviz/Selection
@@ -26,7 +25,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: CloudCluster1
+    SyncSource: HightCloud
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -107,7 +106,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.10000000149011612
       Style: Points
-      Topic: /cloudCluster_1
+      Topic: /laneDetection/cloudCluster_1
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -124,7 +123,7 @@ Visualization Manager:
       Color: 237; 212; 0
       Color Transformer: FlatColor
       Decay Time: 0.05000000074505806
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 7
@@ -137,11 +136,11 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Points
-      Topic: /cloudCluster_2
+      Topic: /laneDetection/cloudCluster_2
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -154,7 +153,7 @@ Visualization Manager:
       Color: 115; 210; 22
       Color Transformer: FlatColor
       Decay Time: 0.20000000298023224
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 5
@@ -167,11 +166,11 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Points
-      Topic: /cloudCluster_3
+      Topic: /laneDetection/cloudCluster_3
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -184,7 +183,7 @@ Visualization Manager:
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 0.20000000298023224
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: -999999
@@ -197,11 +196,11 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Points
-      Topic: /cloudCluster_4
+      Topic: /laneDetection/cloudCluster_4
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -227,7 +226,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Points
-      Topic: /cloudFinal
+      Topic: /laneDetection/cloudFinal
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -241,7 +240,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /laneMarker
+      Marker Topic: /laneDetection/laneMarker
       Name: laneMarker
       Namespaces:
         lanes: true
@@ -265,14 +264,44 @@ Visualization Manager:
       Max Intensity: 3
       Min Color: 0; 0; 0
       Min Intensity: 0.7714285850524902
-      Name: laneRightCloud
+      Name: laneRightPoints
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 8
+      Size (m): 0.009999999776482582
+      Style: Points
+      Topic: /laneDetection/laneRight
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 0.5
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 138; 226; 52
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 63
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: HightCloud
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Points
-      Topic: /laneRight
+      Topic: /laneDetection/cloudHigh
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -305,25 +334,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 29.134960174560547
+      Distance: 96.55561065673828
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -6.585568904876709
-        Y: -2.3985097408294678
-        Z: 9.978451998904347e-6
+        X: -8.361795425415039
+        Y: -0.6463675498962402
+        Z: -9.5367431640625e-7
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.41479721665382385
+      Pitch: 1.2253973484039307
       Target Frame: <Fixed Frame>
       Value: ThirdPersonFollower (rviz)
-      Yaw: 3.245394229888916
+      Yaw: 3.1203970909118652
     Saved: ~
 Window Geometry:
   Displays:
@@ -342,4 +371,4 @@ Window Geometry:
     collapsed: true
   Width: 1002
   X: 67
-  Y: 34
+  Y: 27

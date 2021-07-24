@@ -42,17 +42,14 @@
 class laneDetection
 {
 private:
-    int times = 20;
-    int validDistance = 20;
-    int x_max = 400;
-    int y_max = 800;
-    int minClusterSize = 200;
-    double clusterRadius = 0.25;
-    float test_value = 2;
     float distance_Right = -1;
 
     int rank;
+    int minClusterSize;
+    double clusterRadius;
     double timeLaserCloudNew;
+    double passZ_min;
+    double passZ_max;
     bool receivePoints = false;
     bool over = true;
 
@@ -84,19 +81,12 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
 
-    pcl::console::TicToc time;
     pcl::PassThrough<pcl::PointXYZI> pass_z;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_1;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_2;
     pcl::ProjectInliers<pcl::PointXYZI> projection;
     pcl::ModelCoefficients::Ptr coefficients_1;
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> outrem; //统计滤波
-
-    // Create the segmentation object for the planar model and set all the parameters
-    pcl::SACSegmentation<pcl::PointXYZI> seg; //创建分割对象
-    pcl::PointIndices::Ptr inliers;
-    pcl::ModelCoefficients::Ptr coefficients_2;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_plane;
 
     // pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdLeft;
     pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdRight;
@@ -121,7 +111,7 @@ private:
     ros::Publisher pubLaneMarker;
 
 public:
-    laneDetection() : nh()
+    laneDetection() : nh("~")
     {
         nh.param<std::string>("pointCloud_topic_", pointCloud_topic_, "/velodyne_points_ma");
         ROS_INFO("Input Point Cloud: %s", pointCloud_topic_.c_str());
@@ -129,6 +119,14 @@ public:
         ROS_INFO("Point Cloud Frame ID: %s", frame_id_.c_str());
         nh.param("rank", rank, 3);
         ROS_INFO("Poly Fit Rank: %d", rank);
+        nh.param("minClusterSize", minClusterSize, 200);
+        ROS_INFO("Minimum ClusterSize: %d", minClusterSize);
+        nh.param("clusterRadius", clusterRadius, 0.5);
+        ROS_INFO("Cluster Radius: %f", clusterRadius);
+        nh.param("passZ_min", passZ_min, -1.8);
+        ROS_INFO("PassThrough Filter Z Minimum: %f", passZ_min);
+        nh.param("passZ_max", passZ_max, 0.0);
+        ROS_INFO("PassThrough Filter Z Maximum: %f", passZ_max);
 
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>(pointCloud_topic_, 1, &laneDetection::laserCloudNewHandler, this);
 
@@ -151,7 +149,7 @@ public:
         downSizeFilter_1.setLeafSize(0.2, 0.2, 0.4);
         downSizeFilter_2.setLeafSize(1.0, 1.0, 1.0);
         pass_z.setFilterFieldName("z");
-        pass_z.setFilterLimits(-1.9, 0);
+        pass_z.setFilterLimits(passZ_min, passZ_max);
         pass_z.setFilterLimitsNegative(false);
         projection.setModelType(pcl::SACMODEL_PLANE);
 
@@ -232,15 +230,13 @@ public:
         downSizeFilter_1.filter(*laserCloudNewDS_1);
 
         /*Project to 2D*/
-        // projection.setInputCloud(laserCloudNewDS_1);
-        // projection.setModelCoefficients(coefficients_1);
-        // projection.filter(*laserCloudNewTFDS);
-        *laserCloudNewTFDS = *laserCloudNewDS_1;
+        projection.setInputCloud(laserCloudNewDS_1);
+        projection.setModelCoefficients(coefficients_1);
+        projection.filter(*laserCloudNewTFDS);
 
         /*Down Size Filter*/
-        // downSizeFilter_1.setInputCloud(laserCloudNewTFDS);
-        // downSizeFilter_1.filter(*laserCloudNewDS_2);
-        *laserCloudNewDS_2 = *laserCloudNewTFDS;
+        downSizeFilter_1.setInputCloud(laserCloudNewTFDS);
+        downSizeFilter_1.filter(*laserCloudNewDS_2);
 
         /*Outlier Filter*/
         outrem.setInputCloud(laserCloudNewDS_2);
@@ -331,14 +327,14 @@ public:
             if (y1 < y2)
                 cloudCluster_1->swap(*cloudCluster_2);
 
-            // downSizeFilter_2.setInputCloud(cloudCluster_1);
-            // downSizeFilter_2.filter(*laneLeft);
+            downSizeFilter_2.setInputCloud(cloudCluster_1);
+            downSizeFilter_2.filter(*laneLeft);
             downSizeFilter_2.setInputCloud(cloudCluster_2);
             downSizeFilter_2.filter(*laneRight);
         }
-        std::cout << "Cluster Result Number =  " << j << " data points." << std::endl;
-        std::cout << "Cluster Number 1 =  " << cloudCluster_1->size() << " data points." << std::endl;
-        std::cout << "Cluster Number 2 =  " << cloudCluster_2->size() << " data points." << std::endl;
+        // std::cout << "Cluster Result Number =  " << j << " data points." << std::endl;
+        // std::cout << "Cluster Number 1 =  " << cloudCluster_1->size() << " data points." << std::endl;
+        // std::cout << "Cluster Number 2 =  " << cloudCluster_2->size() << " data points." << std::endl;
     }
 
     void laneDetect()
@@ -370,7 +366,7 @@ public:
                 pcl::getMinMax3D(*cloud_cur, min, max);
                 Range.data.push_back(max.x);
                 Range.data.push_back(min.x);
-                ROS_ERROR_STREAM("dis: " << distance_Right << " max: " << max.x << " min: " << min.x);
+                // ROS_ERROR_STREAM("dis: " << distance_Right << " max: " << max.x << " min: " << min.x);
                 break;
 
             case 3:
@@ -405,37 +401,35 @@ public:
             {
             case 1:
                 A = N;
-                std::cout << " A = " << N << std::endl;
+                // std::cout << " A = " << N << std::endl;
                 break;
 
             case 2:
                 B = N;
-                std::cout << " B = " << N << std::endl;
+                // std::cout << " B = " << N << std::endl;
                 break;
 
             case 3:
                 C = N;
-                std::cout << " C = " << N << std::endl;
+                // std::cout << " C = " << N << std::endl;
                 break;
 
             case 4:
                 D = N;
-                std::cout << " D = " << N << std::endl;
+                // std::cout << " D = " << N << std::endl;
                 break;
 
             default:
                 continue;
             }
         }
-        if (B.empty())
-            return;
-            
-        for (size_t j = 0; j < rank + 1; ++j)
-            B_array.data.push_back(B.at<double>(j, 0));
-        // std::cout << " B_array.data.num = " << B_array.data.size() << std::endl;
-
-        //绘制曲线
-        visualize(B);
+        if (!B.empty())
+        {
+            for (size_t j = 0; j < rank + 1; ++j)
+                B_array.data.push_back(B.at<double>(j, 0));
+            //绘制曲线
+            visualize(B);
+        }
     }
 
     void visualize(const cv::Mat &N)
@@ -458,30 +452,11 @@ public:
         // Create the vertices for the points and lines
         for (float x = ceil(Range.data.back()); x <= ceil(Range.data.front()); ++x)
         {
-            float y;
-            switch (rank)
+            float y = 0;
+            for (size_t i = 0; i < rank; ++i)
             {
-            case 1:
-                //一阶
-                y = N.at<double>(0, 0) + N.at<double>(1, 0) * x;
-                break;
-
-            case 2:
-                //二阶
-                y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
-                    N.at<double>(2, 0) * std::pow(x, 2);
-                break;
-
-            case 3:
-                //三阶
-                y = N.at<double>(0, 0) + N.at<double>(1, 0) * x +
-                    N.at<double>(2, 0) * std::pow(x, 2) + N.at<double>(3, 0) * std::pow(x, 3);
-                break;
-
-            default:
-                continue;
+                y += N.at<double>(i, 0) * pow(x, i);
             }
-
             geometry_msgs::Point p;
             p.x = x;
             p.y = y;
@@ -497,7 +472,6 @@ public:
     {
         //Number of key points
         size_t Num = key_point.size();
-
         //构造矩阵X
         cv::Mat X = cv::Mat::zeros(n + 1, n + 1, CV_64FC1);
         for (size_t i = 0; i < n + 1; ++i)
@@ -511,7 +485,6 @@ public:
                 }
             }
         }
-
         //构造矩阵Y
         cv::Mat Y = cv::Mat::zeros(n + 1, 1, CV_64FC1);
         for (size_t i = 0; i < n + 1; ++i)
@@ -648,7 +621,7 @@ public:
             publishResult();
             clearMemory();
 
-            std::cout << "---------------------------------------------" << std::endl;
+            // std::cout << "---------------------------------------------" << std::endl;
         }
     }
 };
