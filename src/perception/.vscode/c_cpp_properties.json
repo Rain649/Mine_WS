@@ -9,7 +9,7 @@
         "/opt/ros/melodic/include/**",
         // "/home/lsj/dev/Mine_WS/src/perception/include/**",
         "/home/lsj/dev/Mine_WS/**",
-        "/usr/include/**"
+        "/usr/include/pcl-1.8/**"
       ],
       "name": "ROS"
     }

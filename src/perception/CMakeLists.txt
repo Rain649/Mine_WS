@@ -1,8 +1,7 @@
-##此程序由北京理工大学*刘仕杰*编写##
 cmake_minimum_required(VERSION 3.0.2)
 project(perception)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0")
 #set(PCL_INCLUDE_DIRS "/usr/include/pcl-1.9")
 #set(PCL_LIBRARY_DIRS "/usr/local/lib" )
 # set(OpenCV_INCLUDE_DIRS "/usr/include")
@@ -82,29 +81,29 @@ target_link_libraries(segmentationSave
   ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
 )
 
-add_executable(pcd_write
-  src/pcd_write.cpp
-)
-add_dependencies(pcd_write ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(pcd_write
-  ${catkin_LIBRARIES}
-)
+# add_executable(pcd_write
+#   src/pcd_write.cpp
+# )
+# add_dependencies(pcd_write ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(pcd_write
+#   ${catkin_LIBRARIES}
+# )
 
-add_executable(pcd_read
-  src/pcd_read.cpp
-)
-add_dependencies(pcd_read ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(pcd_read
-  ${catkin_LIBRARIES}
-)
+# add_executable(pcd_read
+#   src/pcd_read.cpp
+# )
+# add_dependencies(pcd_read ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(pcd_read
+#   ${catkin_LIBRARIES}
+# )
 
-add_executable(pcd_visual
-  src/pcd_visual.cpp
-)
-add_dependencies(pcd_visual ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(pcd_visual
-  ${catkin_LIBRARIES} ${PCL_LIBRARIES} 
-)
+# add_executable(pcd_visual
+#   src/pcd_visual.cpp
+# )
+# add_dependencies(pcd_visual ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(pcd_visual
+#   ${catkin_LIBRARIES} ${PCL_LIBRARIES} 
+# )
 
 add_executable(topoMap
   src/topoMap.cpp

@@ -5,6 +5,7 @@
         "/opt/ros/melodic/lib/python2.7/dist-packages"
     ],
     "files.associations": {
-        "string": "cpp"
+        "string": "cpp",
+        "cmath": "cpp"
     }
 }

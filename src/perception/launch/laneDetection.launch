@@ -2,18 +2,20 @@
 
   <arg name="pointCloud_topic_" default="/velodyne_points_ma" />
   <arg name="frame_id_" default="base_link" />
-  <arg name="rank" default="3" />
-  <arg name="minClusterSize" default="200" />
+  <arg name="order" default="3" />
+  <arg name="minClusterSize" default="100" />
   <arg name="clusterRadius" default="1.0" />
+  <arg name="passX_min" default="-3.0" />
   <arg name="passZ_min" default="-1.8" />
   <arg name="passZ_max" default="0.0" />
 
   <node pkg="perception" type="laneDetection" name="laneDetection" output="screen">
     <param name="pointCloud_topic_" value="$(arg pointCloud_topic_)" />
     <param name="frame_id_" value="$(arg frame_id_)" />
-    <param name="rank" value="$(arg rank)" />
+    <param name="order" value="$(arg order)" />
     <param name="minClusterSize" value="$(arg minClusterSize)" />
     <param name="clusterRadius" value="$(arg clusterRadius)" />
+    <param name="passX_min" value="$(arg passX_min)" />
     <param name="passZ_min" value="$(arg passZ_min)" />
     <param name="passZ_max" value="$(arg passZ_max)" />
   </node>

@@ -6,21 +6,20 @@
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <pcl/registration/icp.h>
 #include <pcl/console/time.h>
 #include <pcl/filters/filter.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/filters/voxel_grid.h>                  //体素滤波
+#include <pcl/filters/voxel_grid.h>       //体素滤波
+#include <pcl/filters/uniform_sampling.h> //均匀采样
+#include <pcl/filters/grid_minimum.h>
+#include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/passthrough.h>                 //直通滤波
 #include <pcl/ModelCoefficients.h>                   //投影滤波
 #include <pcl/filters/project_inliers.h>             //投影
 #include <pcl/filters/statistical_outlier_removal.h> //统计滤波
 
 #include <pcl/filters/extract_indices.h>
-#include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree.h>
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
 #include <visualization_msgs/Marker.h>
@@ -33,8 +32,8 @@
 #include <stdio.h>
 #include <thread>
 #include <std_msgs/Bool.h>
-#include "std_msgs/Float32.h"
-#include "std_msgs/Float32MultiArray.h"
+#include <std_msgs/Float32.h>
+#include <std_msgs/Float32MultiArray.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <perception/param_Config.h>
@@ -44,10 +43,11 @@ class laneDetection
 private:
     float distance_Right = -1;
 
-    int rank;
+    int order;
     int minClusterSize;
     double clusterRadius;
     double timeLaserCloudNew;
+    double passX_min;
     double passZ_min;
     double passZ_max;
     bool receivePoints = false;
@@ -82,8 +82,11 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
 
     pcl::PassThrough<pcl::PointXYZI> pass_z;
+    pcl::PassThrough<pcl::PointXYZI> pass_x;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_1;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_2;
+    pcl::UniformSampling<pcl::PointXYZI> uniformFilter;
+    pcl::ApproximateVoxelGrid<pcl::PointXYZI> approximateFilter;
     pcl::ProjectInliers<pcl::PointXYZI> projection;
     pcl::ModelCoefficients::Ptr coefficients_1;
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> outrem; //统计滤波
@@ -93,8 +96,6 @@ private:
     pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdFirst;
     std::vector<int> pointSearchInd;
     std::vector<float> pointSearchSqDis;
-
-    cv::Mat polyfit(std::vector<cv::Point> &in_point, int n);
 
     ros::Publisher pubCloudTFDS;
     ros::Publisher pubCloudHigh;
@@ -117,12 +118,14 @@ public:
         ROS_INFO("Input Point Cloud: %s", pointCloud_topic_.c_str());
         nh.param<std::string>("frame_id_", frame_id_, "base_link");
         ROS_INFO("Point Cloud Frame ID: %s", frame_id_.c_str());
-        nh.param("rank", rank, 3);
-        ROS_INFO("Poly Fit Rank: %d", rank);
+        nh.param("order", order, 3);
+        ROS_INFO("Poly Fit Order: %d", order);
         nh.param("minClusterSize", minClusterSize, 200);
         ROS_INFO("Minimum ClusterSize: %d", minClusterSize);
         nh.param("clusterRadius", clusterRadius, 0.5);
         ROS_INFO("Cluster Radius: %f", clusterRadius);
+        nh.param("passX_min", passX_min, -3.0);
+        ROS_INFO("PassThrough Filter X Minimum: %f", passX_min);
         nh.param("passZ_min", passZ_min, -1.8);
         ROS_INFO("PassThrough Filter Z Minimum: %f", passZ_min);
         nh.param("passZ_max", passZ_max, 0.0);
@@ -147,10 +150,16 @@ public:
         pubLaneRange = nh.advertise<std_msgs::Float32MultiArray>("laneRange", 1);
 
         downSizeFilter_1.setLeafSize(0.2, 0.2, 0.4);
-        downSizeFilter_2.setLeafSize(1.0, 1.0, 1.0);
+        downSizeFilter_2.setLeafSize(3.0, 3.0, 3.0);
+        uniformFilter.setRadiusSearch(2.0f);
+        approximateFilter.setLeafSize(4.0, 4.0, 4.0);
         pass_z.setFilterFieldName("z");
         pass_z.setFilterLimits(passZ_min, passZ_max);
         pass_z.setFilterLimitsNegative(false);
+        pass_x.setFilterFieldName("x");
+        pass_x.setFilterLimits(passX_min, FLT_MAX);
+        pass_x.setFilterLimitsNegative(false);
+
         projection.setModelType(pcl::SACMODEL_PLANE);
 
         allocateMemory();
@@ -244,6 +253,10 @@ public:
         outrem.setStddevMulThresh(1);
         outrem.filter(*cloudFinal);
 
+        /*Filter with (x)*/
+        pass_x.setInputCloud(cloudFinal);
+        pass_x.filter(*cloudFinal);
+
         cluster();
 
         receivePoints = true;
@@ -327,10 +340,26 @@ public:
             if (y1 < y2)
                 cloudCluster_1->swap(*cloudCluster_2);
 
-            downSizeFilter_2.setInputCloud(cloudCluster_1);
-            downSizeFilter_2.filter(*laneLeft);
-            downSizeFilter_2.setInputCloud(cloudCluster_2);
-            downSizeFilter_2.filter(*laneRight);
+            // downSizeFilter_2.setInputCloud(cloudCluster_1);
+            // downSizeFilter_2.filter(*laneLeft);
+            // downSizeFilter_2.setInputCloud(cloudCluster_2);
+            // downSizeFilter_2.filter(*laneRight);
+
+            approximateFilter.setInputCloud(cloudCluster_1);
+            approximateFilter.filter(*laneLeft);
+            approximateFilter.setInputCloud(cloudCluster_2);
+            approximateFilter.filter(*laneRight);
+
+            // pcl::GridMinimum<pcl::PointXYZI> gridFilter(3.0);
+            // gridFilter.setInputCloud(cloudCluster_1);
+            // gridFilter.filter(*laneLeft);
+            // gridFilter.setInputCloud(cloudCluster_2);
+            // gridFilter.filter(*laneRight);
+
+            // uniformFilter.setInputCloud(cloudCluster_1);
+            // uniformFilter.filter(*laneLeft);
+            // uniformFilter.setInputCloud(cloudCluster_2);
+            // uniformFilter.filter(*laneRight);
         }
         // std::cout << "Cluster Result Number =  " << j << " data points." << std::endl;
         // std::cout << "Cluster Number 1 =  " << cloudCluster_1->size() << " data points." << std::endl;
@@ -339,7 +368,7 @@ public:
 
     void laneDetect()
     {
-        cv::Mat A, B, C, D, N;
+        Eigen::VectorXd A, B, C, D, N;
         for (size_t i = 2; i <= 2; ++i)
         {
             pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cur(new pcl::PointCloud<pcl::PointXYZI>);
@@ -385,17 +414,16 @@ public:
                 continue;
             }
 
-            //输入拟合点
-            std::vector<cv::Point> fitPoints;
+            // //输入拟合点
+            Eigen::VectorXd xvals(cloud_cur->size());
+            Eigen::VectorXd yvals(cloud_cur->size());
             for (size_t j = 0; j < cloud_cur->size(); ++j)
             {
-                float xx = cloud_cur->points[j].x;
-                float yy = cloud_cur->points[j].y;
-                fitPoints.push_back(cv::Point(xx, yy));
+                xvals[j] = cloud_cur->points[j].x;
+                yvals[j] = cloud_cur->points[j].y;
             }
 
-            polynomial_curve_fit(fitPoints, rank, N);
-            // std::cout << " Lane Matrix = " << N << std::endl;
+            N = polyfit(xvals, yvals, order);
 
             switch (i)
             {
@@ -423,16 +451,16 @@ public:
                 continue;
             }
         }
-        if (!B.empty())
+        if (B.size() == (order + 1))
         {
-            for (size_t j = 0; j < rank + 1; ++j)
-                B_array.data.push_back(B.at<double>(j, 0));
+            for (size_t j = 0; j < order + 1; ++j)
+                B_array.data.push_back(B(j));
             //绘制曲线
             visualize(B);
         }
     }
 
-    void visualize(const cv::Mat &N)
+    void visualize(const Eigen::VectorXd &coeffs)
     {
         visualization_msgs::Marker line_strip;
         line_strip.header.frame_id = frame_id_;
@@ -453,9 +481,9 @@ public:
         for (float x = ceil(Range.data.back()); x <= ceil(Range.data.front()); ++x)
         {
             float y = 0;
-            for (size_t i = 0; i < rank; ++i)
+            for (size_t i = 0; i <= order; ++i)
             {
-                y += N.at<double>(i, 0) * pow(x, i);
+                y += coeffs(i) * pow(x, i);
             }
             geometry_msgs::Point p;
             p.x = x;
@@ -468,38 +496,25 @@ public:
         pubLaneMarker.publish(line_strip);
     }
 
-    bool polynomial_curve_fit(const std::vector<cv::Point> &key_point, int n, cv::Mat &N)
+    Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals, const int order)
     {
-        //Number of key points
-        size_t Num = key_point.size();
-        //构造矩阵X
-        cv::Mat X = cv::Mat::zeros(n + 1, n + 1, CV_64FC1);
-        for (size_t i = 0; i < n + 1; ++i)
+        assert(xvals.size() == yvals.size());
+        assert(order >= 1 && order <= xvals.size() - 1);
+        Eigen::MatrixXd A(xvals.size(), order + 1);
+        for (int i = 0; i < xvals.size(); ++i)
         {
-            for (size_t j = 0; j < n + 1; ++j)
+            A(i, 0) = 1.0;
+        }
+        for (int j = 0; j < xvals.size(); ++j)
+        {
+            for (int i = 0; i < order; ++i)
             {
-                for (size_t k = 0; k < Num; ++k)
-                {
-                    X.at<double>(i, j) = X.at<double>(i, j) +
-                                         std::pow(key_point[k].x, i + j);
-                }
+                A(j, i + 1) = A(j, i) * xvals(j);
             }
         }
-        //构造矩阵Y
-        cv::Mat Y = cv::Mat::zeros(n + 1, 1, CV_64FC1);
-        for (size_t i = 0; i < n + 1; ++i)
-        {
-            for (size_t k = 0; k < Num; ++k)
-            {
-                Y.at<double>(i, 0) = Y.at<double>(i, 0) +
-                                     std::pow(key_point[k].x, i) * key_point[k].y;
-            }
-        }
-
-        N = cv::Mat::zeros(n + 1, 1, CV_64FC1);
-        //求解矩阵A
-        cv::solve(X, Y, N, cv::DECOMP_LU);
-        return true;
+        auto Q = A.householderQr();
+        auto result = Q.solve(yvals);
+        return result;
     }
 
     void publishResult()

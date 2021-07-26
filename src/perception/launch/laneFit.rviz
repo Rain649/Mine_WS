@@ -25,7 +25,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: HightCloud
+    SyncSource: CloudCluster2
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -122,8 +122,8 @@ Visualization Manager:
       Class: rviz/PointCloud2
       Color: 237; 212; 0
       Color Transformer: FlatColor
-      Decay Time: 0.05000000074505806
-      Enabled: false
+      Decay Time: 0
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 7
@@ -140,7 +140,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
@@ -288,7 +288,7 @@ Visualization Manager:
       Color: 138; 226; 52
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: true
+      Enabled: false
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 63
@@ -305,7 +305,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -334,25 +334,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 96.55561065673828
+      Distance: 45.91126251220703
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -8.361795425415039
-        Y: -0.6463675498962402
-        Z: -9.5367431640625e-7
+        X: -3.6577224731445312
+        Y: -0.5130577087402344
+        Z: 1.2378600331430789e-5
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.2253973484039307
+      Pitch: 0.7497963905334473
       Target Frame: <Fixed Frame>
       Value: ThirdPersonFollower (rviz)
-      Yaw: 3.1203970909118652
+      Yaw: 3.2004051208496094
     Saved: ~
 Window Geometry:
   Displays:
