@@ -453,7 +453,7 @@ public:
         }
         if (B.size() == (order + 1))
         {
-            for (size_t j = 0; j < order + 1; ++j)
+            for (size_t j = 0; j <= order; ++j)
                 B_array.data.push_back(B(j));
             //绘制曲线
             visualize(B);
