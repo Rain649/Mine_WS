@@ -9,9 +9,9 @@
 #include <pcl/console/time.h>
 #include <pcl/filters/filter.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/filters/voxel_grid.h>       //体素滤波
-#include <pcl/filters/uniform_sampling.h> //均匀采样
-#include <pcl/filters/grid_minimum.h>
+#include <pcl/filters/voxel_grid.h> //体素滤波
+// #include <pcl/filters/uniform_sampling.h> //均匀采样
+// #include <pcl/filters/grid_minimum.h>
 #include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/passthrough.h>                 //直通滤波
 #include <pcl/ModelCoefficients.h>                   //投影滤波
@@ -85,7 +85,7 @@ private:
     pcl::PassThrough<pcl::PointXYZI> pass_x;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_1;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_2;
-    pcl::UniformSampling<pcl::PointXYZI> uniformFilter;
+    // pcl::UniformSampling<pcl::PointXYZI> uniformFilter;
     pcl::ApproximateVoxelGrid<pcl::PointXYZI> approximateFilter;
     pcl::ProjectInliers<pcl::PointXYZI> projection;
     pcl::ModelCoefficients::Ptr coefficients_1;
@@ -151,8 +151,8 @@ public:
 
         downSizeFilter_1.setLeafSize(0.2, 0.2, 0.4);
         downSizeFilter_2.setLeafSize(3.0, 3.0, 3.0);
-        uniformFilter.setRadiusSearch(2.0f);
-        approximateFilter.setLeafSize(4.0, 4.0, 4.0);
+        // uniformFilter.setRadiusSearch(2.0f);
+        approximateFilter.setLeafSize(2.0, 2.0, 2.0);
         pass_z.setFilterFieldName("z");
         pass_z.setFilterLimits(passZ_min, passZ_max);
         pass_z.setFilterLimitsNegative(false);
@@ -498,8 +498,9 @@ public:
 
     Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals, const int order)
     {
-        assert(xvals.size() == yvals.size());
-        assert(order >= 1 && order <= xvals.size() - 1);
+        Eigen::VectorXd result;
+        if (order >= xvals.size())
+            return result;
         Eigen::MatrixXd A(xvals.size(), order + 1);
         for (int i = 0; i < xvals.size(); ++i)
         {
@@ -513,7 +514,7 @@ public:
             }
         }
         auto Q = A.householderQr();
-        auto result = Q.solve(yvals);
+        result = Q.solve(yvals);
         return result;
     }
 

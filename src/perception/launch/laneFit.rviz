@@ -288,7 +288,7 @@ Visualization Manager:
       Color: 138; 226; 52
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Max Intensity: 63
@@ -305,7 +305,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -334,7 +334,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 45.91126251220703
+      Distance: 68.17011260986328
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -349,10 +349,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7497963905334473
+      Pitch: 1.2497960329055786
       Target Frame: <Fixed Frame>
       Value: ThirdPersonFollower (rviz)
-      Yaw: 3.2004051208496094
+      Yaw: 3.1854052543640137
     Saved: ~
 Window Geometry:
   Displays:
