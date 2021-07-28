@@ -298,7 +298,6 @@ namespace util
 
     int ensureUniqueFilepath(std::string &filepath)
     {
-
         if (!fileExists(filepath))
             return 0;
 

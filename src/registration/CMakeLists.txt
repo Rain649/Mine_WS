@@ -8,8 +8,8 @@ project(Point_Cloud_Registration)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
-set(SOURCE_FILES ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/util.cpp ${SOURCE_DIR}/Visualizer.cpp ${SOURCE_DIR}/Registrator.cpp )
-set(HEADER_FILES ${HEADER_DIR}/types.hpp ${HEADER_DIR}/util.hpp ${HEADER_DIR}/Visualizer.hpp ${HEADER_DIR}/Registrator.hpp )
+set(SOURCE_FILES ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/util.cpp ${SOURCE_DIR}/Visualizer.cpp ${SOURCE_DIR}/Registrator.cpp ${SOURCE_DIR}/hsvrgb.cpp)
+set(HEADER_FILES ${HEADER_DIR}/types.hpp ${HEADER_DIR}/util.hpp ${HEADER_DIR}/Visualizer.hpp ${HEADER_DIR}/Registrator.hpp ${HEADER_DIR}/hsvrgb.hpp)
 # set(HEADER_FILES ${HEADER_DIR}/types.hpp ${HEADER_DIR}/util.hpp ${HEADER_DIR}/Visualizer.hpp ${HEADER_DIR}/Registrator.hpp ${HEADER_DIR}/tinyply.h ${HEADER_DIR}/tiny_obj_loader.h ${HEADER_DIR}/hsvrgb.hpp)
 option(WITH_OPENMP "WITH_OPENMP" ON)
 
@@ -37,7 +37,6 @@ if(PCL_FOUND)
 
 	add_executable(point_cloud_registration ${SOURCE_FILES} ${HEADER_FILES})
 
-    target_link_libraries(point_cloud_registration gflags)
     target_link_libraries(point_cloud_registration ${PCL_COMMON_LIBRARIES} 
 	${PCL_IO_LIBRARIES} ${PCL_KDTREE_LIBRARIES} ${PCL_FEATURES_LIBRARIES} ${PCL_VISUALIZATION_LIBRARIES} ${PCL_RECOGNITION_LIBRARIES})
 endif()

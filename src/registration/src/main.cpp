@@ -36,14 +36,14 @@ using namespace PRT;
 
 int main(int argc, char *argv[])
 {
-    int num_ksearch_neighbors;
-    double descriptor_radius;
-    double subsampling_radius;
-    double consensus_inlier_threshold;
-    int consensus_max_iterations;
-    int icp_max_iterations;
-    double icp_max_correspondence_distance;
-    double residual_threshold;
+    int num_ksearch_neighbors = 100;
+    double descriptor_radius = 1.0;
+    double subsampling_radius = 0.2;
+    double consensus_inlier_threshold = 0.2;
+    int consensus_max_iterations = 100;
+    int icp_max_iterations = 100;
+    double icp_max_correspondence_distance = 0.05;
+    double residual_threshold = 0.1;
     PointCloudT::Ptr target_cloud;
     PointCloudT::Ptr source_cloud;
     std::string registration_technique = "both";
