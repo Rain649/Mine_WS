@@ -28,7 +28,6 @@ pcl::PointCloud<pcl::PointXYZI>::Ptr cloudIntersections;
 
 pcl::PointCloud<pcl::PointXYZI>::Ptr transform2zero(pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud, pcl::PointXYZI zeroPoint)
 {
-
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
     transform.translation() << -zeroPoint.x, -zeroPoint.y, -zeroPoint.z;
     pcl::PointCloud<pcl::PointXYZI>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZI>());

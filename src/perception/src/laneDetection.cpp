@@ -9,10 +9,7 @@
 #include <pcl/console/time.h>
 #include <pcl/filters/filter.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/filters/voxel_grid.h> //体素滤波
-// #include <pcl/filters/uniform_sampling.h> //均匀采样
-// #include <pcl/filters/grid_minimum.h>
-#include <pcl/filters/approximate_voxel_grid.h>
+#include <pcl/filters/voxel_grid.h>                  //体素滤波
 #include <pcl/filters/passthrough.h>                 //直通滤波
 #include <pcl/ModelCoefficients.h>                   //投影滤波
 #include <pcl/filters/project_inliers.h>             //投影
@@ -24,7 +21,6 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <visualization_msgs/Marker.h>
 
-#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <vector>
 
@@ -85,8 +81,6 @@ private:
     pcl::PassThrough<pcl::PointXYZI> pass_x;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_1;
     pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter_2;
-    // pcl::UniformSampling<pcl::PointXYZI> uniformFilter;
-    pcl::ApproximateVoxelGrid<pcl::PointXYZI> approximateFilter;
     pcl::ProjectInliers<pcl::PointXYZI> projection;
     pcl::ModelCoefficients::Ptr coefficients_1;
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> outrem; //统计滤波
@@ -109,7 +103,8 @@ private:
     ros::Publisher pubLaneRange;
     ros::Publisher pubLaneCoefficient;
     ros::Publisher pubDistance;
-    ros::Publisher pubLaneMarker;
+    ros::Publisher pubLaneLeftMarker;
+    ros::Publisher pubLaneRightMarker;
 
 public:
     laneDetection() : nh("~")
@@ -143,16 +138,15 @@ public:
         pubLaneLeft = nh.advertise<sensor_msgs::PointCloud2>("laneLeft", 1);
         pubLaneRight = nh.advertise<sensor_msgs::PointCloud2>("laneRight", 1);
 
-        pubLaneMarker = nh.advertise<visualization_msgs::Marker>("laneMarker", 1);
+        pubLaneLeftMarker = nh.advertise<visualization_msgs::Marker>("laneLeftMarker", 1);
+        pubLaneRightMarker = nh.advertise<visualization_msgs::Marker>("laneRightMarker", 1);
 
         pubDistance = nh.advertise<std_msgs::Float32>("Distance", 1);
         pubLaneCoefficient = nh.advertise<std_msgs::Float32MultiArray>("laneCoefficient", 1);
         pubLaneRange = nh.advertise<std_msgs::Float32MultiArray>("laneRange", 1);
 
         downSizeFilter_1.setLeafSize(0.2, 0.2, 0.4);
-        downSizeFilter_2.setLeafSize(3.0, 3.0, 3.0);
-        // uniformFilter.setRadiusSearch(2.0f);
-        approximateFilter.setLeafSize(2.0, 2.0, 2.0);
+        downSizeFilter_2.setLeafSize(2.0, 2.0, 2.0);
         pass_z.setFilterFieldName("z");
         pass_z.setFilterLimits(passZ_min, passZ_max);
         pass_z.setFilterLimitsNegative(false);
@@ -287,36 +281,24 @@ public:
             case 1:
                 for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
                     cloudCluster_1->points.push_back(cloudFinal->points[*pit]);
-                cloudCluster_1->width = cloudCluster_1->points.size();
-                cloudCluster_1->height = 1;
-                cloudCluster_1->is_dense = true;
 
                 break;
 
             case 2:
                 for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
                     cloudCluster_2->points.push_back(cloudFinal->points[*pit]);
-                cloudCluster_2->width = cloudCluster_2->points.size();
-                cloudCluster_2->height = 1;
-                cloudCluster_2->is_dense = true;
 
                 break;
 
             case 3:
                 for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
                     cloudCluster_3->points.push_back(cloudFinal->points[*pit]);
-                cloudCluster_3->width = cloudCluster_3->points.size();
-                cloudCluster_3->height = 1;
-                cloudCluster_3->is_dense = true;
 
                 break;
 
             case 4:
                 for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
                     cloudCluster_4->points.push_back(cloudFinal->points[*pit]);
-                cloudCluster_4->width = cloudCluster_4->points.size();
-                cloudCluster_4->height = 1;
-                cloudCluster_4->is_dense = true;
 
                 break;
             default:
@@ -340,26 +322,10 @@ public:
             if (y1 < y2)
                 cloudCluster_1->swap(*cloudCluster_2);
 
-            // downSizeFilter_2.setInputCloud(cloudCluster_1);
-            // downSizeFilter_2.filter(*laneLeft);
-            // downSizeFilter_2.setInputCloud(cloudCluster_2);
-            // downSizeFilter_2.filter(*laneRight);
-
-            approximateFilter.setInputCloud(cloudCluster_1);
-            approximateFilter.filter(*laneLeft);
-            approximateFilter.setInputCloud(cloudCluster_2);
-            approximateFilter.filter(*laneRight);
-
-            // pcl::GridMinimum<pcl::PointXYZI> gridFilter(3.0);
-            // gridFilter.setInputCloud(cloudCluster_1);
-            // gridFilter.filter(*laneLeft);
-            // gridFilter.setInputCloud(cloudCluster_2);
-            // gridFilter.filter(*laneRight);
-
-            // uniformFilter.setInputCloud(cloudCluster_1);
-            // uniformFilter.filter(*laneLeft);
-            // uniformFilter.setInputCloud(cloudCluster_2);
-            // uniformFilter.filter(*laneRight);
+            downSizeFilter_2.setInputCloud(cloudCluster_1);
+            downSizeFilter_2.filter(*laneLeft);
+            downSizeFilter_2.setInputCloud(cloudCluster_2);
+            downSizeFilter_2.filter(*laneRight);
         }
         // std::cout << "Cluster Result Number =  " << j << " data points." << std::endl;
         // std::cout << "Cluster Number 1 =  " << cloudCluster_1->size() << " data points." << std::endl;
@@ -492,8 +458,8 @@ public:
 
             line_strip.points.push_back(p);
         }
-
-        pubLaneMarker.publish(line_strip);
+        // pubLaneLeftMarker.publish(line_strip);
+        pubLaneRightMarker.publish(line_strip);
     }
 
     Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals, const int order)

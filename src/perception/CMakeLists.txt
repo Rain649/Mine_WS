@@ -49,37 +49,33 @@ link_directories(
 	${PCL_LIBRARY_DIRS}
 )
 
-add_executable(intersection
-  src/intersection.cpp
-)
-add_dependencies(intersection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(intersection
-  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  ${OpenCV_LIBS}
-)
+# add_executable(intersection
+#   src/intersection.cpp
+# )
+# add_dependencies(intersection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(intersection
+#   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  ${OpenCV_LIBS}
+# )
 
-add_executable(laneDetection
-  src/laneDetection.cpp
-)
+add_executable(laneDetection  src/laneDetection.cpp)
 add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(laneDetection
-  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  ${OpenCV_LIBS}
-)
+target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-add_executable(keyPointSave
-  src/keyPointSave.cpp
-)
-add_dependencies(keyPointSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(keyPointSave
-  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
-)
+# add_executable(keyPointSave
+#   src/keyPointSave.cpp
+# )
+# add_dependencies(keyPointSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(keyPointSave
+#   ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
+# )
 
-add_executable(segmentationSave
-  src/segmentationSave.cpp
-)
-add_dependencies(segmentationSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(segmentationSave
-  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
-)
+# add_executable(segmentationSave
+#   src/segmentationSave.cpp
+# )
+# add_dependencies(segmentationSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(segmentationSave
+#   ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
+# )
 
 # add_executable(pcd_write
 #   src/pcd_write.cpp
@@ -105,14 +101,14 @@ target_link_libraries(segmentationSave
 #   ${catkin_LIBRARIES} ${PCL_LIBRARIES} 
 # )
 
-add_executable(topoMap
-  src/topoMap.cpp
-)
-add_dependencies(topoMap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(topoMap
-  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp
-)
+# add_executable(topoMap
+#   src/topoMap.cpp
+# )
+# add_dependencies(topoMap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(topoMap
+#   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp
+# )
 
-add_executable(ndt src/ndt.cpp)
-add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
+# add_executable(ndt src/ndt.cpp)
+# add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
