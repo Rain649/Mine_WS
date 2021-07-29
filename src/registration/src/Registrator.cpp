@@ -2,16 +2,6 @@
 
 const bool showInfo = true;
 
-// DEFINE_string(registration_technique, Registrator::DEFAULT_registration_technique, "what kind of registration technique to use, 'correspondence', 'icp', 'both'");
-// DEFINE_double(residual_threshold, Registrator::DEFAULT_residual_threshold, "in meters, max residual used in calculation of f-score, also corresponds to blue in the residual colormap");
-// DEFINE_uint64(num_ksearch_neighbors, Registrator::DEFAULT_num_ksearch_neighbors, "number of neighbors to consider in normals computation");
-// DEFINE_double(descriptor_radius, Registrator::DEFAULT_descriptor_radius, "in meters, radius of surrounding points to consider during descriptor computation");
-// DEFINE_double(subsampling_radius, Registrator::DEFAULT_subsampling_radius, "in meters, determines the degree of subsampling used, all points within a sphere of the specified radius are replaced by their centroid");
-// DEFINE_double(consensus_inlier_threshold, Registrator::DEFAULT_consensus_inlier_threshold, "in meters, maximum distance a point can lie from a hypothesis during sample consensus to be considered an inlier");
-// DEFINE_uint64(consensus_max_iterations, Registrator::DEFAULT_consensus_max_iterations, "maximum number of iterations to perform sample consensus");
-// DEFINE_uint64(icp_max_iterations, Registrator::DEFAULT_icp_max_iterations, "maximum number of iterations to perform ICP");
-// DEFINE_double(icp_max_correspondence_distance, Registrator::DEFAULT_icp_max_correspondence_distance, "correspondences greater than this distance apart will be ignored in ICP");
-
 Registrator::Registrator()
 {
     s_cloud_ = PointCloudT::Ptr();
@@ -512,7 +502,6 @@ int Registrator::saveResidualColormapPointCloud(std::string &filepath)
     if (!is_residual_colormap_computed_)
         computeResidualColormap();
 
-    // return util::writePointCloudToPLY(filepath, *r_cloud_rgb_);
     return util::writePointCloudToPCD(filepath, *r_cloud_rgb_);
 }
 
