@@ -1,16 +1,5 @@
 #include "Registrator.hpp"
 
-// Commandline Flags
-// const std::string Registrator::DEFAULT_registration_technique("both");
-// const double Registrator::DEFAULT_residual_threshold(0.1);
-// const int Registrator::DEFAULT_num_ksearch_neighbors(100);
-// const double Registrator::DEFAULT_descriptor_radius(1.0);
-// const double Registrator::DEFAULT_subsampling_radius(0.2);
-// const double Registrator::DEFAULT_consensus_inlier_threshold(0.2);
-// const int Registrator::DEFAULT_consensus_max_iterations(100);
-// const int Registrator::DEFAULT_icp_max_iterations(100);
-// const double Registrator::DEFAULT_icp_max_correspondence_distance(0.05);
-
 const bool showInfo = true;
 
 // DEFINE_string(registration_technique, Registrator::DEFAULT_registration_technique, "what kind of registration technique to use, 'correspondence', 'icp', 'both'");

@@ -29,17 +29,6 @@ using namespace PRT;
 class Registrator
 {
 public:
-    // Constants
-    static const std::string DEFAULT_registration_technique;
-    static const double DEFAULT_residual_threshold;
-    static const int DEFAULT_num_ksearch_neighbors;
-    static const double DEFAULT_descriptor_radius;
-    static const double DEFAULT_subsampling_radius;
-    static const double DEFAULT_consensus_inlier_threshold;
-    static const int DEFAULT_consensus_max_iterations;
-    static const int DEFAULT_icp_max_iterations;
-    static const double DEFAULT_icp_max_correspondence_distance;
-
     // Typedefs
     typedef boost::shared_ptr<Registrator> Ptr;
 
