@@ -1,5 +1,6 @@
 
 #include <ros/ros.h>
+// #include <omp.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <limits>
 #include <pcl/point_cloud.h>
@@ -37,8 +38,6 @@
 class laneDetection
 {
 private:
-    float distance_Right = -1;
-
     int order;
     int minClusterSize;
     double clusterRadius;
@@ -46,12 +45,17 @@ private:
     double passX_min;
     double passZ_min;
     double passZ_max;
-    bool receivePoints = false;
-    bool over = true;
 
-    std_msgs::Float32MultiArray B_array;
-    std_msgs::Float32MultiArray Range;
-    std_msgs::Float32 Distance;
+    /// *poly fit left coefficients
+    std_msgs::Float32MultiArray leftCoefficient_array;
+    /// *poly fit right coefficients
+    std_msgs::Float32MultiArray rightCoefficient_array;
+    /// *[front distance, back distance]
+    std_msgs::Float32MultiArray leftRange;
+    /// *[front distance, back distance]
+    std_msgs::Float32MultiArray rightRange;
+    /// *[left distance, right distance]
+    std_msgs::Float32MultiArray Distance;
 
     std::string pointCloud_topic_;
     std::string frame_id_;
@@ -85,8 +89,6 @@ private:
     pcl::ModelCoefficients::Ptr coefficients_1;
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> outrem; //统计滤波
 
-    // pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdLeft;
-    pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdRight;
     pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdFirst;
     std::vector<int> pointSearchInd;
     std::vector<float> pointSearchSqDis;
@@ -100,8 +102,10 @@ private:
     ros::Publisher pubCluster_4;
     ros::Publisher pubLaneLeft;
     ros::Publisher pubLaneRight;
-    ros::Publisher pubLaneRange;
-    ros::Publisher pubLaneCoefficient;
+    ros::Publisher pubLeftRange;
+    ros::Publisher pubRightRange;
+    ros::Publisher pubLeftCoefficient;
+    ros::Publisher pubRightCoefficient;
     ros::Publisher pubDistance;
     ros::Publisher pubLaneLeftMarker;
     ros::Publisher pubLaneRightMarker;
@@ -115,9 +119,9 @@ public:
         ROS_INFO("Point Cloud Frame ID: %s", frame_id_.c_str());
         nh.param("order", order, 3);
         ROS_INFO("Poly Fit Order: %d", order);
-        nh.param("minClusterSize", minClusterSize, 200);
+        nh.param("minClusterSize", minClusterSize, 100);
         ROS_INFO("Minimum ClusterSize: %d", minClusterSize);
-        nh.param("clusterRadius", clusterRadius, 0.5);
+        nh.param("clusterRadius", clusterRadius, 1.0);
         ROS_INFO("Cluster Radius: %f", clusterRadius);
         nh.param("passX_min", passX_min, -3.0);
         ROS_INFO("PassThrough Filter X Minimum: %f", passX_min);
@@ -141,9 +145,11 @@ public:
         pubLaneLeftMarker = nh.advertise<visualization_msgs::Marker>("laneLeftMarker", 1);
         pubLaneRightMarker = nh.advertise<visualization_msgs::Marker>("laneRightMarker", 1);
 
-        pubDistance = nh.advertise<std_msgs::Float32>("Distance", 1);
-        pubLaneCoefficient = nh.advertise<std_msgs::Float32MultiArray>("laneCoefficient", 1);
-        pubLaneRange = nh.advertise<std_msgs::Float32MultiArray>("laneRange", 1);
+        pubDistance = nh.advertise<std_msgs::Float32MultiArray>("Distance", 1);
+        pubLeftCoefficient = nh.advertise<std_msgs::Float32MultiArray>("leftCoefficient", 1);
+        pubRightCoefficient = nh.advertise<std_msgs::Float32MultiArray>("rightCoefficient", 1);
+        pubLeftRange = nh.advertise<std_msgs::Float32MultiArray>("leftRange", 1);
+        pubRightRange = nh.advertise<std_msgs::Float32MultiArray>("rightRange", 1);
 
         downSizeFilter_1.setLeafSize(0.2, 0.2, 0.4);
         downSizeFilter_2.setLeafSize(2.0, 2.0, 2.0);
@@ -180,8 +186,6 @@ public:
         cloudCluster_4.reset(new pcl::PointCloud<pcl::PointXYZI>());
 
         kdFirst.reset(new pcl::KdTreeFLANN<pcl::PointXYZI>());
-        // kdLeft.reset(new pcl::KdTreeFLANN<pcl::PointXYZI>());
-        kdRight.reset(new pcl::KdTreeFLANN<pcl::PointXYZI>());
 
         coefficients_1.reset(new pcl::ModelCoefficients());
         coefficients_1->values.resize(4);
@@ -205,12 +209,11 @@ public:
         cloudCluster_3->clear();
         cloudCluster_4->clear();
 
-        Distance.data = -1;
-        B_array.data.clear();
-        Range.data.clear();
-
-        receivePoints = false;
-        over = true;
+        Distance.data.clear();
+        leftCoefficient_array.data.clear();
+        rightCoefficient_array.data.clear();
+        leftRange.data.clear();
+        rightRange.data.clear();
     }
 
     void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
@@ -252,8 +255,6 @@ public:
         pass_x.filter(*cloudFinal);
 
         cluster();
-
-        receivePoints = true;
     }
 
     void cluster()
@@ -304,29 +305,40 @@ public:
             default:
                 break;
             }
-
-            if (cloudCluster_1->empty())
-                break;
-
-            kdFirst->setInputCloud(cloudCluster_1);
-            kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
-            double y1 = cloudCluster_1->points[pointSearchInd[0]].y;
-            double y2 = 0;
-            if (!cloudCluster_2->empty())
-            {
-                kdFirst->setInputCloud(cloudCluster_2);
-                kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
-                y2 = cloudCluster_2->points[pointSearchInd[0]].y;
-            }
-
-            if (y1 < y2)
-                cloudCluster_1->swap(*cloudCluster_2);
-
-            downSizeFilter_2.setInputCloud(cloudCluster_1);
-            downSizeFilter_2.filter(*laneLeft);
-            downSizeFilter_2.setInputCloud(cloudCluster_2);
-            downSizeFilter_2.filter(*laneRight);
         }
+        if (cloudCluster_1->empty())
+            return;
+
+        kdFirst->setInputCloud(cloudCluster_1);
+        kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
+        double y1 = cloudCluster_1->points[pointSearchInd[0]].y;
+        double y2 = 0;
+        if (!cloudCluster_2->empty())
+        {
+            kdFirst->setInputCloud(cloudCluster_2);
+            kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
+            y2 = cloudCluster_2->points[pointSearchInd[0]].y;
+        }
+
+        //y2左侧距离，y1右侧距离
+        if (y1 < y2)
+        {
+            cloudCluster_1->swap(*cloudCluster_2);
+            Distance.data.push_back(y2);
+            Distance.data.push_back(y1);
+        }
+        //y1左侧距离，y2右侧距离
+        else
+        {
+            Distance.data.push_back(y1);
+            Distance.data.push_back(y2);
+        }
+
+        downSizeFilter_2.setInputCloud(cloudCluster_1);
+        downSizeFilter_2.filter(*laneLeft);
+        downSizeFilter_2.setInputCloud(cloudCluster_2);
+        downSizeFilter_2.filter(*laneRight);
+
         // std::cout << "Cluster Result Number =  " << j << " data points." << std::endl;
         // std::cout << "Cluster Number 1 =  " << cloudCluster_1->size() << " data points." << std::endl;
         // std::cout << "Cluster Number 2 =  " << cloudCluster_2->size() << " data points." << std::endl;
@@ -334,99 +346,72 @@ public:
 
     void laneDetect()
     {
-        Eigen::VectorXd A, B, C, D, N;
-        for (size_t i = 2; i <= 2; ++i)
-        {
-            pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_cur(new pcl::PointCloud<pcl::PointXYZI>);
-            pcl::PointXYZI min; //用于存放三个轴的最小值
-            pcl::PointXYZI max; //用于存放三个轴的最大值
-            switch (i)
-            {
-            case 1:
-                if (cloudCluster_1->empty())
-                    continue;
-                *cloud_cur = *laneLeft;
-                break;
+        Eigen::VectorXd leftCoefficients, rightCoefficients;
 
-            case 2:
-                if (laneRight->empty())
-                    continue;
-                *cloud_cur = *laneRight;
-                //距右侧墙壁最近点
-                kdRight->setInputCloud(cloud_cur);
-                kdRight->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
-                distance_Right = sqrt(pow(cloud_cur->points[(pointSearchInd[0])].x, 2) + pow(cloud_cur->points[(pointSearchInd[0])].y, 2));
-                // std::cout << "Distance_Right =  " << distance_Right  << std::endl;
-                Distance.data = distance_Right;
-                pcl::getMinMax3D(*cloud_cur, min, max);
-                Range.data.push_back(max.x);
-                Range.data.push_back(min.x);
+        // #pragma omp parallel sections
+        {
+            if (!laneLeft->empty())
+            // #pragma omp section
+            {
+                pcl::PointXYZI min; //用于存放三个轴的最小值
+                pcl::PointXYZI max; //用于存放三个轴的最大值
+                pcl::getMinMax3D(*laneLeft, min, max);
+                leftRange.data.push_back(max.x);
+                leftRange.data.push_back(min.x);
                 // ROS_ERROR_STREAM("dis: " << distance_Right << " max: " << max.x << " min: " << min.x);
-                break;
 
-            case 3:
-                if (cloudCluster_3->empty())
-                    continue;
-                *cloud_cur = *cloudCluster_3;
-                break;
+                // //输入拟合点
+                Eigen::VectorXd xvals(laneLeft->size());
+                Eigen::VectorXd yvals(laneLeft->size());
+                for (size_t j = 0; j < laneLeft->size(); ++j)
+                {
+                    xvals[j] = laneLeft->points[j].x;
+                    yvals[j] = laneLeft->points[j].y;
+                }
 
-            case 4:
-                if (cloudCluster_4->empty())
-                    continue;
-                *cloud_cur = *cloudCluster_4;
-                break;
-
-            default:
-                continue;
+                leftCoefficients = polyfit(xvals, yvals, order);
+                if (leftCoefficients.size() == (order + 1))
+                {
+                    for (size_t j = 0; j <= order; ++j)
+                        leftCoefficient_array.data.push_back(leftCoefficients(j));
+                    //绘制曲线
+                    visualization_msgs::Marker line_strip = visualize(leftCoefficients, leftRange);
+                    pubLaneLeftMarker.publish(line_strip);
+                }
             }
-
-            // //输入拟合点
-            Eigen::VectorXd xvals(cloud_cur->size());
-            Eigen::VectorXd yvals(cloud_cur->size());
-            for (size_t j = 0; j < cloud_cur->size(); ++j)
+            if (!laneRight->empty())
+            // #pragma omp section
             {
-                xvals[j] = cloud_cur->points[j].x;
-                yvals[j] = cloud_cur->points[j].y;
+                pcl::PointXYZI min; //用于存放三个轴的最小值
+                pcl::PointXYZI max; //用于存放三个轴的最大值
+                pcl::getMinMax3D(*laneRight, min, max);
+                rightRange.data.push_back(max.x);
+                rightRange.data.push_back(min.x);
+                // ROS_ERROR_STREAM("dis: " << distance_Right << " max: " << max.x << " min: " << min.x);
+
+                // //输入拟合点
+                Eigen::VectorXd xvals(laneRight->size());
+                Eigen::VectorXd yvals(laneRight->size());
+                for (size_t j = 0; j < laneRight->size(); ++j)
+                {
+                    xvals[j] = laneRight->points[j].x;
+                    yvals[j] = laneRight->points[j].y;
+                }
+
+                rightCoefficients = polyfit(xvals, yvals, order);
+                if (rightCoefficients.size() == (order + 1))
+                {
+                    for (size_t j = 0; j <= order; ++j)
+                        rightCoefficient_array.data.push_back(rightCoefficients(j));
+                    //绘制曲线
+                    visualization_msgs::Marker line_strip = visualize(rightCoefficients, rightRange);
+                    pubLaneRightMarker.publish(line_strip);
+                }
             }
-
-            N = polyfit(xvals, yvals, order);
-
-            switch (i)
-            {
-            case 1:
-                A = N;
-                // std::cout << " A = " << N << std::endl;
-                break;
-
-            case 2:
-                B = N;
-                // std::cout << " B = " << N << std::endl;
-                break;
-
-            case 3:
-                C = N;
-                // std::cout << " C = " << N << std::endl;
-                break;
-
-            case 4:
-                D = N;
-                // std::cout << " D = " << N << std::endl;
-                break;
-
-            default:
-                continue;
-            }
-        }
-        if (B.size() == (order + 1))
-        {
-            for (size_t j = 0; j <= order; ++j)
-                B_array.data.push_back(B(j));
-            //绘制曲线
-            visualize(B);
         }
     }
 
-    void visualize(const Eigen::VectorXd &coeffs)
+    visualization_msgs::Marker visualize(const Eigen::VectorXd &coeffs, const std_msgs::Float32MultiArray &range)
     {
         visualization_msgs::Marker line_strip;
         line_strip.header.frame_id = frame_id_;
@@ -444,7 +429,7 @@ public:
         line_strip.color.a = 1.0;
 
         // Create the vertices for the points and lines
-        for (float x = ceil(Range.data.back()); x <= ceil(Range.data.front()); ++x)
+        for (float x = ceil(range.data.back()); x <= ceil(range.data.front()); ++x)
         {
             float y = 0;
             for (size_t i = 0; i <= order; ++i)
@@ -458,8 +443,7 @@ public:
 
             line_strip.points.push_back(p);
         }
-        // pubLaneLeftMarker.publish(line_strip);
-        pubLaneRightMarker.publish(line_strip);
+        return line_strip;
     }
 
     Eigen::VectorXd polyfit(Eigen::VectorXd xvals, Eigen::VectorXd yvals, const int order)
@@ -576,34 +560,30 @@ public:
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         }
 
-        if (Distance.data)
+        if (!Distance.data.empty())
         {
             pubDistance.publish(Distance);
             // ROS_INFO("\033[1;32m--->\033[0m Distance Published.");
         }
-
-        if (!B_array.data.empty())
+        if (!leftCoefficient_array.data.empty())
         {
-            pubLaneCoefficient.publish(B_array);
+            pubLeftCoefficient.publish(leftCoefficient_array);
             // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
         }
-        if (!Range.data.empty())
+        if (!rightCoefficient_array.data.empty())
         {
-            pubLaneRange.publish(Range);
+            pubRightCoefficient.publish(rightCoefficient_array);
             // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
         }
-    }
-
-    void run()
-    {
-        if (receivePoints && over)
+        if (!leftRange.data.empty())
         {
-            over = false;
-            laneDetect();
-            publishResult();
-            clearMemory();
-
-            // std::cout << "---------------------------------------------" << std::endl;
+            pubLeftRange.publish(leftRange);
+            // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
+        }
+        if (!rightRange.data.empty())
+        {
+            pubRightRange.publish(rightRange);
+            // ROS_INFO("\033[1;32m--->\033[0m Coefficient Published.");
         }
     }
 };
@@ -637,7 +617,11 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         ros::spinOnce();
-        LD.run();
+
+        LD.laneDetect();
+        LD.publishResult();
+        LD.clearMemory();
+
         rate.sleep();
     }
 

@@ -6,6 +6,8 @@
     ],
     "files.associations": {
         "string": "cpp",
-        "cmath": "cpp"
-    }
+        "cmath": "cpp",
+        "random": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
 }
