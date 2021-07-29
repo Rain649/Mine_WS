@@ -1,26 +1,45 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-
+cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O1")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -Ofast")
 
-#同时生成动态库和静态库
-project(registration)
-aux_source_directory(src DIR_SRCS)
-list(REMOVE_ITEM DIR_SRCS "src/main.cpp")
-# include_directories(/usr/include/eigen3/eigen)
+project(Point_Cloud_Registration)
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+aux_source_directory(src SOURCE_FILES)
+# aux_source_directory(include HEADER_FILES)
+set(HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
+# set(SOURCE_DIR ${PROJECT_SOURCE_DIR}/src)
+# set(SOURCE_FILES ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/util.cpp ${SOURCE_DIR}/Visualizer.cpp ${SOURCE_DIR}/Registrator.cpp ${SOURCE_DIR}/hsvrgb.cpp)
+# set(HEADER_FILES ${HEADER_DIR}/types.hpp ${HEADER_DIR}/util.hpp ${HEADER_DIR}/Visualizer.hpp ${HEADER_DIR}/Registrator.hpp ${HEADER_DIR}/hsvrgb.hpp)
+option(WITH_OPENMP "WITH_OPENMP" ON)
+
 find_package(PCL 1.7 REQUIRED COMPONENTS common io kdtree features visualization recognition)
-include_directories(${PCL_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-#生成动态库
-ADD_LIBRARY(registration SHARED ${DIR_SRCS})
-#指定动态库版本号
-# SET_TARGET_PROPERTIES(registration PROPERTIES VERSION 1.0 SOVERSION 1)
-#
-INSTALL(FILES registration.h DESTINATION include)
+if(WITH_OPENMP)
+find_package(OpenMP)
 
-# ADD_LIBRARY(registration_s STATIC ${DIR_SRCS})
-# SET_TARGET_PROPERTIES(registration_s PROPERTIES OUTPUT_NAME "registration")
+if(OPENMP_FOUND)
+	message("OpenMP found")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 
-# INSTALL(TARGETS registration registration_s
-#           LIBRARY DESTINATION lib 
-#           ARCHIVE DESTINATION lib)
+endif()
+
+if(PCL_FOUND)
+	message("PCL found")
+
+	include_directories(${PCL_INCLUDE_DIRS})
+	include_directories(${HEADER_DIR})
+    link_directories("/home/lsj/dev/Mine_WS/src/registrationSo/lib")
+	
+	add_definitions(${PCL_DEFINITIONS})
+
+	add_executable(point_cloud_registration ${SOURCE_FILES} ${HEADER_FILES})
+
+    target_link_libraries(point_cloud_registration ${PCL_COMMON_LIBRARIES} 
+	${PCL_IO_LIBRARIES} ${PCL_KDTREE_LIBRARIES} ${PCL_FEATURES_LIBRARIES} 
+    ${PCL_VISUALIZATION_LIBRARIES} ${PCL_RECOGNITION_LIBRARIES} libregistration.so)
+endif()
