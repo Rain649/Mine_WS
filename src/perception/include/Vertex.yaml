@@ -1,50 +1,838 @@
-- index: 1
-  position: [-356, -24.9, 156]
-  adjacent_index: [1, 3]
-  cluster_number: 3
-  peak_number: 2
-  search_radius: 8
-
-# - index: 2
-#   position: [-478, -13.5, 180]
-#   adjacent_index: [1, 2, 3]
-#   cluster_number: 4
-#   peak_number: 2
-#   search_radius: 8
-
-- index: 3
-  position: [-529, -4.81, 198]
-  adjacent_index: [1, 3, 4, 7]
-  cluster_number: 5
-  peak_number: 5
-  search_radius: 8
-
-- index: 4
-  position: [-644, 13.6, 241]
-  adjacent_index: [3, 4, 5]
-  cluster_number: 3
-  peak_number: 3
-  search_radius: 8
-
-- index: 5
-  position: [-633, 19.1, 274]
-  adjacent_index: [4, 5, 6]
-  cluster_number: 4
-  peak_number: 3
-  search_radius: 8
-
-- index: 6
-  position: [-576, 8.64, 255]
-  adjacent_index: [5, 6, 7]
-  cluster_number: 4
-  peak_number: 2
-  search_radius: 8
-
-- index: 7
-  position: [-536, 0.746, 237]
-  adjacent_index: [3, 6, 7]
-  cluster_number: 4
-  peak_number: 2
-  search_radius: 8
-
+# # -----template-----
+# - vertex_id: 1
+#   # number of linked edges
+#   branch_numbers: 2
+#   # the edge that may come into this vertex
+#   entranceEdge: 
+#     -entranceEdge_id: 2
+#       angle: 0
+#       # the edge that this edge may transfer to
+#       accessEdge:
+#         -accessEdge_id: 1
+#           # the lanes that can be tranferred to
+#           accessLanes:
+#             -accessLane_id: 1
+#               # the lanes that can be tranferred from
+#               fromLanes: 
+#                 -fromLane_id: 1
+#                   inPoint: [0, 0]
+#                   outPoint: [0, 0]
+#                   path:
+#                     -point: [0, 0]
+#                     -point: [0, 0]
+#                     -point: [0, 0]
+# # -----template-----
   
+- vertex_id: 1
+  # number of linked edges
+  branch_numbers: 2
+  # the edge that may come into this vertex
+  entranceEdge: 
+    -entranceEdge_id: 2
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 1
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+
+- vertex_id: 2
+  # number of linked edges
+  branch_numbers: 4
+  # the edge that may come into this vertex
+  entranceEdge: 
+    -entranceEdge_id: 1
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 2
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 3
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 4
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+    -entranceEdge_id: 5
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 2
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 3
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 4
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+    -entranceEdge_id: 6
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 2
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 3
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 4
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+
+- vertex_id: 3
+  # number of linked edges
+  branch_numbers: 2
+  # the edge that may come into this vertex
+  entranceEdge: 
+    -entranceEdge_id: 3
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 5
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 7
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+    -entranceEdge_id: 8
+      angle: 0
+      # the edge that this edge may transfer to
+        -accessEdge_id: 5
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 7
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+  -entranceEdge_id: 6
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 2
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 3
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 4
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+
+- vertex_id: 4
+  # number of linked edges
+  branch_numbers: 3
+  # the edge that may come into this vertex
+  entranceEdge: 
+    -entranceEdge_id: 7
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 8
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 9
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+    -entranceEdge_id: 10
+      angle: 0
+      # the edge that this edge may transfer to
+        -accessEdge_id: 8
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 9
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+
+- vertex_id: 5
+  # number of linked edges
+  branch_numbers: 3
+  # the edge that may come into this vertex
+  entranceEdge: 
+    -entranceEdge_id: 9
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 10
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 11
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+    -entranceEdge_id: 12
+      angle: 0
+      # the edge that this edge may transfer to
+        -accessEdge_id: 10
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 11
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+
+- vertex_id: 6
+  # number of linked edges
+  branch_numbers: 3
+  # the edge that may come into this vertex
+  entranceEdge: 
+    -entranceEdge_id: 4
+      angle: 0
+      # the edge that this edge may transfer to
+      accessEdge:
+        -accessEdge_id: 6
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 12
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+    -entranceEdge_id: 11
+      angle: 0
+      # the edge that this edge may transfer to
+        -accessEdge_id: 6
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+        -accessEdge_id: 12
+          # the lanes that can be tranferred to
+          accessLanes:
+            -accessLane_id: 1
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 1
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+            -accessLane_id: 2
+              # the lanes that can be tranferred from
+              fromLanes: 
+                -fromLane_id: 2
+                  inPoint: [0, 0]
+                  outPoint: [0, 0]
+                  path:
+                    -point: [0, 0]
+                    -point: [0, 0]
+                    -point: [0, 0]
+
+
+
+
+
+# begin_angle指路段开始处角度
+# end_angle指路段末端处角度
+# - id: 1
+#   link:
+#     - link_index: 2
+#       begin_angle: 0
+#       end_angle: -70
+
+# - id: 2
+#   link:
+#     - link_index: 3
+#       begin_angle: 0
+#       end_angle: -40
+
+#     - link_index: 6
+#       begin_angle: 0
+#       end_angle: 0
+
+# - id: 3
+#   link:
+#     - link_index: 4
+#       begin_angle: 0
+#       end_angle: 20
+
+# - id: 4
+#   link:
+#     - link_index: 5
+#       begin_angle: 0
+#       end_angle: 140
+
+# - id: 5
+#   link:
+#     - link_index: 6
+#       begin_angle: 0
+#       end_angle: 140
+
+# - id: 6
+#   link:
+
+# - vertex_id: 2
+#   branch_numbers: 4
+#   entranceEdge: [1, 2, 3, 6]
+
+# - vertex_id: 3
+#   branch_numbers: 2
+#   entranceEdge: [2, 3, 4]
+
+# - vertex_id: 4
+#   branch_numbers: 3
+#   entranceEdge: [3, 4, 5]
+
+# - vertex_id: 5
+#   branch_numbers: 3
+#   entranceEdge: [4, 5, 6]
+
+# - vertex_id: 6
+#   branch_numbers: 3
+#   entranceEdge: [2, 5, 6]
