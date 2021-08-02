@@ -40,34 +40,45 @@ struct Edge
 
 struct FromLane
 {
-
     int id;
     position inPoint;
     position outPoint;
     std::vector<position> path;
 
+    FromLane() {}
     FromLane(int fromLane_id) : id(fromLane_id) {}
     FromLane(int fromLane_id, position inPoint, position outPoint, std::vector<position> path) : id(fromLane_id), inPoint(inPoint), outPoint(outPoint), path(path) {}
 };
 
 struct AccessLane
 {
-
     int id;
     std::unordered_map<int, FromLane> fromLanes_Umap;
 
+    AccessLane() {}
     AccessLane(int accessLane_id) : id(accessLane_id) {}
     AccessLane(int accessLane_id, std::unordered_map<int, FromLane> fromLanes_Umap) : id(accessLane_id), fromLanes_Umap(fromLanes_Umap) {}
 };
 
 struct AccessEdge
 {
-
     int id;
     std::unordered_map<int, AccessLane> accessLanes_Umap;
 
+    AccessEdge() {}
     AccessEdge(int accessEdge_id) : id(accessEdge_id) {}
     AccessEdge(int accessEdge_id, std::unordered_map<int, AccessLane> accessLanes_Umap) : id(accessEdge_id), accessLanes_Umap(accessLanes_Umap) {}
+};
+
+struct EntranceEdge
+{
+    int id;
+    double angle;
+    std::unordered_map<int, AccessEdge> accessEdges_Umap;
+
+    EntranceEdge() {}
+    EntranceEdge(int entranceEdge_id) : id(entranceEdge_id) {}
+    EntranceEdge(int entranceEdge_id, double angle, std::unordered_map<int, AccessEdge> accessEdges_Umap) : id(entranceEdge_id), angle(angle), accessEdges_Umap(accessEdges_Umap) {}
 };
 
 struct Vertex
@@ -75,15 +86,15 @@ struct Vertex
 
     int id;
     int branch_num;
-    std::unordered_map<int, AccessEdge> accessEdge_Umap;
+    std::unordered_map<int, EntranceEdge> entranceEdge_Umap;
 
+    Vertex() {}
     Vertex(int vetex_id) : id(vetex_id) {}
-    Vertex(int vetex_id, int branch_num, std::unordered_map<int, AccessEdge> accessEdge_Umap) : id(vetex_id), branch_num(branch_num), accessEdge_Umap(accessEdge_Umap) {}
+    Vertex(int vetex_id, int branch_num, std::unordered_map<int, EntranceEdge> entranceEdge_Umap) : id(vetex_id), branch_num(branch_num), entranceEdge_Umap(entranceEdge_Umap) {}
 };
 
 struct TopoMap
 {
-
     std::unordered_map<int, Vertex> vertex_Umap;
     std::unordered_map<int, Edge> edge_Umap;
 

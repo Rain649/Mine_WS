@@ -3,11 +3,11 @@
 #   # number of linked edges
 #   branch_numbers: 2
 #   # the edge that may come into this vertex
-#   entranceEdge:
+#   entranceEdges:
 #    - entranceEdge_id: 2
 #      angle: 0
 #      # the edge that this edge may transfer to
-#      accessEdge:
+#      accessEdges:
 #       - accessEdge_id: 1
 #         # the lanes that can be tranferred to
 #         accessLanes:
@@ -27,11 +27,11 @@
   # number of linked edges
   branch_numbers: 2
   # the edge that may come into this vertex
-  entranceEdge:
+  entranceEdges:
    - entranceEdge_id: 2
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 1
         # the lanes that can be tranferred to
         accessLanes:
@@ -60,11 +60,11 @@
   # number of linked edges
   branch_numbers: 4
   # the edge that may come into this vertex
-  entranceEdge:
+  entranceEdges:
    - entranceEdge_id: 1
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 2
         # the lanes that can be tranferred to
         accessLanes:
@@ -137,7 +137,7 @@
    - entranceEdge_id: 5
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 2
         # the lanes that can be tranferred to
         accessLanes:
@@ -210,7 +210,7 @@
    - entranceEdge_id: 6
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 2
         # the lanes that can be tranferred to
         accessLanes:
@@ -285,11 +285,11 @@
   # number of linked edges
   branch_numbers: 2
   # the edge that may come into this vertex
-  entranceEdge:
+  entranceEdges:
    - entranceEdge_id: 3
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 5
         # the lanes that can be tranferred to
         accessLanes:
@@ -339,7 +339,7 @@
    - entranceEdge_id: 8
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 5
         # the lanes that can be tranferred to
         accessLanes:
@@ -389,7 +389,7 @@
    - entranceEdge_id: 6
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 2
         # the lanes that can be tranferred to
         accessLanes:
@@ -464,11 +464,11 @@
   # number of linked edges
   branch_numbers: 3
   # the edge that may come into this vertex
-  entranceEdge:
+  entranceEdges:
    - entranceEdge_id: 7
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 8
         # the lanes that can be tranferred to
         accessLanes:
@@ -518,7 +518,7 @@
    - entranceEdge_id: 10
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 8
         # the lanes that can be tranferred to
         accessLanes:
@@ -570,11 +570,11 @@
   # number of linked edges
   branch_numbers: 3
   # the edge that may come into this vertex
-  entranceEdge:
+  entranceEdges:
    - entranceEdge_id: 9
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 10
         # the lanes that can be tranferred to
         accessLanes:
@@ -624,7 +624,7 @@
    - entranceEdge_id: 12
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 10
         # the lanes that can be tranferred to
         accessLanes:
@@ -676,11 +676,11 @@
   # number of linked edges
   branch_numbers: 3
   # the edge that may come into this vertex
-  entranceEdge:
+  entranceEdges:
    - entranceEdge_id: 4
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 6
         # the lanes that can be tranferred to
         accessLanes:
@@ -730,7 +730,7 @@
    - entranceEdge_id: 11
      angle: 0
      # the edge that this edge may transfer to
-     accessEdge:
+     accessEdges:
       - accessEdge_id: 6
         # the lanes that can be tranferred to
         accessLanes:
@@ -818,20 +818,20 @@
 
 # - vertex_id: 2
 #   branch_numbers: 4
-#   entranceEdge: [1, 2, 3, 6]
+#   entranceEdges: [1, 2, 3, 6]
 
 # - vertex_id: 3
 #   branch_numbers: 2
-#   entranceEdge: [2, 3, 4]
+#   entranceEdges: [2, 3, 4]
 
 # - vertex_id: 4
 #   branch_numbers: 3
-#   entranceEdge: [3, 4, 5]
+#   entranceEdges: [3, 4, 5]
 
 # - vertex_id: 5
 #   branch_numbers: 3
-#   entranceEdge: [4, 5, 6]
+#   entranceEdges: [4, 5, 6]
 
 # - vertex_id: 6
 #   branch_numbers: 3
-#   entranceEdge: [2, 5, 6]
+#   entranceEdges: [2, 5, 6]
