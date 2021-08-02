@@ -15,25 +15,66 @@
 // topoMap Classes
 #include "topoMap.cpp"
 
+// now the extraction operators for these types
+void operator>>(const YAML::Node &node, Lane &l)
+{
+    l.id = node["lane_id"].as<int>();
+    l.offset = node["offset"].as<double>();
+    l.width = node["width"].as<double>();
+    l.length = node["length"].as<double>();
+}
+
+void operator>>(const YAML::Node &node, Edge &e)
+{
+    e.id = node["id"].as<int>();
+    e.entranceVertex_id = node["entranceVertex_id"].as<int>();
+    e.exitVertex_id = node["exitVertex_id"].as<int>();
+    const YAML::Node &lanes = node["lanes"];
+    for (unsigned i = 0; i < lanes.size(); ++i)
+    {
+        Lane lane;
+        lanes[i] >> lane;
+        e.lanes_Umap.insert(std::pair<int, Lane>(lane.id, lane));
+    }
+}
+void operator>>(const YAML::Node &node, position &p)
+{
+    p.x = node[0].as<double>();
+    p.y = node[1].as<double>();
+}
+
+// end
+
 void loadMap(std::string vertexFilePath, std::string edgeFilePath)
 // TopoMap loadMap(std::string vertexFilePath, std::string edgeFilePath)
 {
     TopoMap m;
-    // #pragma omp parallel sections
+    std::cout << "Read Vertex Data from " << vertexFilePath << std::endl;
+    std::cout << "Read Edge Data from " << edgeFilePath << std::endl;
+#pragma omp parallel sections
     {
-        // #pragma omp section
+#pragma omp section
         {
-            std::cout << "-------------Read Vertex Data-------------" << std::endl;
             YAML::Node vertex_YN = YAML::LoadFile(vertexFilePath);
-            std::cout << "Read Vertex Data from " << vertexFilePath << std::endl;
+            // for (unsigned i = 0; i < vertex_YN.size(); i++)
+            // {
+            //     Monster monster;
+            //     doc[i] >> monster;
+            //     std::cout << monster.name << "\n";
+            // }
         }
-        // #pragma omp section
+#pragma omp section
         {
-            std::cout << "-------------Read Edge Data-------------" << std::endl;
             YAML::Node edge_YN = YAML::LoadFile(edgeFilePath);
-            std::cout << "Read Edge Data from " << edgeFilePath << std::endl;
+            for (unsigned i = 0; i < edge_YN.size(); ++i)
+            {
+                Edge edge;
+                edge_YN[i] >> edge;
+                std::cout << edge.id << std::endl;
+            }
         }
     }
 
+    std::cout << "-------------Read Complete-------------" << std::endl;
     // return m;
 }

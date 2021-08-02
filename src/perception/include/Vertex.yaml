@@ -4,23 +4,23 @@
 #   branch_numbers: 2
 #   # the edge that may come into this vertex
 #   entranceEdge:
-#     - entranceEdge_id: 2
-#       angle: 0
-#       # the edge that this edge may transfer to
-#       accessEdge:
-#         - accessEdge_id: 1
-#           # the lanes that can be tranferred to
-#           accessLanes:
-#             - accessLane_id: 1
-#               # the lanes that can be tranferred from
-#               fromLanes:
-#                 - fromLane_id: 1
-#                   inPoint: [0, 0]
-#                   outPoint: [0, 0]
-#                   path:
-#                     - point: [0, 0]
-#                     - point: [0, 0]
-#                     - point: [0, 0]
+#    - entranceEdge_id: 2
+#      angle: 0
+#      # the edge that this edge may transfer to
+#      accessEdge:
+#       - accessEdge_id: 1
+#         # the lanes that can be tranferred to
+#         accessLanes:
+#          - accessLane_id: 1
+#            # the lanes that can be tranferred from
+#            fromLanes:
+#             - fromLane_id: 1
+#               inPoint: [0, 0]
+#               outPoint: [0, 0]
+#               path:
+#                - point: [0, 0]
+#                - point: [0, 0]
+#                - point: [0, 0]
 # # - - - - - template- - - - -
 
 - vertex_id: 1
