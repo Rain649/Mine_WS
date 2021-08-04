@@ -75,9 +75,8 @@ private:
     tf::TransformBroadcaster tfBroadcaster;
     tf::StampedTransform fixedTrans;
 
-    pcl::PointXYZI ExistPoint;
     pcl::PointXYZI nanPoint;
-    pcl::PointXYZI thisKeyPoint;
+    pcl::PointXYZI egoPoint;
     pcl::PointCloud<pcl::PointXYZI>::Ptr laserOrigin_Cloud;
     pcl::PointCloud<pcl::PointXYZI>::Ptr outlierRemove_Cloud;
     pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudNewTFDS;
@@ -90,7 +89,7 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_5;
-    pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter;
+    // pcl::VoxelGrid<pcl::PointXYZI> downSizeFilter;
     pcl::StatisticalOutlierRemoval<pcl::PointXYZI> cloud_after_StatisticalRemoval; //统计滤波
     pcl::ConditionAnd<pcl::PointXYZI>::Ptr longitudinal_Condition;                 //条件滤波
     pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition;                       //条件滤波
@@ -120,7 +119,7 @@ private:
     ros::Publisher pubCluster_5;
 
 public:
-    Detection() : nh()
+    Detection() : nh("~")
     {
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_ma", 1, &Detection::laserCloudNewHandler, this);
 
@@ -151,7 +150,7 @@ public:
         intersectionDetected.data = false;
         intersectionVerified.data = false;
 
-        downSizeFilter.setLeafSize(0.5, 0.5, 0.5);
+        // downSizeFilter.setLeafSize(0.5, 0.5, 0.5);
 
         //设置特性
         plotter->setShowLegend(true);
@@ -159,9 +158,9 @@ public:
         plotter->setYTitle("Distance");
         plotter->setXRange(0, Horizon_SCAN);
 
-        for (int i = 0; i < Horizon_SCAN; i++)
+        for (int i = 0; i < Horizon_SCAN; ++i)
         {
-            Cols[i] = i + 1;
+            Cols[i] = i;
         }
 
         laser_Lane.header.frame_id = Edge_Lane.header.frame_id = circle_Lane.header.frame_id = "base_link";
@@ -186,7 +185,7 @@ public:
         circle_Lane.color.g = 1.0;
         circle_Lane.color.a = 1.0;
 
-        thisKeyPoint.x = thisKeyPoint.y = thisKeyPoint.z = thisKeyPoint.intensity = 0;
+        egoPoint.x = egoPoint.y = egoPoint.z = egoPoint.intensity = 0;
 
         allocateMemory();
     }
@@ -315,10 +314,10 @@ public:
     void laser_Visualizaton()
     {
         /*求雷达每列最大距离*/
-        for (int columnIdn = 0; columnIdn < Horizon_SCAN; columnIdn++)
+        for (int columnIdn = 0; columnIdn < Horizon_SCAN; ++columnIdn)
         {
             int max_Index = -1;
-            for (int rowIdn = 0; rowIdn < N_SCAN; rowIdn++)
+            for (int rowIdn = 0; rowIdn < N_SCAN; ++rowIdn)
             {
                 int index = columnIdn + rowIdn * Horizon_SCAN;
                 double distance = sqrt(pow(cloudWithInfo->points[index].x, 2) + pow(cloudWithInfo->points[index].y, 2));
@@ -338,11 +337,11 @@ public:
         if (medianFilter_Bool)
         {
             double beam_Distance_0[Horizon_SCAN];
-            for (int i = 0; i < Horizon_SCAN; i++)
+            for (int i = 0; i < Horizon_SCAN; ++i)
             {
                 std::vector<double> beamNeighbor_Vec;
                 int k = 0;
-                for (int j = -median_Size; j <= median_Size; j++)
+                for (int j = -median_Size; j <= median_Size; ++j)
                 {
                     int index = i + j;
                     if (index < 0)
@@ -358,7 +357,7 @@ public:
                 beam_Distance_0[i] = beamNeighbor_Vec[(int)median_Coefficient * (median_Size - 1)];
             }
 
-            for (int i = 0; i < Horizon_SCAN; i++)
+            for (int i = 0; i < Horizon_SCAN; ++i)
             {
                 beamDistance_Vec[i] = beam_Distance_0[i];
             }
@@ -367,14 +366,8 @@ public:
         }
         /*中值滤波（实际用为扩张）*/
 
-        //进行中心点的计算
-        if (true)
-        {
-            // for()
-        }
-
         /*laser可视化处理*/
-        for (int columnIdn = 0; columnIdn < Horizon_SCAN; columnIdn++)
+        for (int columnIdn = 0; columnIdn < Horizon_SCAN; ++columnIdn)
         {
             if (index_Array[columnIdn] == 0)
                 continue;
@@ -396,7 +389,7 @@ public:
         //距离阈值可视化
         circle_Lane.points.clear();
         circle_Lane.header.stamp = laser_Lane.header.stamp;
-        for (int i = 0; i < 360; i++)
+        for (int i = 0; i < 360; ++i)
         {
             geometry_msgs::Point circle;
             circle.x = distance_Thre * cos(i / 2 / M_PI);
@@ -439,7 +432,7 @@ public:
         int Cols_plot[sizeOfBeamInvalid];
         double Distance_plot[sizeOfBeamInvalid];
         int i_plot = 0;
-        for (std::vector<std::pair<int, double>>::iterator itr = beam_Invalid.begin(); itr != beam_Invalid.end(); itr++)
+        for (std::vector<std::pair<int, double>>::iterator itr = beam_Invalid.begin(); itr != beam_Invalid.end(); ++itr)
         {
             Cols_plot[i_plot] = itr->first;
             Distance_plot[i_plot++] = itr->second;
@@ -448,12 +441,12 @@ public:
 
         /*路口数量检测*/
         int numOfEdgeLaser = 0;
-        for (int i_left = 0; i_left < sizeOfBeamInvalid; i_left++)
+        for (int i_left = 0; i_left < sizeOfBeamInvalid; ++i_left)
         {
             //跳过最初相位的波峰
             if (i_left == 0)
                 while (Distance_plot[i_left] > distance_Thre)
-                    i_left++;
+                    ++i_left;
 
             int i_neighbor = i_left + 1;
             if (i_neighbor >= sizeOfBeamInvalid)
@@ -505,7 +498,7 @@ public:
                                 endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_right]]].z;
                                 Edge_Lane.points.push_back(endPoint);
 
-                                numOfEdgeLaser++;
+                                ++numOfEdgeLaser;
                             }
 
                             if (index_Array[Cols_plot[i_neighbor]])
@@ -536,11 +529,11 @@ public:
                                 endPoint.z = cloudWithInfo->points[index_Array[Cols_plot[i_right_neighbor]]].z;
                                 Edge_Lane.points.push_back(endPoint);
 
-                                numOfEdgeLaser++;
+                                ++numOfEdgeLaser;
                             }
 
                             //统计路口数量
-                            peak_Num.data++;
+                            ++peak_Num.data;
 
                             //完成一个周期，跳出本次循环
                             if (i_left < i_right)
@@ -552,7 +545,7 @@ public:
                     }
 
                     //右边界索引迭代，计算右边界与左边界水平索引差值
-                    i_right++;
+                    ++i_right;
                     if (i_right == sizeOfBeamInvalid)
                         i_right = 0;
                     colIndexMinus = Cols_plot[i_right] - Cols_plot[i_left];
@@ -581,7 +574,7 @@ public:
         /*排除检测为岔道线的最大光束距离*/
         if (startEnd_Vec.size() == 0)
             return;
-        for (std::vector<std::pair<int, int>>::iterator itr = startEnd_Vec.begin(); itr != startEnd_Vec.end(); itr++)
+        for (std::vector<std::pair<int, int>>::iterator itr = startEnd_Vec.begin(); itr != startEnd_Vec.end(); ++itr)
         {
             double thisMin = 20.0;
             std::vector<std::pair<int, int>>::iterator itr_front;
@@ -597,7 +590,7 @@ public:
 
             if (itr->first < itr_front->second)
             {
-                for (int i = 0; i < sizeOfBeamInvalid; i++)
+                for (int i = 0; i < sizeOfBeamInvalid; ++i)
                 {
                     if (i == itr->first)
                         i = itr_front->second;
@@ -613,7 +606,7 @@ public:
             }
             else
             {
-                for (int i = itr_front->second; i < itr->first; i++)
+                for (int i = itr_front->second; i < itr->first; ++i)
                 {
                     double thisDistance = Distance_plot[i];
                     if (thisMin > 20)
@@ -649,7 +642,7 @@ public:
             pcl::PassThrough<pcl::PointXYZI> pass;
             pass.setInputCloud(cloudWithInfo);
             pass.setFilterFieldName("intensity");
-            pass.setFilterLimits(0, 999999);
+            pass.setFilterLimits(0, INT_MAX);
             pass.setFilterLimitsNegative(false);
             pass.filter(*cloudWithInfo);
 
@@ -665,7 +658,7 @@ public:
         std::vector<int> pointIdxRadiusSearch;         //保存每个近邻点的索引
         std::vector<float> pointRadiusSquaredDistance; //保存每个近邻点与查找点之间的欧式距离平方
 
-        if (kdtree.radiusSearch(thisKeyPoint, segmentationRadius, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
+        if (kdtree.radiusSearch(egoPoint, segmentationRadius, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
         {
             ROS_ERROR("There is no point nearby !!!");
             return;
@@ -868,7 +861,7 @@ public:
             tfBroadcaster.sendTransform(fixedTrans);
 
             std_msgs::Float32MultiArray beam_Dis;
-            for (int i = 0; i < Horizon_SCAN; i++)
+            for (int i = 0; i < Horizon_SCAN; ++i)
             {
                 beam_Dis.data.push_back(beamDistance_Vec[i]);
             }

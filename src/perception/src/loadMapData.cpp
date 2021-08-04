@@ -109,8 +109,7 @@ void operator>>(const YAML::Node &node, Vertex &v)
 }
 // end
 
-void loadMap(std::string vertexFilePath, std::string edgeFilePath)
-// TopoMap loadMap(std::string vertexFilePath, std::string edgeFilePath)
+TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath)
 {
     std::unordered_map<int, Vertex> vertex_Umap;
     std::unordered_map<int, Edge> edge_Umap;
@@ -144,5 +143,5 @@ void loadMap(std::string vertexFilePath, std::string edgeFilePath)
     TopoMap m(vertex_Umap, edge_Umap);
 
     std::cout << "-------------Read Complete-------------" << std::endl;
-    // return m;
+    return m;
 }

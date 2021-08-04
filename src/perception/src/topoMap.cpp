@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
+//construct topoMap
 struct position
 {
     float x, y;
@@ -102,3 +103,17 @@ struct TopoMap
     TopoMap(std::unordered_map<int, Vertex> vertex_Umap,
             std::unordered_map<int, Edge> edge_Umap) : vertex_Umap(vertex_Umap), edge_Umap(edge_Umap) {}
 };
+//construct topoMap end
+
+//search the path
+void searchPath(const int &beginningVertex_id, const int &entranceEdge_id, const int &end_id, const TopoMap &topoMap)
+{
+    Vertex currentVertex;
+    EntranceEdge currentEntranceEdge;
+    double currentEntranceAngle;
+
+    currentVertex = topoMap.vertex_Umap.at(beginningVertex_id);
+    currentEntranceEdge = currentVertex.entranceEdge_Umap.at(entranceEdge_id);
+    currentEntranceAngle = currentEntranceEdge.angle;
+}
+//search the path end
