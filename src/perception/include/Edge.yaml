@@ -1,179 +1,73 @@
-#排序：每个Vertex的lane先出后入
+#顺序：按1.entrance_id；2.exit_id 排序
 
-# - name: Ogre
-#   position: [0, 5, 0]
-#   powers:
-#    - name: Club
-#      damage: 10
-#    - name: Fist
-#      damage: 8
-# - name: Dragon
-#   position: [1, 0, 10]
-#   powers:
-#    - name: Fire Breath
-#      damage: 25
-#    - name: Claws
-#      damage: 15
-# - name: Wizard
-#   position: [5, -3, 0]
-#   powers:
-#    - name: Acid Rain
-#      damage: 50
-#    - name: Staff
-#      damage: 3
-
-- id: 1
+- edge_id: 1
   entranceVertex_id: 1
   exitVertex_id: 2
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 2
+- edge_id: 2
   entranceVertex_id: 2
   exitVertex_id: 1
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 3
+- edge_id: 3
   entranceVertex_id: 2
   exitVertex_id: 3
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 4
+- edge_id: 4
   entranceVertex_id: 2
   exitVertex_id: 6
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 5
+- edge_id: 5
   entranceVertex_id: 3
   exitVertex_id: 2
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 6
-  entranceVertex_id: 6
-  exitVertex_id: 2
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
-
-- id: 7
+- edge_id: 6
   entranceVertex_id: 3
   exitVertex_id: 4
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 8
+- edge_id: 7
   entranceVertex_id: 4
   exitVertex_id: 3
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 9
+- edge_id: 8
   entranceVertex_id: 4
   exitVertex_id: 5
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 10
+- edge_id: 9
   entranceVertex_id: 5
   exitVertex_id: 4
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 11
+- edge_id: 10
   entranceVertex_id: 5
   exitVertex_id: 6
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20
 
-- id: 12
+- edge_id: 11
+  entranceVertex_id: 6
+  exitVertex_id: 2
+  width: 3
+  length: 20
+
+- edge_id: 12
   entranceVertex_id: 6
   exitVertex_id: 5
-  lanes:
-   - lane_id: 1
-     offset: 0.75
-     width: 1.5
-     length: 20
-   - lane_id: 2
-     offset: 1.25
-     width: 1.5
-     length: 20
+  width: 3
+  length: 20

@@ -69,7 +69,9 @@
         "memory": "cpp",
         "memory_resource": "cpp",
         "optional": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "variant": "cpp",
+        "bit": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

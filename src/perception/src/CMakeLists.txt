@@ -7,12 +7,12 @@ project(Point_Cloud_Registration)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-# set(HEADER_DIR ${PROJECT_SOURCE_DIR}/include)
-# set(HEADER_FILES ${HEADER_DIR}/types.hpp ${HEADER_DIR}/util.hpp ${HEADER_DIR}/Visualizer.hpp ${HEADER_DIR}/Registrator.hpp ${HEADER_DIR}/hsvrgb.hpp)
+set(HEADER_DIR /home/lsj/dev/Mine_WS/src/perception/include)
+set(HEADER_FILES /home/lsj/dev/Mine_WS/src/perception/include/topoMap.h)
 
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR})
-set(SOURCE_FILES ${SOURCE_DIR}/main.cpp )
-# set(SOURCE_FILES ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/loadMapData.cpp ${SOURCE_DIR}/topoMap.cpp )
+# set(SOURCE_FILES ${SOURCE_DIR}/main.cpp )
+set(SOURCE_FILES ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/loadMapData.cpp ${SOURCE_DIR}/topoMap.cpp)
 
 find_package(PCL 1.7 REQUIRED COMPONENTS common io kdtree features visualization recognition)
 
@@ -31,14 +31,12 @@ if(PCL_FOUND)
 	message("PCL found")
 
 	include_directories(${PCL_INCLUDE_DIRS})
-	# include_directories(${HEADER_DIR})
+	include_directories(${HEADER_DIR})
     # link_directories("/home/lsj/dev/Mine_WS/src/registration/test/lib")
 	
 	add_definitions(${PCL_DEFINITIONS})
 
-	add_executable(main ${SOURCE_FILES} )
-
-	# add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
+	add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
 
     target_link_libraries(main ${PCL_LIBRARIES} yaml-cpp)
 endif()
