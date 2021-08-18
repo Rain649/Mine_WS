@@ -123,33 +123,6 @@ main/fast:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
-loadMapData.o: loadMapData.cpp.o
-
-.PHONY : loadMapData.o
-
-# target to build an object file
-loadMapData.cpp.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/loadMapData.cpp.o
-.PHONY : loadMapData.cpp.o
-
-loadMapData.i: loadMapData.cpp.i
-
-.PHONY : loadMapData.i
-
-# target to preprocess a source file
-loadMapData.cpp.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/loadMapData.cpp.i
-.PHONY : loadMapData.cpp.i
-
-loadMapData.s: loadMapData.cpp.s
-
-.PHONY : loadMapData.s
-
-# target to generate assembly for a file
-loadMapData.cpp.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/loadMapData.cpp.s
-.PHONY : loadMapData.cpp.s
-
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -213,9 +186,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... main"
-	@echo "... loadMapData.o"
-	@echo "... loadMapData.i"
-	@echo "... loadMapData.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

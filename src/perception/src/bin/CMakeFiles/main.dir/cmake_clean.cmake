@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/main.dir/loadMapData.cpp.o"
   "CMakeFiles/main.dir/main.cpp.o"
   "CMakeFiles/main.dir/topoMap.cpp.o"
   "main"

@@ -1,8 +1,16 @@
-#pragma once
+// #pragma once
+
+#ifndef TopoMap_H
+#define TopoMap_H
 
 #include <vector>
 #include <unordered_map>
-
+#include <iostream>
+#include <stdio.h>
+#include <fstream>
+#include <string>
+#include <omp.h>
+#include <yaml-cpp/yaml.h>
 namespace perception
 {
     ///* Define link information
@@ -61,3 +69,11 @@ public:
     TopoMap() {}
     TopoMap(std::unordered_map<int, perception::Vertex> _vertex_Umap, std::unordered_map<int, perception::Edge> _edge_Umap) : vertex_Umap(_vertex_Umap), edge_Umap(_edge_Umap) {}
 };
+
+void operator>>(const YAML::Node &node, perception::LinkedInfo &lI);
+void operator>>(const YAML::Node &node, perception::Vertex &v);
+void operator>>(const YAML::Node &node, perception::Edge &e);
+
+TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath);
+
+#endif
