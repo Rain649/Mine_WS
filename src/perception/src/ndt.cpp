@@ -126,6 +126,8 @@ int main(int argc, char **argv)
   //使用创建的变换对未过滤的输入点云进行变换
   //ndt.getFinalTransformation (）即最终变换
   Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+  std::cout << "Here is the matrix m:\n"
+            << transformation << std::endl;
   pcl::transformPointCloud(*output_cloud1, *output_cloud, transformation);
   Eigen::Matrix3f transformation_3f;
   for (int i = 0; i < 3; ++i)
