@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(perception)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")
 
 find_package(catkin REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
@@ -109,6 +109,6 @@ target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 #   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp
 # )
 
-# add_executable(ndt src/ndt.cpp)
-# add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
+add_executable(ndt src/ndt.cpp)
+add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
