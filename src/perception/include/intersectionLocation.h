@@ -8,23 +8,7 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
-// void range_filter(pcl::PointCloud<pcl::PointXYZ> & input_cloud, pcl::PointCloud<pcl::PointXYZ> & output_cloud,const float & min_scan_range_, const float min_z)
-// {
-//     double r;
-//     pcl::PointXYZ p ;
-//     for (pcl::PointCloud<pcl::PointXYZ>::const_iterator item = input_cloud.begin();
-//         item != input_cloud.end(); ++item)
-//     {
-//         p.x = (double) item->x;
-//         p.y = (double) item->y;
-//         p.z = (double) item->z;
-//         r = p.x * p.x + p.y * p.y;
-//         if (r > min_scan_range_&&p.z >min_z) //filter the point distance lager than min_scan_range and height lower than min_z
-//         {
-//             output_cloud.push_back(p);
-//         }
-//     }
-// }
+void range_filter(pcl::PointCloud<pcl::PointXYZ> & input_cloud, pcl::PointCloud<pcl::PointXYZ> & output_cloud,const float & min_scan_range_, const float min_z);
 
 /**
  * intersectionLocation gets the pose of vehicle at intersections

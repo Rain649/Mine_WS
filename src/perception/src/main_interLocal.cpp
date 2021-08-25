@@ -2,6 +2,9 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <mutex>
+#include <thread>
+#include <chrono>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/pcl_visualizer.h>
@@ -9,6 +12,19 @@
 #include <yaml-cpp/yaml.h>
 
 #include "intersectionLocation.h"
+
+std::mutex mtx;
+
+void visual(pcl::visualization::PCLVisualizer &viewer)
+{
+    while (!viewer.wasStopped())
+    {
+        mtx.lock();
+        viewer.spinOnce(10);
+        mtx.unlock();
+    }
+    return;
+}
 
 int main()
 {
@@ -20,10 +36,11 @@ int main()
     float y = config["y"].as<float>();
     std::string test1File = config["test1File"].as<std::string>();
     std::string test2File = config["test2File"].as<std::string>();
-    static float yaw_pre = config["yaw_pre"].as<float>() * M_PI / 180;
-    static float x_pre = config["x_pre"].as<float>();
-    static float y_pre = config["y_pre"].as<float>();
+    float yaw_pre = config["yaw_pre"].as<float>() * M_PI / 180;
+    float x_pre = config["x_pre"].as<float>();
+    float y_pre = config["y_pre"].as<float>();
     /********读取数据********/
+    ///* input->target的x, y, yaw
     std::vector<float> pose{x_pre, y_pre, yaw_pre};
 
     //加载目标点云pcd
@@ -78,16 +95,21 @@ int main()
     }
 
     pcl::visualization::PCLVisualizer viewer("ndt");
+    std::thread visual_thread(visual, std::ref(viewer));
     clock_t startTime, endTime;
     startTime = clock(); //计时开始
     while (1)
+    {
+        mtx.lock();
+        viewer.removeAllPointClouds();
         intersectionLocation(pose, targetCloud_Trans, inputCloud_Trans, viewer);
+        mtx.unlock();
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
     endTime = clock(); //计时结束
     std::cout << "The run time is: " << (int)(endTime - startTime) / CLOCKS_PER_SEC << " s" << std::endl;
-    while (!viewer.wasStopped())
-    {
-        viewer.spinOnce(10);
-        boost::this_thread::sleep(boost::posix_time::seconds(0.5));
-    }
+
+    visual_thread.join();
+
     return 0;
 }
