@@ -1,20 +1,25 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O1")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -Ofast")
+# set(CMAKE_CXX_STANDARD 11)
+# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -O1")
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -w -Ofast")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2")
 
-project(Point_Cloud_Registration)
+project(ndt)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 set(HEADER_DIR /home/lsj/dev/Mine_WS/src/perception/include)
-set(HEADER_FILES ${HEADER_DIR}/topoMap.h)
+set(HEADER_FILES ${HEADER_DIR}/intersectionLocation.h)
+# set(HEADER_FILES ${HEADER_DIR}/topoMap.h)
+
 
 set(SOURCE_DIR ${PROJECT_SOURCE_DIR})
+set(SOURCE_FILES ${SOURCE_DIR}/main_interLocal.cpp ${SOURCE_DIR}/intersectionLocation.cpp)
+# set(SOURCE_FILES ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/topoMap.cpp)
 
-set(SOURCE_FILES ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/topoMap.cpp)
 
 find_package(PCL 1.7 REQUIRED COMPONENTS common io kdtree features visualization recognition)
+find_package(Eigen3 REQUIRED)
 
 option(WITH_OPENMP "WITH_OPENMP" ON)
 if(WITH_OPENMP)
@@ -27,16 +32,14 @@ if(WITH_OPENMP)
 	endif()
 endif()
 
-if(PCL_FOUND)
-	message("PCL found")
+include_directories(${PCL_INCLUDE_DIRS})
+include_directories(${HEADER_DIR})
+include_directories(${EIGEN3_INCLUDE_DIR})
+link_directories(include ${PCL_LIBRARY_DIRS})
+# link_directories("/home/lsj/dev/Mine_WS/src/registration/test/lib")
 
-	include_directories(${PCL_INCLUDE_DIRS})
-	include_directories(${HEADER_DIR})
-    # link_directories("/home/lsj/dev/Mine_WS/src/registration/test/lib")
-	
-	add_definitions(${PCL_DEFINITIONS})
+add_definitions(${PCL_DEFINITIONS})
 
-	add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
 
-    target_link_libraries(main ${PCL_LIBRARIES} yaml-cpp)
-endif()
+target_link_libraries(main ${PCL_LIBRARIES} yaml-cpp)

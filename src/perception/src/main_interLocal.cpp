@@ -80,7 +80,8 @@ int main()
     pcl::visualization::PCLVisualizer viewer("ndt");
     clock_t startTime, endTime;
     startTime = clock(); //计时开始
-    intersectionLocation(pose, target_cloud, input_cloud, viewer);
+    while (1)
+        intersectionLocation(pose, targetCloud_Trans, inputCloud_Trans, viewer);
     endTime = clock(); //计时结束
     std::cout << "The run time is: " << (int)(endTime - startTime) / CLOCKS_PER_SEC << " s" << std::endl;
     while (!viewer.wasStopped())

@@ -77,7 +77,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
       transformation_3f(i, j) = transformation(i, j);
 
   Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(0, 1, 2);
-  cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << endl;
+  std::cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << std::endl;
 
   pose[0] = transformation(0, 3);
   pose[1] = transformation(1, 3);
@@ -97,24 +97,28 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   //对目标点云着色（红色）并可视化
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
       target_color(target_cloud, 255, 0, 0);
-  viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud0", v1);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          1, "target cloud0");
-  //对转换后的目标点云着色（绿色）并可视化
+  //对转换前的输入点云着色（绿色）并可视化
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-      output_color(input_cloud, 0, 255, 0);
-  viewer.addPointCloud<pcl::PointXYZ>(input_cloud, output_color, "output cloud0", v1);
+      input_color(input_cloud, 0, 255, 0);
+  //对转换后的输入点云着色（蓝色）并可视化
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
+      output_color(output_cloud, 0, 0, 255);
+
+  viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud1", v1);
   viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          2, "output cloud0");
+                                          1, "target cloud1");
+  viewer.addPointCloud<pcl::PointXYZ>(input_cloud, input_color, "input cloud1", v1);
+  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
+                                          2, "input cloud1");
 
   //对目标点云着色（红色）并可视化
-  viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud", v2);
+  viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud2", v2);
   viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          1, "target cloud");
-  //对转换后的目标点云着色（绿色）并可视化
-  viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud", v2);
+                                          1, "target cloud2");
+  //对转换后的输入点云着色（绿色）并可视化
+  viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud2", v2);
   viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          2, "output cloud");
+                                          2, "output cloud2");
 
   return;
 }

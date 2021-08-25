@@ -1,4 +1,4 @@
-yaw: 15
+yaw: 50
 
 x: 6
 
@@ -12,20 +12,18 @@ stepSize: 0.6
 
 transformationEpsilon: 0.15
 
-# test1File: /home/lsj/dev/Mine_WS/src/perception/src/test1.pcd
+test1File: /home/lsj/dev/Mine_WS/src/perception/src/test1.pcd
 
-# test2File: /home/lsj/dev/Mine_WS/src/perception/src/test2.pcd
+test2File: /home/lsj/dev/Mine_WS/src/perception/src/test2.pcd
 
-test1File: /home/lsj/dev/Mine_WS/src/perception/src/4_whole.pcd
+# test1File: /home/lsj/dev/Mine_WS/src/perception/src/4_whole.pcd
 
-test2File: /home/lsj/dev/Mine_WS/src/perception/src/4_whole.pcd
+# test2File: /home/lsj/dev/Mine_WS/src/perception/src/4_whole.pcd
 
-yaw_pre: 30
+yaw_pre: 0
 
-x_pre: -5
+x_pre: 0
 
-y_pre: -2
+y_pre: 0
 
 menu_bool: n
-
-bol: y
