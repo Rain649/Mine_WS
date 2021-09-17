@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 generate_dynamic_reconfigure_options(
   cfg/param.cfg
   cfg/topoMap.cfg
+  cfg/simuSegSave.cfg
 )
 
 find_package(Boost COMPONENTS thread filesystem date_time system REQUIRED)
@@ -57,9 +58,9 @@ link_directories(
 #   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  ${OpenCV_LIBS}
 # )
 
-add_executable(laneDetection  src/laneDetection.cpp)
-add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+# add_executable(laneDetection  src/laneDetection.cpp)
+# add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
 # add_executable(keyPointSave
 #   src/keyPointSave.cpp
@@ -109,6 +110,10 @@ target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 #   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp
 # )
 
-add_executable(ndt src/ndt.cpp)
-add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
+# add_executable(ndt src/ndt.cpp)
+# add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
+
+add_executable(simuSegSave  src/simuSegSave.cpp)
+add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})

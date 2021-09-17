@@ -13,7 +13,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/search/kdtree.h>                 // 包含kdtree头文件
 #include <pcl/kdtree/kdtree_flann.h>           //kdtree搜索
-#include <pcl/common/transforms.h>             //	pcl::transformPointCloud 用到这个头文件
+#include <pcl/common/transforms.h>             //pcl::transformPointCloud 用到这个头文件
 #include <pcl/filters/extract_indices.h>       //按索引提取
 #include <pcl/segmentation/extract_clusters.h> //分割聚类
 #include <pcl/common/centroid.h>               //点云重心

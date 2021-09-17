@@ -1,0 +1,16 @@
+<launch>
+
+  <node name="simuSegSave" pkg="perception" type="simuSegSave" output="screen"></node>
+
+  <!-- - TF -->
+  <node pkg="tf" type="static_transform_publisher" name="base_link2vehicle_reference" args="2 0 -1 0 0 0 /base_link /vehicle_reference 10" />
+
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_gazebo)/launch/mineSimulation.rviz"/> -->
+
+  <!-- <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"></node> -->
+
+  <!-- <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot"></node> -->
+
+  <!-- <node name="rqt_logger_level" pkg="rqt_logger_level" type="rqt_logger_level"></node> -->
+
+</launch>
