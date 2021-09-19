@@ -1,9 +1,12 @@
+<?xml version="1.0"?>
 <launch>
 
-  <node name="simuSegSave" pkg="perception" type="simuSegSave" output="screen"></node>
+  <param name="use_sim_time" value="true"/>
 
   <!-- - TF -->
-  <node pkg="tf" type="static_transform_publisher" name="base_link2vehicle_reference" args="2 0 -1 0 0 0 /base_link /vehicle_reference 10" />
+  <!-- <node pkg="tf" type="static_transform_publisher" name="base_link2vehicle_reference" args="-2 0 1 0 0 0 /base_link /vehicle_reference 10" /> -->
+
+  <node name="simuSegSave" pkg="perception" type="simuSegSave" output="screen"></node>
 
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_gazebo)/launch/mineSimulation.rviz"/> -->
 
