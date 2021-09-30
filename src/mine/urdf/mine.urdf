@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<robot name="mine">
+
+  <link name="world"/>
+
+  <joint name="fixed_joint" type="fixed">
+    <parent link="world"/>
+    <child link="mine_link"/>
+  </joint>
+
+  <gazebo reference = " ine_link">
+    <material>Gazebo/Grey2</material>
+  </gazebo>
+
+  <link name="mine_link">
+    <inertial>
+      <origin xyz="130.736197522301 184.265594661978 3.93267374208958" rpy="0 0 0" />
+      <mass value="2379583143.16571" />
+      <inertia ixx="31827475003598.4" ixy="-839540214066.285" ixz="-1668866655.16839" iyy="17989781021615.5" iyz="-5758552793.67403" izz="49776763433677.5" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://mine/meshes/base_link.STL" />
+      </geometry>
+      <material name="Grey2">
+        <color rgba="0.9 0.9 0.9 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://mine/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+</robot>
