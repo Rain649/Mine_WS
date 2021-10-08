@@ -91,7 +91,7 @@ CMAKE_BUILD_TYPE:STRING=
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
 //CXX compiler
-CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/g++
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -196,7 +196,7 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=ndt
+CMAKE_PROJECT_NAME:STATIC=topomap
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -470,10 +470,10 @@ VTK_DIR:PATH=/usr/lib/cmake/vtk-6.3
 WITH_OPENMP:BOOL=ON
 
 //Value Computed by CMake
-ndt_BINARY_DIR:STATIC=/home/lsj/dev/Mine_WS/src/perception/src/bin
+topomap_BINARY_DIR:STATIC=/home/lsj/dev/Mine_WS/src/perception/src/bin
 
 //Value Computed by CMake
-ndt_SOURCE_DIR:STATIC=/home/lsj/dev/Mine_WS/src/perception/src
+topomap_SOURCE_DIR:STATIC=/home/lsj/dev/Mine_WS/src/perception/src
 
 
 ########################

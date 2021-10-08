@@ -123,59 +123,59 @@ main/fast:
 	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
-intersectionLocation.o: intersectionLocation.cpp.o
+main.o: main.cpp.o
 
-.PHONY : intersectionLocation.o
-
-# target to build an object file
-intersectionLocation.cpp.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/intersectionLocation.cpp.o
-.PHONY : intersectionLocation.cpp.o
-
-intersectionLocation.i: intersectionLocation.cpp.i
-
-.PHONY : intersectionLocation.i
-
-# target to preprocess a source file
-intersectionLocation.cpp.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/intersectionLocation.cpp.i
-.PHONY : intersectionLocation.cpp.i
-
-intersectionLocation.s: intersectionLocation.cpp.s
-
-.PHONY : intersectionLocation.s
-
-# target to generate assembly for a file
-intersectionLocation.cpp.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/intersectionLocation.cpp.s
-.PHONY : intersectionLocation.cpp.s
-
-main_interLocal.o: main_interLocal.cpp.o
-
-.PHONY : main_interLocal.o
+.PHONY : main.o
 
 # target to build an object file
-main_interLocal.cpp.o:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main_interLocal.cpp.o
-.PHONY : main_interLocal.cpp.o
+main.cpp.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.o
+.PHONY : main.cpp.o
 
-main_interLocal.i: main_interLocal.cpp.i
+main.i: main.cpp.i
 
-.PHONY : main_interLocal.i
+.PHONY : main.i
 
 # target to preprocess a source file
-main_interLocal.cpp.i:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main_interLocal.cpp.i
-.PHONY : main_interLocal.cpp.i
+main.cpp.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.i
+.PHONY : main.cpp.i
 
-main_interLocal.s: main_interLocal.cpp.s
+main.s: main.cpp.s
 
-.PHONY : main_interLocal.s
+.PHONY : main.s
 
 # target to generate assembly for a file
-main_interLocal.cpp.s:
-	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main_interLocal.cpp.s
-.PHONY : main_interLocal.cpp.s
+main.cpp.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.cpp.s
+.PHONY : main.cpp.s
+
+topoMap.o: topoMap.cpp.o
+
+.PHONY : topoMap.o
+
+# target to build an object file
+topoMap.cpp.o:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/topoMap.cpp.o
+.PHONY : topoMap.cpp.o
+
+topoMap.i: topoMap.cpp.i
+
+.PHONY : topoMap.i
+
+# target to preprocess a source file
+topoMap.cpp.i:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/topoMap.cpp.i
+.PHONY : topoMap.cpp.i
+
+topoMap.s: topoMap.cpp.s
+
+.PHONY : topoMap.s
+
+# target to generate assembly for a file
+topoMap.cpp.s:
+	$(MAKE) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/topoMap.cpp.s
+.PHONY : topoMap.cpp.s
 
 # Help Target
 help:
@@ -186,12 +186,12 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... main"
 	@echo "... edit_cache"
-	@echo "... intersectionLocation.o"
-	@echo "... intersectionLocation.i"
-	@echo "... intersectionLocation.s"
-	@echo "... main_interLocal.o"
-	@echo "... main_interLocal.i"
-	@echo "... main_interLocal.s"
+	@echo "... main.o"
+	@echo "... main.i"
+	@echo "... main.s"
+	@echo "... topoMap.o"
+	@echo "... topoMap.i"
+	@echo "... topoMap.s"
 .PHONY : help
 
 

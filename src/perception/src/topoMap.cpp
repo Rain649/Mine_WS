@@ -64,10 +64,11 @@ double TopoMap::get_cost(const int &vertex1_id, const int &vertex2_id)
 }
 
 /************Load Map************/
-TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath)
+TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath, const std::string &pcdFilePath)
 {
     std::unordered_map<int, Vertex> vertex_Umap;
     std::unordered_map<int, Edge> edge_Umap;
+    std::vector<int> notExistIndex;
     std::cout
         << "Read Vertex Data from " << vertexFilePath << std::endl;
     std::cout << "Read Edge Data from " << edgeFilePath << std::endl;
@@ -76,11 +77,24 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 #pragma omp section
         {
             YAML::Node vertex_YN = YAML::LoadFile(vertexFilePath);
-            for (unsigned i = 0; i < vertex_YN.size(); i++)
+            for (unsigned i = 0; i < vertex_YN.size(); ++i)
             {
                 Vertex vertex;
                 vertex_YN[i] >> vertex;
                 vertex_Umap.insert(std::pair<int, Vertex>(vertex.id, vertex));
+
+                std::string fileName = pcdFilePath + std::to_string(vertex.id) + "_node.pcd";
+                if (access(fileName.c_str(), 0))
+                    notExistIndex.push_back(vertex.id);
+            }
+            if (!notExistIndex.empty())
+            {
+                std::cerr << "#########" << std::endl;
+                std::cerr << "Cannot Find the Following Vertex Pcd !!!" << std::endl;
+                for (int i = 0; i < notExistIndex.size(); ++i)
+                    std::cout << "  " << i + 1 << ".  " << notExistIndex[i] << std::endl;
+                std::cerr << "#########" << std::endl;
+                exit(EXIT_FAILURE);
             }
         }
 #pragma omp section

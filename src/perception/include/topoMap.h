@@ -11,6 +11,9 @@
 #include <string>
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
+
+// std::string pcdFilePath = "/home/lsj/dev/Mine_WS/simu_data/";
+
 namespace perception
 {
     ///* Define link information
@@ -74,6 +77,6 @@ void operator>>(const YAML::Node &node, perception::LinkedInfo &lI);
 void operator>>(const YAML::Node &node, perception::Vertex &v);
 void operator>>(const YAML::Node &node, perception::Edge &e);
 
-TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath);
+TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath, const std::string &pcdFilePath);
 
 #endif

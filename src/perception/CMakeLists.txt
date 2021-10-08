@@ -114,6 +114,10 @@ link_directories(
 # add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
 
+# add_executable(simuSegSave  src/simuSegSave.cpp)
+# add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+
 add_executable(simuSegSave  src/simuSegSave.cpp)
 add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
