@@ -30,7 +30,6 @@
 #include <pcl/visualization/pcl_plotter.h>
 #include <visualization_msgs/Marker.h>
 #include <utility.h>
-#include <opencv2/opencv.hpp>
 #include <numeric>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
@@ -168,17 +167,17 @@ public:
         laser_Lane.action = Edge_Lane.action = circle_Lane.action = visualization_msgs::Marker::ADD;
         laser_Lane.pose.orientation.w = Edge_Lane.pose.orientation.w = circle_Lane.pose.orientation.w = 1.0;
         laser_Lane.type = Edge_Lane.type = visualization_msgs::Marker::LINE_LIST;
-        //laser_Lane
+        // laser_Lane
         laser_Lane.id = 0;
         laser_Lane.scale.x = 0.1;
         laser_Lane.color.b = 1.0;
         laser_Lane.color.a = 0.6;
-        //Edge_Lane
+        // Edge_Lane
         Edge_Lane.id = 1;
         Edge_Lane.scale.x = 0.2;
         Edge_Lane.color.g = 1.0;
         Edge_Lane.color.a = 1.0;
-        //circle_Lane
+        // circle_Lane
         circle_Lane.type = visualization_msgs::Marker::LINE_STRIP;
         circle_Lane.id = 2;
         circle_Lane.scale.x = 0.1;
@@ -382,7 +381,7 @@ public:
         }
         /*laser可视化处理*/
 
-        //beam model(距离-角度分布图)
+        // beam model(距离-角度分布图)
         plotter->addPlotData(Cols, beamDistance_Vec, Horizon_SCAN, "直方图");
         plotter->spinOnce(0);
 
@@ -411,11 +410,11 @@ public:
         Edge_Lane.header.stamp = laser_Lane.header.stamp;
 
         /*横向距离阈值判定路口*/
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -5))); //GT表示大于等于
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 5)));  //GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -5))); // GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 5)));  // GT表示大于等于
 
-        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 5)));  //LT表示小于等于
-        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -5))); //LT表示小于等于        //条件滤波
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 5)));  // LT表示小于等于
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -5))); // LT表示小于等于        //条件滤波
 
         condition.setCondition(longitudinal_Condition);
         condition.setInputCloud(laserOrigin_Cloud);
@@ -475,7 +474,7 @@ public:
 
                             if (index_Array[Cols_plot[i_left]])
                             {
-                                //mark this beam
+                                // mark this beam
                                 endPoint.x = endPoint.y = endPoint.z = 0;
                                 Edge_Lane.points.push_back(endPoint);
 
@@ -489,7 +488,7 @@ public:
 
                             if (index_Array[Cols_plot[i_right]])
                             {
-                                //mark right beam
+                                // mark right beam
                                 endPoint.x = endPoint.y = endPoint.z = 0;
                                 Edge_Lane.points.push_back(endPoint);
 
@@ -503,7 +502,7 @@ public:
 
                             if (index_Array[Cols_plot[i_neighbor]])
                             {
-                                //mark this beam
+                                // mark this beam
                                 endPoint.x = endPoint.y = endPoint.z = 0;
                                 Edge_Lane.points.push_back(endPoint);
 
@@ -520,7 +519,7 @@ public:
                                 i_right_neighbor = sizeOfBeamInvalid - 1;
                             if (index_Array[Cols_plot[i_right_neighbor]])
                             {
-                                //mark right beam
+                                // mark right beam
                                 endPoint.x = endPoint.y = endPoint.z = 0;
                                 Edge_Lane.points.push_back(endPoint);
 
@@ -559,7 +558,7 @@ public:
     part1:
         ROS_DEBUG("Jump to Part 1");
 
-        //laser可视数量
+        // laser可视数量
         ROS_DEBUG_STREAM("Num of Edge Laser =   " << numOfEdgeLaser);
 
         if (cloudFar->points.size() >= 20)

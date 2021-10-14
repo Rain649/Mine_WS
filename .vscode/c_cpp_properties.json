@@ -1,19 +1,16 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
             "includePath": [
-                "${workspaceFolder}/**"
+                "/opt/ros/melodic/include/**",
+                "/home/lsj/dev/Mine_WS/**",
+                "/usr/include/**"
             ],
-            "defines": [],
-            "files.autoSave": "on",
-            "editor.tabSize": 4,
-            "editor.formatOnSave": "on",
-            "compilerPath": "/bin/gcc",
-            "cStandard": "gnu17",
-            "cppStandard": "gnu++14",
-            "intelliSenseMode": "${default}",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+            "name": "ROS"
         }
     ],
     "version": 4

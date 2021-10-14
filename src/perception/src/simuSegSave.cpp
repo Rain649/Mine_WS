@@ -153,7 +153,7 @@ void pointCloudSave()
     extract_2.setNegative(true); //如果设为true,可以提取指定index之外的点云
     extract_2.filter(*cloudFinal);
 
-    if (!save_Bool)
+    if (!save_Bool && 0)
         return;
     // 保存文件
     std::string fileName;

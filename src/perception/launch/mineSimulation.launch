@@ -6,7 +6,9 @@
   <!-- - TF -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="base_link2vehicle_reference" args="-2 0 1 0 0 0 /base_link /vehicle_reference 10" /> -->
 
-  <node name="simuSegSave" pkg="perception" type="simuSegSave" output="screen"></node>
+  <node name="intersection" pkg="perception" type="intersection" output="screen"></node>
+
+  <node name="laneDetection" pkg="perception" type="laneDetection" output="screen"></node>
 
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_gazebo)/launch/mineSimulation.rviz"/> -->
 

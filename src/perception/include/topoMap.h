@@ -12,8 +12,6 @@
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
 
-// std::string pcdFilePath = "/home/lsj/dev/Mine_WS/simu_data/";
-
 namespace perception
 {
     ///* Define link information
@@ -65,6 +63,7 @@ public:
     double get_cost(const int &edge_id);
     //Vertex
     perception::LinkedInfo get_linkedInfo(const int &vertex1_id, const int &vertex2_id);
+    double get_angleDiff(const int &vertex1_id, const int &vertex2_id);
     std::vector<int> get_linkedVertex_Vec(const int &vertex_id);
     std::vector<double> get_targetPoint(const int &vertex1_id, const int &vertex2_id);
     double get_cost(const int &vertex1_id, const int &vertex2_id);

@@ -20,8 +20,6 @@
 
 void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::visualization::PCLVisualizer &viewer)
 {
-  clock_t startTime, endTime;
-  startTime = clock(); //计时开始
   /********读取数据********/
   std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/ndtData.yaml";
   YAML::Node config = YAML::LoadFile(fin);

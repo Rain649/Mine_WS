@@ -7,6 +7,7 @@
 #include <chrono>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <boost/thread/thread.hpp>
 #include <yaml-cpp/yaml.h>
@@ -60,12 +61,8 @@ int main()
     }
     std::cout << "Loaded " << input_cloud->size() << " data points from room_scan2.pcd" << std::endl;
 
-    // static pcl::PointXYZ thisP;
     pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud_Trans(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr targetCloud_Trans(new pcl::PointCloud<pcl::PointXYZ>);
-    // // range filter,去除周围点云
-    // range_filter(*input_cloud,*inputCloud_Trans,4,0.1);
-    // range_filter(*target_cloud,*targetCloud_Trans,4,0.1);
 
     for (const auto &p : *input_cloud)
     {

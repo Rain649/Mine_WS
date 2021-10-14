@@ -26,7 +26,7 @@ double TopoMap::get_cost(const int &edge_id)
     cost = edge_Umap[edge_id].length;
     return cost;
 }
-//Vertex
+// Vertex
 LinkedInfo TopoMap::get_linkedInfo(const int &vertex1_id, const int &vertex2_id)
 {
     if (vertex_Umap.count(vertex1_id) == 0 || vertex_Umap.count(vertex2_id) == 0)
@@ -34,6 +34,14 @@ LinkedInfo TopoMap::get_linkedInfo(const int &vertex1_id, const int &vertex2_id)
     Vertex v = vertex_Umap[vertex1_id];
     LinkedInfo lI = v.linkedInfo_Umap[vertex2_id];
     return lI;
+}
+double TopoMap::get_angleDiff(const int &vertex1_id, const int &vertex2_id)
+{
+    if (vertex_Umap.count(vertex1_id) == 0 || vertex_Umap.count(vertex2_id) == 0)
+        return {};
+    Vertex v = vertex_Umap[vertex1_id];
+    LinkedInfo lI = v.linkedInfo_Umap[vertex2_id];
+    return lI.angleDiff;
 }
 std::vector<int> TopoMap::get_linkedVertex_Vec(const int &vertex_id)
 {
