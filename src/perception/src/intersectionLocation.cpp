@@ -1,4 +1,5 @@
 #include "intersectionLocation.h"
+#include <ros/ros.h>
 
 // void range_filter(pcl::PointCloud<pcl::PointXYZ> & input_cloud, pcl::PointCloud<pcl::PointXYZ> & output_cloud,const float & min_scan_range_, const float min_z)
 // {
@@ -18,6 +19,29 @@
 //     }
 // }
 
+// // 初始化点云可视化界面
+// int v1(0); //设置左窗口
+// int v2(1); //设置右窗口
+// viewer.createViewPort(0.0, 0.0, 0.5, 1, v1);
+// viewer.setBackgroundColor(0, 0, 0, v1);
+// viewer.createViewPort(0.5, 0.0, 1, 1, v2);
+// viewer.setBackgroundColor(0.5, 0.5, 0.5, v2);
+// viewer.addCoordinateSystem(5);
+// viewer.initCameraParameters();
+// viewer.setCameraPosition(30, 40, 50, -3, -4, -5, 0);
+
+//将弧度转换到-π~π区间
+inline void radianTransform(float &radian)
+{
+  while (radian > M_PI)
+    radian -= 2 * M_PI;
+  while (radian <= -M_PI)
+    radian += 2 * M_PI;
+}
+
+int v1(1); //设置左窗口
+int v2(2); //设置右窗口
+
 void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::visualization::PCLVisualizer &viewer)
 {
   /********读取数据********/
@@ -31,6 +55,9 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   float x_pre = pose[0];
   float y_pre = pose[1];
   float yaw_pre = pose[2];
+  radianTransform(yaw_pre);
+  ROS_INFO("---------------------------------------");
+  ROS_INFO_STREAM("yaw_pre =  " << yaw_pre << "; x =  " << x_pre << "; y =  " << y_pre);
 
   //将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
   pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -38,8 +65,13 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   approximate_voxel_filter.setLeafSize(0.1, 0.1, 0.1);
   approximate_voxel_filter.setInputCloud(input_cloud);
   approximate_voxel_filter.filter(*filtered_cloud);
-  std::cout << "Filtered cloud contains " << filtered_cloud->size()
-            << " data points from test2.pcd" << std::endl;
+  // std::cout << "Filtered cloud contains " << filtered_cloud->size() << " data points from test2.pcd" << std::endl;
+  pcl::PassThrough<pcl::PointXYZ> groundFilter;
+  groundFilter.setInputCloud(target_cloud);
+  groundFilter.setFilterFieldName("z");
+  groundFilter.setFilterLimits(DBL_MIN, -0.8);
+  groundFilter.setFilterLimitsNegative(true);
+  groundFilter.filter(*target_cloud);
 
   //初始化正态分布变换（NDT）
   pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
@@ -48,7 +80,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
   ndt.setStepSize(stepSize);
   //设置NDT网格结构的分辨率（VoxelGridCovariance）
-  ndt.setResolution(resolution); //ND体素的大小，单位为m,越小越准确，但占用内存越多
+  ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
   //设置匹配迭代的最大次数
   ndt.setMaximumIterations(maximumIterations);
   // 设置要配准的点云
@@ -62,8 +94,11 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   //计算需要的刚体变换以便将输入的点云匹配到目标点云
   pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   ndt.align(*output_cloud, init_guess); //这一步是将降采样之后的点云经过变换后的到output_cloud
-  std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged()
-            << "; score: " << ndt.getFitnessScore() << std::endl; //欧式适合度评分
+  // if (ndt.getFitnessScore() > 8.0)
+  // {
+  //   return;
+  // }
+  std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() << "; score: " << ndt.getFitnessScore() << std::endl; //欧式适合度评分
   //使用创建的变换对未过滤的输入点云进行变换
   Eigen::Matrix4f transformation = ndt.getFinalTransformation();
   std::cout << "Here is the matrix m:\n"
@@ -80,43 +115,29 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   pose[0] = transformation(0, 3);
   pose[1] = transformation(1, 3);
   pose[2] = eulerAngle[2];
-
-  // 初始化点云可视化界面
-  int v1(0); //设置左窗口
-  int v2(1); //设置右窗口
-  viewer.createViewPort(0.0, 0.0, 0.5, 1, v1);
-  viewer.setBackgroundColor(0, 0, 0, v1);
-  viewer.createViewPort(0.5, 0.0, 1, 1, v2);
-  viewer.setBackgroundColor(0.5, 0.5, 0.5, v2);
-  viewer.addCoordinateSystem(5);
-  viewer.initCameraParameters();
-  viewer.setCameraPosition(30, 40, 50, -3, -4, -5, 0);
+  radianTransform(pose[2]);
+  ROS_INFO_STREAM("yaw =  " << pose[2] << "; x =  " << pose[0] << yaw_pre << "; y =  " << pose[1]);
 
   //对目标点云着色（红色）并可视化
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-      target_color(target_cloud, 255, 0, 0);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
   //对转换前的输入点云着色（绿色）并可视化
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-      input_color(input_cloud, 0, 255, 0);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> input_color(input_cloud, 0, 255, 0);
   //对转换后的输入点云着色（蓝色）并可视化
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-      output_color(output_cloud, 0, 0, 255);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> output_color(output_cloud, 0, 0, 255);
+
+  viewer.removeAllPointClouds();
 
   viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud1", v1);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          1, "target cloud1");
-  viewer.addPointCloud<pcl::PointXYZ>(input_cloud, input_color, "input cloud1", v1);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          2, "input cloud1");
+  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud1");
+  viewer.addPointCloud<pcl::PointXYZ>(input_cloud, input_color, "input cloud", v1);
+  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "input cloud");
 
   //对目标点云着色（红色）并可视化
   viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud2", v2);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          1, "target cloud2");
-  //对转换后的输入点云着色（绿色）并可视化
-  viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud2", v2);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-                                          2, "output cloud2");
+  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud2");
+  // //对转换后的输入点云着色（蓝色）并可视化
+  viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud", v2);
+  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "output cloud");
 
   return;
 }

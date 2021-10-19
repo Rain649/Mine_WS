@@ -120,7 +120,12 @@ private:
 public:
     Detection() : nh("~")
     {
-        subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>("/velodyne_points_ma", 1, &Detection::laserCloudNewHandler, this);
+        std::string lidarTopic;
+        nh.param<std::string>("ground_point_topic", lidarTopic, "/simuSegSave/cloud_Combined");
+        ROS_INFO("Lidar topic : %s", lidarTopic.c_str());
+        ROS_INFO("----------------------------------------------------------------------");
+
+        subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic, 1, &Detection::laserCloudNewHandler, this);
 
         pubCloudOutlierRemove = nh.advertise<sensor_msgs::PointCloud2>("cloud_outlier_remove", 1);
         pubCloudWithInfo = nh.advertise<sensor_msgs::PointCloud2>("cloudWithInfo", 1);
@@ -229,7 +234,6 @@ public:
         straightLine->clear();
         cloudFar->clear();
         cloudIntersections->clear();
-        plotter->clearPlots();
         laser_Lane.points.clear();
         Edge_Lane.points.clear();
         beam_Invalid.clear();
@@ -382,6 +386,7 @@ public:
         /*laser可视化处理*/
 
         // beam model(距离-角度分布图)
+        plotter->clearPlots();
         plotter->addPlotData(Cols, beamDistance_Vec, Horizon_SCAN, "直方图");
         plotter->spinOnce(0);
 

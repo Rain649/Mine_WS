@@ -28,6 +28,7 @@
 // ros::Time time;
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudOrigin;
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedTrans;
+pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNoCar;
 ros::Time time_st;
 
 void topHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
@@ -116,7 +117,6 @@ void pointCloudSave()
     ros::param::get("/simuSegSave/save_name", save_Name);
     /*动态参数*/
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCenter(new pcl::PointCloud<pcl::PointXYZI>());
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudFinal(new pcl::PointCloud<pcl::PointXYZI>());
 
     pcl::KdTreeFLANN<pcl::PointXYZI> kdtree_1, kdtree_2;
@@ -126,34 +126,34 @@ void pointCloudSave()
     pcl::PointXYZI zeroPoint(0.f);
     zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
 
-    // 外围分割
+    // 分割车辆
     kdtree_1.setInputCloud(cloudCombinedTrans); // 设置要搜索的点云，建立KDTree
     pcl::ExtractIndices<pcl::PointXYZI> extract_1;
-    if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index_1, distance_1) == 0)
+    if (kdtree_1.radiusSearch(zeroPoint, 3.0, index_1, distance_1) == 0)
     {
-        ROS_ERROR("There is no point nearby !!!");
+        ROS_ERROR("There is no vehicle points  !!!");
         return;
     }
     extract_1.setInputCloud(cloudCombinedTrans);
     boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index_1);
     extract_1.setIndices(index_ptr);
-    extract_1.setNegative(false); //如果设为true,可以提取指定index之外的点云
-    extract_1.filter(*cloudCenter);
-    // 分割车辆
-    kdtree_2.setInputCloud(cloudCenter); // 设置要搜索的点云，建立KDTree
+    extract_1.setNegative(true); //如果设为true,可以提取指定index之外的点云
+    extract_1.filter(*cloudNoCar);
+    // 外围分割
+    kdtree_2.setInputCloud(cloudNoCar); // 设置要搜索的点云，建立KDTree
     pcl::ExtractIndices<pcl::PointXYZI> extract_2;
-    if (kdtree_2.radiusSearch(zeroPoint, 3.0, index_2, distance_2) == 0)
+    if (kdtree_2.radiusSearch(zeroPoint, segmentationRadius, index_2, distance_2) == 0)
     {
-        ROS_ERROR("There is no vehicle points  !!!");
+        ROS_ERROR("There is no point nearby !!!");
         return;
     }
-    extract_2.setInputCloud(cloudCenter);
+    extract_2.setInputCloud(cloudNoCar);
     index_ptr = boost::make_shared<std::vector<int>>(index_2);
     extract_2.setIndices(index_ptr);
-    extract_2.setNegative(true); //如果设为true,可以提取指定index之外的点云
+    extract_2.setNegative(false); //如果设为true,可以提取指定index之外的点云
     extract_2.filter(*cloudFinal);
 
-    if (!save_Bool && 0)
+    if (!save_Bool && true)
         return;
     // 保存文件
     std::string fileName;
@@ -225,10 +225,12 @@ int main(int argc, char **argv)
 
     ROS_INFO("\033[1;32m---->\033[0m Simulation Segmentation Save Started.");
 
+    cloudNoCar.reset(new pcl::PointCloud<pcl::PointXYZI>());
     cloudOrigin.reset(new pcl::PointCloud<pcl::PointXYZI>());
     cloudCombinedTrans.reset(new pcl::PointCloud<pcl::PointXYZI>());
     cloudOrigin->header.frame_id = "base_link";
     cloudCombinedTrans->header.frame_id = "vehicle_reference";
+    cloudNoCar->header.frame_id = "vehicle_reference";
 
     ros::Subscriber subLidarCloudLeft = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_left, 1, &leftHandler);
     ros::Subscriber subLidarCloudRight = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_right, 1, &rightHandler);
@@ -247,11 +249,12 @@ int main(int argc, char **argv)
 
         //发布点云
         sensor_msgs::PointCloud2 output;
-        toROSMsg(*cloudCombinedTrans, output);
+        toROSMsg(*cloudNoCar, output);
         cloudCombined_pub.publish(output);
 
         cloudOrigin->clear();
         cloudCombinedTrans->clear();
+        cloudNoCar->clear();
 
         rate.sleep();
     }

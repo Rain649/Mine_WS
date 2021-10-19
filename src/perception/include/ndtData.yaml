@@ -4,13 +4,13 @@ x: 6
 
 y: 2
 
-resolution: 6
+resolution: 10
 
-maximumIterations: 50
+maximumIterations: 30
 
-stepSize: 0.6
+stepSize: 0.3
 
-transformationEpsilon: 0.15
+transformationEpsilon: 0.1
 
 test1File: /home/lsj/dev/Mine_WS/src/perception/src/test1.pcd
 

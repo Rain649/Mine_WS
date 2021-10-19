@@ -37,6 +37,8 @@ LinkedInfo TopoMap::get_linkedInfo(const int &vertex1_id, const int &vertex2_id)
 }
 double TopoMap::get_angleDiff(const int &vertex1_id, const int &vertex2_id)
 {
+    if (vertex1_id == vertex2_id)
+        return 0.0;
     if (vertex_Umap.count(vertex1_id) == 0 || vertex_Umap.count(vertex2_id) == 0)
         return {};
     Vertex v = vertex_Umap[vertex1_id];

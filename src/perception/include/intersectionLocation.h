@@ -4,11 +4,15 @@
 #include <pcl/registration/ndt.h>
 #include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/passthrough.h>     //直通滤波
 #include <boost/thread/thread.hpp>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
-void range_filter(pcl::PointCloud<pcl::PointXYZ> & input_cloud, pcl::PointCloud<pcl::PointXYZ> & output_cloud,const float & min_scan_range_, const float min_z);
+void range_filter(pcl::PointCloud<pcl::PointXYZ> &input_cloud, pcl::PointCloud<pcl::PointXYZ> &output_cloud, const float &min_scan_range_, const float min_z);
+
+//将弧度转换到-π~π区间
+inline void radianTransform(float &radian);
 
 /**
  * intersectionLocation gets the pose of vehicle at intersections

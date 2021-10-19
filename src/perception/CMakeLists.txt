@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(perception)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O1")
 
 find_package(catkin REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
@@ -81,17 +81,19 @@ link_directories(
 
 # ${OpenCV_LIBS}
 
-add_executable(intersection  src/intersection.cpp)
-add_dependencies(intersection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(intersection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+############################################
 
-add_executable(laneDetection  src/laneDetection.cpp)
-add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+# add_executable(intersection  src/intersection.cpp)
+# add_dependencies(intersection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(intersection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-add_executable(simuSegSave  src/simuSegSave.cpp)
-add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+# add_executable(laneDetection  src/laneDetection.cpp)
+# add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+
+# add_executable(simuSegSave  src/simuSegSave.cpp)
+# add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
 add_executable(main  src/main.cpp src/intersectionLocation.cpp src/topoMap.cpp include/intersectionLocation.h include/topoMap.h)
 add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
