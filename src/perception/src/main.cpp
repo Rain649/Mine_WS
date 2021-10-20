@@ -84,7 +84,7 @@ void cloudHandler(const sensor_msgs::PointCloud2ConstPtr msg)
     pcl::ExtractIndices<pcl::PointXYZ> extract_1;
     pcl::PointXYZ zeroPoint;
     zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
-    int segmentationRadius = 25;
+    int segmentationRadius = 12;
     if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index_1, distance_1) == 0)
     {
         ROS_ERROR("There is no point nearby !!!");
@@ -99,8 +99,8 @@ void cloudHandler(const sensor_msgs::PointCloud2ConstPtr msg)
     pcl::PassThrough<pcl::PointXYZ> groundFilter;
     groundFilter.setInputCloud(cloudNoCar);
     groundFilter.setFilterFieldName("z");
-    groundFilter.setFilterLimits(DBL_MIN, -0.8);
-    groundFilter.setFilterLimitsNegative(true);
+    groundFilter.setFilterLimits(-0.8, 10);
+    groundFilter.setFilterLimitsNegative(false);
     groundFilter.filter(*lidarCloud);
 
     ROS_DEBUG_STREAM("lidarCloud :  " << lidarCloud->size());
@@ -130,8 +130,12 @@ void location()
         return;
     }
     // mtx_pose.lock();
-    pose[0] = -5;
-    pose[1] = -0.5;
+    // pose[0] = -5;
+    // pose[1] = -0.5;
+    // pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
+    // zj 自己调试
+    pose[0] = 0;
+    pose[1] = 0;
     pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
     radianTransform(pose[2]);
     // mtx_pose.unlock();

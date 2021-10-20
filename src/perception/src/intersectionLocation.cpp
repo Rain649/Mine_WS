@@ -69,8 +69,8 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   pcl::PassThrough<pcl::PointXYZ> groundFilter;
   groundFilter.setInputCloud(target_cloud);
   groundFilter.setFilterFieldName("z");
-  groundFilter.setFilterLimits(DBL_MIN, -0.8);
-  groundFilter.setFilterLimitsNegative(true);
+  groundFilter.setFilterLimits(-0.8, 10);
+  groundFilter.setFilterLimitsNegative(false);
   groundFilter.filter(*target_cloud);
 
   //初始化正态分布变换（NDT）
@@ -103,7 +103,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   Eigen::Matrix4f transformation = ndt.getFinalTransformation();
   std::cout << "Here is the matrix m:\n"
             << transformation << std::endl;
-  pcl::transformPointCloud(*input_cloud, *output_cloud, transformation);
+  pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
   Eigen::Matrix3f transformation_3f;
   for (int i = 0; i < 3; ++i)
     for (int j = 0; j < 3; ++j)
@@ -112,16 +112,16 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(0, 1, 2);
   std::cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << std::endl;
 
-  pose[0] = transformation(0, 3);
-  pose[1] = transformation(1, 3);
-  pose[2] = eulerAngle[2];
+  // pose[0] = transformation(0, 3);
+  // pose[1] = transformation(1, 3);
+  // pose[2] = eulerAngle[2];
   radianTransform(pose[2]);
-  ROS_INFO_STREAM("yaw =  " << pose[2] << "; x =  " << pose[0] << yaw_pre << "; y =  " << pose[1]);
+  ROS_INFO_STREAM("yaw =  " << eulerAngle[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
 
   //对目标点云着色（红色）并可视化
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
   //对转换前的输入点云着色（绿色）并可视化
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> input_color(input_cloud, 0, 255, 0);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> input_color(filtered_cloud, 0, 255, 0);
   //对转换后的输入点云着色（蓝色）并可视化
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> output_color(output_cloud, 0, 0, 255);
 
@@ -129,7 +129,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
 
   viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud1", v1);
   viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud1");
-  viewer.addPointCloud<pcl::PointXYZ>(input_cloud, input_color, "input cloud", v1);
+  viewer.addPointCloud<pcl::PointXYZ>(filtered_cloud, input_color, "input cloud", v1);
   viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "input cloud");
 
   //对目标点云着色（红色）并可视化
