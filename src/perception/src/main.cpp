@@ -35,7 +35,7 @@
 std::mutex mtx_visual;
 std::mutex mtx_pose;
 std::vector<float> pose(3, 0.0);
-std::vector<int> path{17, 1, 2, 3, 4, 5};
+std::vector<int> path{0, 1, 2, 3, 4, 5};
 std::string dataPath = "/home/lsj/dev/Mine_WS/simu_data/";
 // int nextVertex_ID = 1;
 int preVertex_index = 0;
@@ -84,7 +84,7 @@ void cloudHandler(const sensor_msgs::PointCloud2ConstPtr msg)
     pcl::ExtractIndices<pcl::PointXYZ> extract_1;
     pcl::PointXYZ zeroPoint;
     zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
-    int segmentationRadius = 12;
+    int segmentationRadius = 20;
     if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index_1, distance_1) == 0)
     {
         ROS_ERROR("There is no point nearby !!!");
@@ -134,7 +134,7 @@ void location()
     // pose[1] = -0.5;
     // pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
     // zj 自己调试
-    pose[0] = 0;
+    pose[0] = 8;
     pose[1] = 0;
     pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
     radianTransform(pose[2]);

@@ -1,10 +1,10 @@
-yaw: 50
+yaw: 0
 
-x: 6
+x: 0
 
-y: 2
+y: 0
 
-resolution: 25
+resolution: 10
 
 maximumIterations: 50
 

@@ -51,9 +51,13 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   float resolution = config["resolution"].as<float>();
   float stepSize = config["stepSize"].as<float>();
   float transformationEpsilon = config["transformationEpsilon"].as<float>();
+  //
+  float x_pre = config["x"].as<float>();
+  float y_pre = config["y"].as<float>();
+  // float yaw_pre = config["yaw"].as<float>();
   /********读取数据********/
-  float x_pre = pose[0];
-  float y_pre = pose[1];
+  // float x_pre = pose[0];
+  // float y_pre = pose[1];
   float yaw_pre = pose[2];
   radianTransform(yaw_pre);
   ROS_INFO("---------------------------------------");
@@ -72,6 +76,26 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   groundFilter.setFilterLimits(-0.8, 10);
   groundFilter.setFilterLimitsNegative(false);
   groundFilter.filter(*target_cloud);
+
+  // // icp配准
+  // pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp; //创建ICP的实例类
+  // icp.setInputSource(filtered_cloud);
+  // icp.setInputTarget(target_cloud);
+  // icp.setMaxCorrespondenceDistance(0.1);
+  // icp.setTransformationEpsilon(1e-1);
+  // icp.setEuclideanFitnessEpsilon(1);
+  // icp.setMaximumIterations(100);
+  // icp.setRANSACIterations(0);
+  // pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  // icp.align(*output_cloud);
+  // // pcl::transformPointCloud(*latestSurfKeyFrameCloud, *closed_cloud, icp.getFinalTransformation());
+
+  // if (icp.hasConverged() == false || icp.getFitnessScore() > 2)
+  // {
+  //   ROS_ERROR_STREAM("icp Failed : " << icp.getFitnessScore());
+  // }
+  // // pcl::transformPointCloud(*filtered_cloud, *closed_cloud, icp.getFinalTransformation());
+  /////////////////////////////////////////////
 
   //初始化正态分布变换（NDT）
   pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
@@ -93,11 +117,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
   //计算需要的刚体变换以便将输入的点云匹配到目标点云
   pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  ndt.align(*output_cloud, init_guess); //这一步是将降采样之后的点云经过变换后的到output_cloud
-  // if (ndt.getFitnessScore() > 8.0)
-  // {
-  //   return;
-  // }
+  ndt.align(*output_cloud, init_guess);                                                                                                     //这一步是将降采样之后的点云经过变换后的到output_cloud
   std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() << "; score: " << ndt.getFitnessScore() << std::endl; //欧式适合度评分
   //使用创建的变换对未过滤的输入点云进行变换
   Eigen::Matrix4f transformation = ndt.getFinalTransformation();
@@ -109,12 +129,12 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
     for (int j = 0; j < 3; ++j)
       transformation_3f(i, j) = transformation(i, j);
 
-  Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(0, 1, 2);
+  Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2, 0, 2);
   std::cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << std::endl;
 
   // pose[0] = transformation(0, 3);
   // pose[1] = transformation(1, 3);
-  // pose[2] = eulerAngle[2];
+  pose[2] = -eulerAngle[2];
   radianTransform(pose[2]);
   ROS_INFO_STREAM("yaw =  " << eulerAngle[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
 

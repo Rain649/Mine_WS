@@ -2,9 +2,10 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/ndt.h>
+#include <pcl/registration/icp.h>
 #include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/filters/passthrough.h>     //直通滤波
+#include <pcl/filters/passthrough.h> //直通滤波
 #include <boost/thread/thread.hpp>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
