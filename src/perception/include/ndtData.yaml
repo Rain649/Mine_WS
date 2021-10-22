@@ -1,16 +1,20 @@
-yaw: 0
+yaw: -0.5
 
-x: 0
+x: 2
 
 y: 0
 
 resolution: 10
 
-maximumIterations: 50
+maximumIterations: 100
 
 stepSize: 0.3
 
 transformationEpsilon: 0.01
+
+euclideanFitnessEpsilon: 0.01
+
+maxCorrespondenceDistance: 2
 
 test1File: /home/lsj/dev/Mine_WS/src/perception/src/test1.pcd
 

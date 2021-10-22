@@ -33,11 +33,9 @@
 // using namespace perception;
 
 std::mutex mtx_visual;
-std::mutex mtx_pose;
 std::vector<float> pose(3, 0.0);
-std::vector<int> path{0, 1, 2, 3, 4, 5};
+std::vector<int> path{0, 1, 2, 11, 12, 13, 16, 17, 18, 1};
 std::string dataPath = "/home/lsj/dev/Mine_WS/simu_data/";
-// int nextVertex_ID = 1;
 int preVertex_index = 0;
 bool intersectionVerified = false;
 TopoMap topoMap;
@@ -129,16 +127,10 @@ void location()
         PCL_ERROR("Couldn't read file target_cloud.pcd \n");
         return;
     }
-    // mtx_pose.lock();
-    // pose[0] = -5;
-    // pose[1] = -0.5;
-    // pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
-    // zj 自己调试
-    pose[0] = 8;
+    pose[0] = -10;
     pose[1] = 0;
     pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
     radianTransform(pose[2]);
-    // mtx_pose.unlock();
     while (ros::ok())
     {
         if (!intersectionVerified)
@@ -179,6 +171,7 @@ void visual()
 
 void beginLocation()
 {
+    std::thread visual_thread(visual);
     while (ros::ok())
     {
         if (intersectionVerified)
@@ -189,13 +182,12 @@ void beginLocation()
                 break;
             }
             std::thread thread2(location);
-            std::thread visual_thread(visual);
             thread2.join();
-            visual_thread.join();
             preVertex_index += 1;
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    visual_thread.join();
     return;
 }
 

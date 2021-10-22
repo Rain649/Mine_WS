@@ -51,13 +51,15 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   float resolution = config["resolution"].as<float>();
   float stepSize = config["stepSize"].as<float>();
   float transformationEpsilon = config["transformationEpsilon"].as<float>();
+  float maxCorrespondenceDistance = config["maxCorrespondenceDistance"].as<float>();
+  float euclideanFitnessEpsilon = config["euclideanFitnessEpsilon"].as<float>();
   //
-  float x_pre = config["x"].as<float>();
-  float y_pre = config["y"].as<float>();
+  // float x_pre = config["x"].as<float>();
+  // float y_pre = config["y"].as<float>();
   // float yaw_pre = config["yaw"].as<float>();
   /********读取数据********/
-  // float x_pre = pose[0];
-  // float y_pre = pose[1];
+  float x_pre = pose[0];
+  float y_pre = pose[1];
   float yaw_pre = pose[2];
   radianTransform(yaw_pre);
   ROS_INFO("---------------------------------------");
@@ -77,66 +79,141 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   groundFilter.setFilterLimitsNegative(false);
   groundFilter.filter(*target_cloud);
 
-  // // icp配准
-  // pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp; //创建ICP的实例类
-  // icp.setInputSource(filtered_cloud);
-  // icp.setInputTarget(target_cloud);
-  // icp.setMaxCorrespondenceDistance(0.1);
-  // icp.setTransformationEpsilon(1e-1);
-  // icp.setEuclideanFitnessEpsilon(1);
-  // icp.setMaximumIterations(100);
+  // icp配准
+  pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp; //创建ICP的实例类
+  icp.setInputSource(filtered_cloud);
+  icp.setInputTarget(target_cloud);
+  icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
+  icp.setTransformationEpsilon(transformationEpsilon);
+  icp.setEuclideanFitnessEpsilon(euclideanFitnessEpsilon);
+  icp.setMaximumIterations(maximumIterations);
   // icp.setRANSACIterations(0);
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  // icp.align(*output_cloud);
-  // // pcl::transformPointCloud(*latestSurfKeyFrameCloud, *closed_cloud, icp.getFinalTransformation());
+  pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  //设置使用机器人测距法得到的初始对准估计结果
+  Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
+  Eigen::Translation3f init_translation(x_pre, y_pre, 0);
+  Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
+  icp.align(*output_cloud, init_guess);
 
   // if (icp.hasConverged() == false || icp.getFitnessScore() > 2)
   // {
   //   ROS_ERROR_STREAM("icp Failed : " << icp.getFitnessScore());
   // }
+
+  //这一步是将降采样之后的点云经过变换后的到output_cloud
+  std::cout << "ICP Transform has converged: " << icp.hasConverged() << "; score: " << icp.getFitnessScore() << std::endl; //欧式适合度评分
+  //使用创建的变换对未过滤的输入点云进行变换
+  Eigen::Matrix4f transformation = icp.getFinalTransformation();
+
   // // pcl::transformPointCloud(*filtered_cloud, *closed_cloud, icp.getFinalTransformation());
+  // std::cout << "Here is the matrix m:\n"
+  //           << transformation << std::endl;
+  // Eigen::Matrix3f transformation_3f;
+  // for (int i = 0; i < 3; ++i)
+  //   for (int j = 0; j < 3; ++j)
+  //     transformation_3f(i, j) = transformation(i, j);
+  // Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(0, 1, 2);
+  // std::cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << std::endl;
+
+  pose[0] = transformation(0, 3);
+  pose[1] = transformation(1, 3);
+  // pose[2] = eulerAngle[2];
+  pose[2] = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
+  radianTransform(pose[2]);
+  ROS_INFO_STREAM("yaw =  " << pose[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
   /////////////////////////////////////////////
 
-  //初始化正态分布变换（NDT）
-  pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
-  //为终止条件设置最小转换差异
-  ndt.setTransformationEpsilon(transformationEpsilon); //定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
-  //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
-  ndt.setStepSize(stepSize);
-  //设置NDT网格结构的分辨率（VoxelGridCovariance）
-  ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
-  //设置匹配迭代的最大次数
-  ndt.setMaximumIterations(maximumIterations);
-  // 设置要配准的点云
-  ndt.setInputSource(filtered_cloud);
-  //设置点云配准目标
-  ndt.setInputTarget(target_cloud);
-  //设置使用机器人测距法得到的初始对准估计结果
-  Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
-  Eigen::Translation3f init_translation(x_pre, y_pre, 0);
-  Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
-  //计算需要的刚体变换以便将输入的点云匹配到目标点云
-  pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  ndt.align(*output_cloud, init_guess);                                                                                                     //这一步是将降采样之后的点云经过变换后的到output_cloud
-  std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() << "; score: " << ndt.getFitnessScore() << std::endl; //欧式适合度评分
-  //使用创建的变换对未过滤的输入点云进行变换
-  Eigen::Matrix4f transformation = ndt.getFinalTransformation();
-  std::cout << "Here is the matrix m:\n"
-            << transformation << std::endl;
-  pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
-  Eigen::Matrix3f transformation_3f;
-  for (int i = 0; i < 3; ++i)
-    for (int j = 0; j < 3; ++j)
-      transformation_3f(i, j) = transformation(i, j);
+  // //初始化正态分布变换（NDT）
+  // pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
+  // //为终止条件设置最小转换差异
+  // ndt.setTransformationEpsilon(transformationEpsilon); //定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
+  // //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
+  // ndt.setStepSize(stepSize);
+  // //设置NDT网格结构的分辨率（VoxelGridCovariance）
+  // ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
+  // //设置匹配迭代的最大次数
+  // ndt.setMaximumIterations(maximumIterations);
+  // // 设置要配准的点云
+  // ndt.setInputSource(filtered_cloud);
+  // //设置点云配准目标
+  // ndt.setInputTarget(target_cloud);
+  // //设置使用机器人测距法得到的初始对准估计结果
+  // Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
+  // Eigen::Translation3f init_translation(x_pre, y_pre, 0);
+  // Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
+  // //计算需要的刚体变换以便将输入的点云匹配到目标点云
+  // pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  // ndt.align(*output_cloud, init_guess);                                                                                                     //这一步是将降采样之后的点云经过变换后的到output_cloud
+  // std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() << "; score: " << ndt.getFitnessScore() << std::endl; //欧式适合度评分
+  // //使用创建的变换对未过滤的输入点云进行变换
+  // Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+  // std::cout << "Here is the matrix m:\n"
+  //           << transformation << std::endl;
+  // pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
+  // Eigen::Matrix3f transformation_3f;
+  // for (int i = 0; i < 3; ++i)
+  //   for (int j = 0; j < 3; ++j)
+  //     transformation_3f(i, j) = transformation(i, j);
 
-  Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2, 0, 2);
-  std::cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << std::endl;
+  // Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2, 0, 2);
+  // std::cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << std::endl;
 
-  // pose[0] = transformation(0, 3);
-  // pose[1] = transformation(1, 3);
-  pose[2] = -eulerAngle[2];
-  radianTransform(pose[2]);
-  ROS_INFO_STREAM("yaw =  " << eulerAngle[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
+  // // pose[0] = transformation(0, 3);
+  // // pose[1] = transformation(1, 3);
+  // pose[2] = -eulerAngle[2];
+  // radianTransform(pose[2]);
+  // ROS_INFO_STREAM("yaw =  " << eulerAngle[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
+
+  // //初始化正态分布变换（NDT）
+  // pcl::NormalDistributionsTransform<pcl::PointXY, pcl::PointXY> ndt;
+  // //为终止条件设置最小转换差异
+  // ndt.setTransformationEpsilon(transformationEpsilon); //定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
+  // //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
+  // ndt.setStepSize(stepSize);
+  // //设置NDT网格结构的分辨率（VoxelGridCovariance）
+  // ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
+  // //设置匹配迭代的最大次数
+  // ndt.setMaximumIterations(maximumIterations);
+  // // 设置要配准的点云
+  // pcl::PointCloud<pcl::PointXY>::Ptr filtered_2D(new pcl::PointCloud<pcl::PointXY>);
+  // for (auto i : *filtered_cloud)
+  // {
+  //   filtered_2D->push_back(pcl::PointXY(i.x, i.y));
+  // }
+  // ndt.setInputSource(filtered_2D);
+  // //设置点云配准目标
+  // pcl::PointCloud<pcl::PointXY>::Ptr target_2D(new pcl::PointCloud<pcl::PointXY>);
+  // for (const auto i : *target_cloud)
+  // {
+  //   target_2D->push_back(pcl::PointXY(i.x, i.y));
+  // }
+  // ndt.setInputTarget(target_2D);
+  // //设置使用机器人测距法得到的初始对准估计结果
+  // Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
+  // Eigen::Translation2f init_translation(x_pre, y_pre);
+  // Eigen::Matrix3f init_guess = (init_translation * init_rotation).matrix();
+  // //计算需要的刚体变换以便将输入的点云匹配到目标点云
+  // pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXY>);
+  // ndt.align(*output_cloud, init_guess);                                                                                                     //这一步是将降采样之后的点云经过变换后的到output_cloud
+  // std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged() << "; score: " << ndt.getFitnessScore() << std::endl; //欧式适合度评分
+  // //使用创建的变换对未过滤的输入点云进行变换
+  // Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+  // std::cout << "Here is the matrix m:\n"
+  //           << transformation << std::endl;
+  // pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
+  // Eigen::Matrix3f transformation_3f;
+  // for (int i = 0; i < 3; ++i)
+  //   for (int j = 0; j < 3; ++j)
+  //     transformation_3f(i, j) = transformation(i, j);
+
+  // Eigen::Vector3f eulerAngle = transformation_3f.eulerAngles(2, 0, 2);
+  // std::cout << "roll, pitch, yaw : " << eulerAngle[0] * 180 / M_PI << ", " << eulerAngle[1] * 180 / M_PI << ", " << eulerAngle[2] * 180 / M_PI << "." << std::endl;
+
+  // // pose[0] = transformation(0, 3);
+  // // pose[1] = transformation(1, 3);
+  // pose[2] = -eulerAngle[2];
+  // radianTransform(pose[2]);
+  // ROS_INFO_STREAM("yaw =  " << eulerAngle[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
 
   //对目标点云着色（红色）并可视化
   pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
