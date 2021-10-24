@@ -23,15 +23,15 @@
   </include>
 
   <!-- 矿下地图模型 -->
-  <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find mine)/urdf/mine.urdf -urdf -model mine -z 0.5" output="screen" />
-  <node name="fake_joint_calibration" pkg="rostopic" type="rostopic" args="pub /calibrated std_msgs/Bool true" />
+  <!-- <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find mine)/urdf/mine.urdf -urdf -model mine -z 0.5" output="screen" />
+  <node name="fake_joint_calibration" pkg="rostopic" type="rostopic" args="pub /calibrated std_msgs/Bool true" /> -->
 
 
   <!-- 车辆模型  -->
   <arg name="model" default="$(find xacro)/xacro --inorder '$(find car)/urdf/car.xacro'" />
   <param name="robot_description" command="$(arg model)" />
 
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x 0 -y -8 -z 0.8 -Y -1.57"/>
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x 0 -y 0 -z 0 "/>
 
   <!-- 运动控制 -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
@@ -39,7 +39,7 @@
   </node>
 
   <!--- Run Rviz-->
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find car)/launch/simulation.rviz" />
+  <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find car)/launch/simulation.rviz" /> -->
 
   <!-- <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping">
     <remap from="scan" to="/robot/laser/scan"/>

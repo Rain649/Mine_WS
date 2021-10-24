@@ -127,7 +127,7 @@ void location()
         PCL_ERROR("Couldn't read file target_cloud.pcd \n");
         return;
     }
-    pose[0] = -10;
+    pose[0] = -7;
     pose[1] = 0;
     pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
     radianTransform(pose[2]);
@@ -153,7 +153,7 @@ void location()
         odom.pose.pose.position.y = pose[1];
         odom.pose.pose.position.z = 0;
         pubOdom.publish(odom);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        // std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     return;
 }

@@ -169,7 +169,54 @@
     </collision>
   </link>
 
+  <!-- 雷达下面垫一个高度0.02m的盘 -->
+  <link name="velodyne_leftBase">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.02" radius="0.1"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>​
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <cylinder length="0.02" radius="0.1"/>
+      </geometry>
+    </collision>
+  </link>
 
+  <joint name="joint_leftBase" type="fixed">
+    <origin xyz="-0.2566 0.95 1.388"/>
+    <parent link="base_link" />
+    <child link="velodyne_leftBase" />
+  </joint>
+
+  <link name="velodyne_rightBase">
+    <visual>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.02" radius="0.1"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>​
+    <collision>
+      <origin xyz="0 0 0" />
+      <geometry>
+        <cylinder length="0.02" radius="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="joint_rightBase" type="fixed">
+    <origin xyz="-0.2566 -0.95 1.388"/>
+    <parent link="base_link" />
+    <child link="velodyne_rightBase" />
+  </joint>
 
   <!-- Drive controller -->
   <gazebo>

@@ -145,7 +145,6 @@
         <mesh filename="package://car/meshes/wheel_rr.STL" />
       </geometry>
       <material name="black"/>
-
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -163,19 +162,19 @@
   </joint>
 
   <!-- 左前16线激光雷达 -->
-  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+  <xacro:include filename="VLP-16.urdf.xacro"/>
   <xacro:VLP-16 parent="base_link" name="velodyne_left" topic="/velodyne_left" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
-    <origin xyz="-0.2566 0.95 1.388" rpy="0 0 0" />
+    <origin xyz="-0.2566 0.95 1.408" rpy="0 0 0" />
   </xacro:VLP-16>
 
   <!-- 右前16线激光雷达 -->
-  <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+  <xacro:include filename="VLP-16.urdf.xacro"/>
   <xacro:VLP-16 parent="base_link" name="velodyne_right" topic="/velodyne_right" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
-    <origin xyz="-0.2566 -0.95 1.388" rpy="0 0 0" />
+    <origin xyz="-0.2566 -0.95 1.408" rpy="0 0 0" />
   </xacro:VLP-16>
 
   <!-- 顶部32线激光雷达 -->
-  <xacro:include filename="$(find velodyne_description)/urdf/HDL-32E.urdf.xacro"/>
+  <xacro:include filename="HDL-32E.urdf.xacro"/>
   <xacro:HDL-32E parent="base_link" name="velodyne_top" topic="/velodyne_top" organize_cloud="${organize_cloud}" hz="10" samples="220" gpu="${gpu}">
     <origin xyz="-2.45 0 1.813" rpy="0 0 0" />
   </xacro:HDL-32E>

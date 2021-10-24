@@ -38,12 +38,12 @@
   </node>
 
   <!--- Run Rviz-->
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception)/launch/simulation.rviz" />
+  <!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception)/launch/simulation.rviz" /> -->
 
   <!-- 感知程序 -->
-  <node name="simuSegSave" pkg="perception" type="simuSegSave" output="screen"></node>
+  <!-- <node name="simuSegSave" pkg="perception" type="simuSegSave" output="screen"></node>
   <node name="intersection" pkg="perception" type="intersection" output="screen"></node>
-  <node name="laneDetection" pkg="perception" type="laneDetection" output="screen"></node>
+  <node name="laneDetection" pkg="perception" type="laneDetection" output="screen"></node> -->
   <!-- <node name="main" pkg="perception" type="main" output="screen"></node> -->
 
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_gazebo)/launch/mineSimulation.rviz"/> -->
