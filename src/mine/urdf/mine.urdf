@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot name="mine">
-
   <link name="world"/>
 
   <joint name="fixed_joint" type="fixed">
     <parent link="world"/>
-    <child link="mine_link"/>
+    <child link="map_base_link"/>
   </joint>
 
-  <gazebo reference = " ine_link">
+  <gazebo reference = " map_base_link">
     <material>Gazebo/Grey2</material>
   </gazebo>
 
-  <link name="mine_link">
+  <link name="map_base_link">
     <inertial>
-      <origin xyz="130.736197522301 184.265594661978 3.93267374208958" rpy="0 0 0" />
-      <mass value="2379583143.16571" />
-      <inertia ixx="31827475003598.4" ixy="-839540214066.285" ixz="-1668866655.16839" iyy="17989781021615.5" iyz="-5758552793.67403" izz="49776763433677.5" />
+      <origin xyz="130.81 183.95 3.9345" rpy="0 0 0" />
+      <mass value="2387200000" />
+      <inertia ixx="31955000000000" ixy="-826810000000" ixz="-1773300000" iyy="18007000000000" iyz="-5332700000" izz="49921000000000" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://mine/meshes/base_link.STL" />
+        <mesh filename="package://mine/meshes/map_base_link.STL" />
       </geometry>
       <material name="Grey2">
         <color rgba="0.9 0.9 0.9 1.0"/>
@@ -32,9 +32,8 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://mine/meshes/base_link.STL" />
+        <mesh filename="package://mine/meshes/map_base_link.STL" />
       </geometry>
     </collision>
   </link>
-
 </robot>

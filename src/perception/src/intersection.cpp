@@ -415,11 +415,11 @@ public:
         Edge_Lane.header.stamp = laser_Lane.header.stamp;
 
         /*横向距离阈值判定路口*/
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -5))); // GT表示大于等于
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 5)));  // GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -7))); // GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 7)));  // GT表示大于等于
 
-        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 5)));  // LT表示小于等于
-        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -5))); // LT表示小于等于        //条件滤波
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 7)));  // LT表示小于等于
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -7))); // LT表示小于等于        //条件滤波
 
         condition.setCondition(longitudinal_Condition);
         condition.setInputCloud(laserOrigin_Cloud);

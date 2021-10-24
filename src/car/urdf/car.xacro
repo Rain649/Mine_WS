@@ -5,20 +5,44 @@
   <xacro:arg name="organize_cloud" default="false"/>
   <xacro:property name="organize_cloud" value="$(arg organize_cloud)" />
 
-  <gazebo reference = "base_link">
+  <gazebo reference = "vehicle_base_link">
     <material>Gazebo/Orange</material>
   </gazebo>
 
-  <link name="base_link">
+  <gazebo reference = "wheel_lf">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "wheel_lr">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "wheel_rf">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "wheel_rr">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "plate_l">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <gazebo reference = "plate_r">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <link name="vehicle_base_link">
     <inertial>
-      <origin xyz="-2.89659483427445 1.10001092434988E-14 1.03672946451707" rpy="0 0 0" />
+      <origin xyz="-0.446594834274452 1.10140809459871E-14 -0.0812605354829313" rpy="0 0 0" />
       <mass value="17432.032798497" />
-      <inertia ixx="9357.94654211181" ixy="-1.26060446501624E-10" ixz="-1547.1262306227" iyy="42349.3870226843" iyz="-1.01196747271312E-11" izz="46064.4886813343" />
+      <inertia ixx="9357.94654211181" ixy="-1.25947873442229E-10" ixz="-1547.1262306227" iyy="42349.3870226843" iyz="-9.50421805128393E-12" izz="46064.4886813343" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://car/meshes/base_link.STL" />
+        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
       </geometry>
       <material name="Orange">
         <color rgba="1.0 0.33 0.0 1.0"/>
@@ -27,20 +51,15 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://car/meshes/base_link.STL" />
+        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
       </geometry>
     </collision>
   </link>
-
-  <gazebo reference = "wheel_lf">
-    <material>Gazebo/Black</material>
-  </gazebo>
-
   <link name="wheel_lf">
     <inertial>
-      <origin xyz="-2.22044604925031E-16 4.44089209850063E-16 0.16" rpy="0 0 0" />
+      <origin xyz="0.00818093352436322 0.16 0.00575085442955692" rpy="0 0 0" />
       <mass value="195.872333513578" />
-      <inertia ixx="10.0526194504852" ixy="-4.44089209850063E-16" ixz="-1.40195071728621E-14" iyy="10.0526194504852" iyz="1.96135447538109E-14" izz="16.8524046276173" />
+      <inertia ixx="10.0526194504852" ixy="-2.40997915164867E-14" ixz="6.55520207342926E-17" iyy="16.8524046276173" iyz="-1.27333631675207E-16" izz="10.0526194504852" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -59,29 +78,25 @@
     </collision>
   </link>
   <joint name="joint_lf" type="continuous">
-    <origin xyz="-0.886590000000002 0.630000000000016 0.422985466863979" rpy="-1.5707963267949 0.958087741007821 0" />
-    <parent link="base_link" />
+    <origin xyz="1.5552 0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
     <child link="wheel_lf" />
-    <axis xyz="0 0 1" />
+    <axis xyz="0 1 0" />
   </joint>
-
-  <gazebo reference = "wheel_lr">
-    <material>Gazebo/Black</material>
-  </gazebo>
-
   <link name="wheel_lr">
     <inertial>
-      <origin xyz="-1.77635683940025E-15 -5.55111512312578E-17 0.16" rpy="0 0 0" />
+      <origin xyz="-8.88178419700125E-16 0.16 0" rpy="0 0 0" />
       <mass value="195.872333513578" />
-      <inertia ixx="10.0526194504852" ixy="-6.51011529597682E-30" ixz="-2.39496003678538E-14" iyy="10.0526194504852" iyz="1.18124621258017E-31" izz="16.8524046276173" />
+      <inertia ixx="10.0526194504852" ixy="-2.41411214140486E-14" ixz="3.69237933083238E-30" iyy="16.8524046276173" iyz="-1.3532984430688E-31" izz="10.0526194504852" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="package://car/meshes/wheel_lr.STL" />
       </geometry>
-      <material name="black"/>
-
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -91,29 +106,25 @@
     </collision>
   </link>
   <joint name="joint_lr" type="continuous">
-    <origin xyz="-4.11659 0.630000000000004 0.422985466863991" rpy="-1.5707963267949 0 0" />
-    <parent link="base_link" />
+    <origin xyz="-1.6666 0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
     <child link="wheel_lr" />
-    <axis xyz="0 0 1" />
+    <axis xyz="0 1 0" />
   </joint>
-
-  <gazebo reference = "wheel_rf">
-    <material>Gazebo/Black</material>
-  </gazebo>
-
   <link name="wheel_rf">
     <inertial>
-      <origin xyz="-4.4409E-16 4.4409E-16 0.16" rpy="0 0 0" />
-      <mass value="195.87" />
-      <inertia ixx="10.053" ixy="8.8818E-16" ixz="-2.0266E-14" iyy="10.053" iyz="1.3394E-14" izz="16.852" />
+      <origin xyz="6.66133814775094E-16 -0.16 -1.11022302462516E-16" rpy="0 0 0" />
+      <mass value="195.872333513578" />
+      <inertia ixx="10.0526194504852" ixy="-2.41227541210537E-14" ixz="1.03944522260315E-17" iyy="16.8524046276173" iyz="3.48321257960907E-17" izz="10.0526194504852" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="package://car/meshes/wheel_rf.STL" />
       </geometry>
-      <material name="black"/>
-
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -123,28 +134,25 @@
     </collision>
   </link>
   <joint name="joint_rf" type="continuous">
-    <origin xyz="-0.886589999999997 -0.629999999999984 0.422985466863979" rpy="-1.5707963267949 0.578709634858061 3.14159265358979" />
-    <parent link="base_link" />
+    <origin xyz="1.5634 -0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
     <child link="wheel_rf" />
-    <axis xyz="0 0 -1" />
+    <axis xyz="0 1 0" />
   </joint>
-
-  <gazebo reference = "wheel_rr">
-    <material>Gazebo/Black</material>
-  </gazebo>
-
   <link name="wheel_rr">
     <inertial>
-      <origin xyz="0 -5.55111512312578E-17 -0.16" rpy="0 0 0" />
+      <origin xyz="2.22044604925031E-16 -0.16 0" rpy="0 0 0" />
       <mass value="195.872333513578" />
-      <inertia ixx="10.0526194504852" ixy="-6.51011529597682E-30" ixz="-2.39496003678538E-14" iyy="10.0526194504852" iyz="1.18124621258017E-31" izz="16.8524046276173" />
+      <inertia ixx="10.0526194504852" ixy="-2.41411214140486E-14" ixz="3.69237933083238E-30" iyy="16.8524046276173" iyz="-1.3532984430688E-31" izz="10.0526194504852" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="package://car/meshes/wheel_rr.STL" />
       </geometry>
-      <material name="black"/>
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -153,30 +161,85 @@
       </geometry>
     </collision>
   </link>
-
   <joint name="joint_rr" type="continuous">
-    <origin xyz="-4.11659 -0.629999999999996 0.422985466863991" rpy="-1.5707963267949 0 0" />
-    <parent link="base_link" />
+    <origin xyz="-1.6666 -0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
     <child link="wheel_rr" />
-    <axis xyz="0  0 1" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <link name="plate_l">
+    <inertial>
+      <origin xyz="-4.44089209850063E-16 -2.22044604925031E-16 0.00100000000000067" rpy="0 0 0" />
+      <mass value="0.0831265416139861" />
+      <inertia ixx="0.000101857722324338" ixy="-6.70850094225479E-21" ixz="3.74007284466562E-19" iyy="0.000101857722324338" iyz="9.60487555893223E-23" izz="0.000203660026954266" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_l.STL" />
+      </geometry>
+      <material name="Orange">
+        <color rgba="1.0 0.33 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_l.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_pl" type="fixed">
+    <origin xyz="2.1934 0.95 0.27" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="plate_l" />
+    <axis xyz="0 0 0" />
+  </joint>
+  <link name="plate_r">
+    <inertial>
+      <origin xyz="-4.44089209850063E-16 1.11022302462516E-16 0.00100000000000039" rpy="0 0 0" />
+      <mass value="0.0831265416139861" />
+      <inertia ixx="0.000101857722324338" ixy="3.76876721968964E-21" ixz="3.74111586635625E-19" iyy="0.000101857722324338" iyz="7.8828622518223E-23" izz="0.000203660026954266" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_r.STL" />
+      </geometry>
+      <material name="Orange">
+        <color rgba="1.0 0.33 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_r.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_pr" type="fixed">
+    <origin xyz="2.1934 -0.95 0.27" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="plate_r" />
+    <axis xyz="0 0 0" />
   </joint>
 
   <!-- 左前16线激光雷达 -->
   <xacro:include filename="VLP-16.urdf.xacro"/>
-  <xacro:VLP-16 parent="base_link" name="velodyne_left" topic="/velodyne_left" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
-    <origin xyz="-0.2566 0.95 1.408" rpy="0 0 0" />
+  <xacro:VLP-16 parent="plate_l" name="velodyne_left" topic="/velodyne_left" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
+    <origin xyz="0 0 0.002" rpy="0 0 0" />
   </xacro:VLP-16>
 
   <!-- 右前16线激光雷达 -->
   <xacro:include filename="VLP-16.urdf.xacro"/>
-  <xacro:VLP-16 parent="base_link" name="velodyne_right" topic="/velodyne_right" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
-    <origin xyz="-0.2566 -0.95 1.408" rpy="0 0 0" />
+  <xacro:VLP-16 parent="plate_r" name="velodyne_right" topic="/velodyne_right" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
+    <origin xyz="0 0 0.002" rpy="0 0 0" />
   </xacro:VLP-16>
 
   <!-- 顶部32线激光雷达 -->
   <xacro:include filename="HDL-32E.urdf.xacro"/>
-  <xacro:HDL-32E parent="base_link" name="velodyne_top" topic="/velodyne_top" organize_cloud="${organize_cloud}" hz="10" samples="220" gpu="${gpu}">
-    <origin xyz="-2.45 0 1.813" rpy="0 0 0" />
+  <xacro:HDL-32E parent="vehicle_base_link" name="velodyne_top" topic="/velodyne_top" organize_cloud="${organize_cloud}" hz="10" samples="220" gpu="${gpu}">
+    <origin xyz="0 0 0.695" rpy="0 0 0" />
   </xacro:HDL-32E>
 
   <!-- Drive controller -->
@@ -189,8 +252,8 @@
       <leftRearJoint>joint_lr</leftRearJoint>
       <rightRearJoint>joint_rr</rightRearJoint>
       <wheelSeparation>4</wheelSeparation>
-      <wheelDiameter>1</wheelDiameter>
-      <robotBaseFrame>base_link</robotBaseFrame>
+      <wheelDiameter>0.41</wheelDiameter>
+      <robotBaseFrame>vehicle_base_link</robotBaseFrame>
       <torque>5000000</torque>
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
