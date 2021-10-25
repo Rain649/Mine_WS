@@ -10,8 +10,6 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 
-void range_filter(pcl::PointCloud<pcl::PointXYZ> &input_cloud, pcl::PointCloud<pcl::PointXYZ> &output_cloud, const float &min_scan_range_, const float min_z);
-
 //将弧度转换到-π~π区间
 inline void radianTransform(float &radian);
 

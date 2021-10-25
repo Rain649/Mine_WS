@@ -123,11 +123,11 @@ public:
         ROS_INFO("Minimum ClusterSize: %d", minClusterSize);
         nh.param("clusterRadius", clusterRadius, 1.0);
         ROS_INFO("Cluster Radius: %f", clusterRadius);
-        nh.param("passX_min", passX_min, -3.0);
+        nh.param("passX_min", passX_min, -5.0);
         ROS_INFO("PassThrough Filter X Minimum: %f", passX_min);
-        nh.param("passZ_min", passZ_min, -1.8);
+        nh.param("passZ_min", passZ_min, -0.8);
         ROS_INFO("PassThrough Filter Z Minimum: %f", passZ_min);
-        nh.param("passZ_max", passZ_max, 0.0);
+        nh.param("passZ_max", passZ_max, 1.0);
         ROS_INFO("PassThrough Filter Z Maximum: %f", passZ_max);
 
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>(pointCloud_topic_, 1, &laneDetection::laserCloudNewHandler, this);
@@ -320,14 +320,14 @@ public:
             y2 = cloudCluster_2->points[pointSearchInd[0]].y;
         }
 
-        //y2左侧距离，y1右侧距离
+        // y2左侧距离，y1右侧距离
         if (y1 < y2)
         {
             cloudCluster_1->swap(*cloudCluster_2);
             Distance.data.push_back(y2);
             Distance.data.push_back(y1);
         }
-        //y1左侧距离，y2右侧距离
+        // y1左侧距离，y2右侧距离
         else
         {
             Distance.data.push_back(y1);

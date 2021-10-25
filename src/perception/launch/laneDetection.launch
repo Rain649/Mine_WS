@@ -5,8 +5,8 @@
   <arg name="order" default="3" />
   <arg name="minClusterSize" default="100" />
   <arg name="clusterRadius" default="1.0" />
-  <arg name="passX_min" default="-3.0" />
-  <arg name="passZ_min" default="-1.8" />
+  <arg name="passX_min" default="-5.0" />
+  <arg name="passZ_min" default="-0.8" />
   <arg name="passZ_max" default="0.0" />
 
   <node pkg="perception" type="laneDetection" name="laneDetection" output="screen">
@@ -21,18 +21,18 @@
   </node>
 
   <!--- TF -->
-  <!-- <node pkg="tf" type="static_transform_publisher" name="velodyne2base_link"  args="0 0 0 0 0 0 /velodyne /base_link 100" /> -->
+  <!-- <node pkg="tf" type="static_transform_publisher" name="velodyne2base_link" args="0 0 0 0 0 0 /velodyne /base_link 100" /> -->
 
-   <!-- - rviz -->
+  <!-- - rviz -->
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find perception)/launch/laneFit.rviz"/>
 
   <!-- - rqt_reconfigure -->
-  <!-- <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" ></node> -->
+  <!-- <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"></node> -->
 
-    <!-- - rqt_plot -->
-  <!-- <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" ></node> -->
+  <!-- - rqt_plot -->
+  <!-- <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot"></node> -->
 
   <!-- - rqt_logger_level -->
-  <!-- <node name="rqt_logger_level" pkg="rqt_logger_level" type="rqt_logger_level" ></node> -->
+  <!-- <node name="rqt_logger_level" pkg="rqt_logger_level" type="rqt_logger_level"></node> -->
 
 </launch>

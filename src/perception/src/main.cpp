@@ -135,9 +135,13 @@ void location()
     {
         if (!intersectionVerified)
         {
-            ROS_ERROR_STREAM("Leave the vertex  " << path[preVertex_index + 1]);
-            viewer.removeAllPointClouds();
-            break;
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+            if (!intersectionVerified)
+            {
+                ROS_ERROR_STREAM("Leave the vertex  " << path[preVertex_index + 1]);
+                viewer.removeAllPointClouds();
+                break;
+            }
         }
         mtx_visual.lock();
         intersectionLocation(pose, target_cloud, lidarCloud, viewer);
@@ -153,7 +157,6 @@ void location()
         odom.pose.pose.position.y = pose[1];
         odom.pose.pose.position.z = 0;
         pubOdom.publish(odom);
-        // std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     return;
 }

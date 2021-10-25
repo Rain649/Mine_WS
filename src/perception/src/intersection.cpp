@@ -1,4 +1,3 @@
-
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -93,7 +92,7 @@ private:
     pcl::ConditionAnd<pcl::PointXYZI>::Ptr longitudinal_Condition;                 //条件滤波
     pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition;                       //条件滤波
     pcl::ConditionalRemoval<pcl::PointXYZI> condition;
-    pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang"); //定义绘图器
+    // pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang"); //定义绘图器
     pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kd_first;
     pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
     pcl::ExtractIndices<pcl::PointXYZI> extract;
@@ -157,10 +156,10 @@ public:
         // downSizeFilter.setLeafSize(0.5, 0.5, 0.5);
 
         //设置特性
-        plotter->setShowLegend(true);
-        plotter->setXTitle("Beam");
-        plotter->setYTitle("Distance");
-        plotter->setXRange(0, Horizon_SCAN);
+        // plotter->setShowLegend(true);
+        // plotter->setXTitle("Beam");
+        // plotter->setYTitle("Distance");
+        // plotter->setXRange(0, Horizon_SCAN);
 
         for (int i = 0; i < Horizon_SCAN; ++i)
         {
@@ -386,9 +385,9 @@ public:
         /*laser可视化处理*/
 
         // beam model(距离-角度分布图)
-        plotter->clearPlots();
-        plotter->addPlotData(Cols, beamDistance_Vec, Horizon_SCAN, "直方图");
-        plotter->spinOnce(0);
+        // plotter->clearPlots();
+        // plotter->addPlotData(Cols, beamDistance_Vec, Horizon_SCAN, "直方图");
+        // plotter->spinOnce(0);
 
         //距离阈值可视化
         circle_Lane.points.clear();
@@ -415,8 +414,8 @@ public:
         Edge_Lane.header.stamp = laser_Lane.header.stamp;
 
         /*横向距离阈值判定路口*/
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -7))); // GT表示大于等于
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 7)));  // GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -10))); // GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 10)));  // GT表示大于等于
 
         lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 7)));  // LT表示小于等于
         lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -7))); // LT表示小于等于        //条件滤波

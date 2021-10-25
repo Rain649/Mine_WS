@@ -1,24 +1,6 @@
 #include "intersectionLocation.h"
 #include <ros/ros.h>
 
-// void range_filter(pcl::PointCloud<pcl::PointXYZ> & input_cloud, pcl::PointCloud<pcl::PointXYZ> & output_cloud,const float & min_scan_range_, const float min_z)
-// {
-//     double r;
-//     pcl::PointXYZ p ;
-//     for (pcl::PointCloud<pcl::PointXYZ>::const_iterator item = input_cloud.begin();
-//         item != input_cloud.end(); ++item)
-//     {
-//         p.x = (double) item->x;
-//         p.y = (double) item->y;
-//         p.z = (double) item->z;
-//         r = p.x * p.x + p.y * p.y;
-//         if (r > min_scan_range_&&p.z >min_z) //filter the point distance lager than min_scan_range and height lower than min_z
-//         {
-//             output_cloud.push_back(p);
-//         }
-//     }
-// }
-
 // // 初始化点云可视化界面
 // int v1(0); //设置左窗口
 // int v2(1); //设置右窗口
@@ -53,7 +35,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   float transformationEpsilon = config["transformationEpsilon"].as<float>();
   float maxCorrespondenceDistance = config["maxCorrespondenceDistance"].as<float>();
   float euclideanFitnessEpsilon = config["euclideanFitnessEpsilon"].as<float>();
-  //
+
   // float x_pre = config["x"].as<float>();
   // float y_pre = config["y"].as<float>();
   // float yaw_pre = config["yaw"].as<float>();

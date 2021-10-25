@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -21,6 +20,8 @@
 #include <pcl/kdtree/kdtree_flann.h>           //kdtree搜索
 #include <pcl/filters/extract_indices.h>       //按索引提取
 #include <pcl/segmentation/extract_clusters.h> //分割聚类
+#include <pcl/filters/passthrough.h>           //直通滤波
+#include <pcl/filters/conditional_removal.h>   //条件滤波
 
 #include <dynamic_reconfigure/server.h>
 #include <perception/simuSegSave_Config.h>
@@ -29,11 +30,9 @@
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudOrigin;
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedTrans;
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNoCar;
-ros::Time time_st;
 
 void topHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
-    time_st = msg->header.stamp;
     pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
     pcl::fromROSMsg(*msg, lidarCloudThis);
     // 坐标系转换
@@ -47,7 +46,6 @@ void topHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 
 void leftHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
-    time_st = msg->header.stamp;
     pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
     pcl::fromROSMsg(*msg, lidarCloudThis);
     // 坐标系转换
@@ -61,7 +59,6 @@ void leftHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 
 void rightHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
-    time_st = msg->header.stamp;
     pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
     pcl::fromROSMsg(*msg, lidarCloudThis);
     // 坐标系转换
@@ -77,31 +74,10 @@ void pointCloudSave()
 {
     if (cloudOrigin->empty())
     {
-        std::cout << cloudCombinedTrans->header.frame_id << std::endl;
-        ROS_INFO("EMPTY!!!");
+        ROS_ERROR("No lidar point cloud !!!");
         return;
     }
 
-    // // 坐标系转换
-    // pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedTrans(new pcl::PointCloud<pcl::PointXYZI>());
-    // tf::TransformListener listener;
-    // if (listener.waitForTransform("vehicle_base_link", "vehicle_reference", ros::Time(0), ros::Duration(1)))
-    //     ROS_INFO("YES Receive Tranform !!!!");
-    // else
-    //     ROS_INFO("NO Receive Tranform !!!!");
-
-    // pcl_ros::transformPointCloud("vehicle_base_link", *cloudOrigin, *cloudCombinedTrans, listener);
-
-    //笨方法-坐标系转换
-    // for (const auto thisPoint : *cloudOrigin)
-    // {
-    //     pcl::PointXYZI p;
-    //     p.x = thisPoint.x + 2;
-    //     p.y = thisPoint.y;
-    //     p.z = thisPoint.z - 1;
-    //     p.intensity = thisPoint.intensity;
-    //     cloudCombinedTrans->push_back(p);
-    // }
     cloudCombinedTrans = cloudOrigin;
 
     /*动态参数*/
@@ -116,48 +92,65 @@ void pointCloudSave()
     ros::param::get("/simuSegSave/save_name", save_Name);
     /*动态参数*/
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudFinal(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<pcl::PointXYZI> cloudFinal;
 
-    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree_1, kdtree_2;
-    std::vector<int> index_1, index_2;         //保存每个近邻点的索引
-    std::vector<float> distance_1, distance_2; //保存每个近邻点与查找点之间的欧式距离平方
+    pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
+    std::vector<int> index;      //保存每个近邻点的索引
+    std::vector<float> distance; //保存每个近邻点与查找点之间的欧式距离平方
 
     pcl::PointXYZI zeroPoint(0.f);
     zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
 
+    //分离地面点
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedFiltered(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PassThrough<pcl::PointXYZI> groundFilter;
+    groundFilter.setInputCloud(cloudCombinedTrans);
+    groundFilter.setFilterFieldName("z");
+    groundFilter.setFilterLimits(-0.8, 1);
+    groundFilter.setFilterLimitsNegative(false);
+    groundFilter.filter(*cloudCombinedFiltered);
     // 分割车辆
-    kdtree_1.setInputCloud(cloudCombinedTrans); // 设置要搜索的点云，建立KDTree
-    pcl::ExtractIndices<pcl::PointXYZI> extract_1;
-    if (kdtree_1.radiusSearch(zeroPoint, 3.0, index_1, distance_1) == 0)
-    {
-        ROS_ERROR("There is no vehicle points  !!!");
-        return;
-    }
-    extract_1.setInputCloud(cloudCombinedTrans);
-    boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index_1);
-    extract_1.setIndices(index_ptr);
-    extract_1.setNegative(true); //如果设为true,可以提取指定index之外的点云
-    extract_1.filter(*cloudNoCar);
+    pcl::ConditionOr<pcl::PointXYZI>::Ptr longitudinal_Condition(new pcl::ConditionOr<pcl::PointXYZI>()); //条件滤波
+    pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition(new pcl::ConditionOr<pcl::PointXYZI>());      //条件滤波
+    pcl::ConditionalRemoval<pcl::PointXYZI> condition;
+
+    longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, 2.5))); // GT表示大于等于
+    longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -3)));  // GT表示大于等于
+
+    lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 0.96)));  // LT表示小于等于
+    lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -0.96))); // LT表示小于等于
+
+    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudTemp(new pcl::PointCloud<pcl::PointXYZI>());
+    condition.setCondition(longitudinal_Condition);
+    condition.setInputCloud(cloudCombinedFiltered);
+    condition.setKeepOrganized(false);
+    condition.filter(*cloudTemp);
+
+    condition.setCondition(lateral_Condition);
+    condition.setInputCloud(cloudTemp);
+    condition.setKeepOrganized(false);
+    condition.filter(*cloudNoCar);
+
     // 外围分割
-    kdtree_2.setInputCloud(cloudNoCar); // 设置要搜索的点云，建立KDTree
+    kdtree.setInputCloud(cloudNoCar); // 设置要搜索的点云，建立KDTree
     pcl::ExtractIndices<pcl::PointXYZI> extract_2;
-    if (kdtree_2.radiusSearch(zeroPoint, segmentationRadius, index_2, distance_2) == 0)
+    if (kdtree.radiusSearch(zeroPoint, segmentationRadius, index, distance) == 0)
     {
         ROS_ERROR("There is no point nearby !!!");
         return;
     }
     extract_2.setInputCloud(cloudNoCar);
-    index_ptr = boost::make_shared<std::vector<int>>(index_2);
+    boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index);
     extract_2.setIndices(index_ptr);
     extract_2.setNegative(false); //如果设为true,可以提取指定index之外的点云
-    extract_2.filter(*cloudFinal);
+    extract_2.filter(cloudFinal);
 
     if (!save_Bool)
         return;
     // 保存文件
     std::string fileName;
     fileName = "/home/lsj/dev/Mine_WS/simu_data/" + std::to_string(node_Id) + save_Name;
-    pcl::io::savePCDFileASCII(fileName, *cloudFinal); //将点云保存到PCD文件中
+    pcl::io::savePCDFileASCII(fileName, cloudFinal); //将点云保存到PCD文件中
     ROS_INFO("PCD file saved in  :  [%s]", fileName.c_str());
 }
 
@@ -228,8 +221,6 @@ int main(int argc, char **argv)
     cloudOrigin.reset(new pcl::PointCloud<pcl::PointXYZI>());
     cloudCombinedTrans.reset(new pcl::PointCloud<pcl::PointXYZI>());
     cloudOrigin->header.frame_id = "vehicle_base_link";
-    // cloudCombinedTrans->header.frame_id = "vehicle_reference";
-    // cloudNoCar->header.frame_id = "vehicle_reference";
     cloudCombinedTrans->header.frame_id = "vehicle_base_link";
     cloudNoCar->header.frame_id = "vehicle_base_link";
 
