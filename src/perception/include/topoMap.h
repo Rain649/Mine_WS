@@ -12,6 +12,7 @@
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
 
+inline void radianTransform(double &radian);
 namespace perception
 {
     ///* Define link information
@@ -57,12 +58,13 @@ private:
     std::unordered_map<int, perception::Edge> edge_Umap;
 
 public:
-    //Edge
+    // Edge
     int get_entranceVertex_id(const int &edge_id);
     int get_exitVertex_id(const int &edge_id);
     double get_cost(const int &edge_id);
-    //Vertex
+    // Vertex
     perception::LinkedInfo get_linkedInfo(const int &vertex1_id, const int &vertex2_id);
+    //弧度
     double get_angleDiff(const int &vertex1_id, const int &vertex2_id);
     std::vector<int> get_linkedVertex_Vec(const int &vertex_id);
     std::vector<double> get_targetPoint(const int &vertex1_id, const int &vertex2_id);

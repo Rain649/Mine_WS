@@ -34,7 +34,8 @@
 
 std::mutex mtx_visual;
 std::vector<float> pose(3, 0.0);
-std::vector<int> path{0, 1, 2, 11, 12, 13, 16, 17, 18, 1};
+// std::vector<int> path;
+std::vector<int> path{2, 11, 12, 13, 16, 17, 18, 1};
 std::string dataPath = "/home/lsj/dev/Mine_WS/simu_data/";
 int preVertex_index = 0;
 bool intersectionVerified = false;
@@ -42,6 +43,7 @@ TopoMap topoMap;
 pcl::PointCloud<pcl::PointXYZ>::Ptr lidarCloud;
 pcl::visualization::PCLVisualizer viewer("ndt");
 ros::Publisher pubOdom;
+ros::Publisher pubIntersectionID;
 
 //将弧度转换到-π~π区间
 inline void radianTransform(float &radian)
@@ -127,9 +129,9 @@ void location()
         PCL_ERROR("Couldn't read file target_cloud.pcd \n");
         return;
     }
-    pose[0] = -7;
-    pose[1] = 0;
-    pose[2] = static_cast<float>(yaw_pre * M_PI / 180);
+    pose[0] = -10 * cos(yaw_pre);
+    pose[1] = -10 * sin(yaw_pre);
+    pose[2] = yaw_pre;
     radianTransform(pose[2]);
     while (ros::ok())
     {
@@ -157,6 +159,7 @@ void location()
         odom.pose.pose.position.y = pose[1];
         odom.pose.pose.position.z = 0;
         pubOdom.publish(odom);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     return;
 }
@@ -199,6 +202,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "intersectionLocation");
     ros::NodeHandle nh("~");
     pubOdom = nh.advertise<nav_msgs::Odometry>("intersectionOdom", 1);
+    pubIntersectionID = nh.advertise<std_msgs::Int32>("intersection_id", 1);
     lidarCloud.reset(new pcl::PointCloud<pcl::PointXYZ>);
     // 初始化点云可视化界面
     int v1(1); //设置左窗口
@@ -225,21 +229,22 @@ int main(int argc, char **argv)
     {
         ros::spinOnce();
 
+        std_msgs::Int32 intersectionID;
+        if (!path.empty())
+            intersectionID.data = path[preVertex_index + 1];
+        else if (preVertex_index + 1 >= path.size())
+        {
+            intersectionID.data = path.back();
+        }
+        else
+        {
+            intersectionID.data = -1;
+            ROS_ERROR_THROTTLE(2, "Intersection ID ERROR!!!");
+        }
+        pubIntersectionID.publish(intersectionID);
+
         rate.sleep();
     }
-
-    // /********读取数据********/
-    // std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/ndtData.yaml";
-    // YAML::Node config = YAML::LoadFile(fin);
-    // float yaw = config["yaw"].as<float>() * M_PI / 180;
-    // float x = config["x"].as<float>();
-    // float y = config["y"].as<float>();
-    // std::string test1File = config["test1File"].as<std::string>();
-    // std::string test2File = config["test2File"].as<std::string>();
-    // float yaw_pre = config["yaw_pre"].as<float>() * M_PI / 180;
-    // float x_pre = config["x_pre"].as<float>();
-    // float y_pre = config["y_pre"].as<float>();
-    // /********读取数据********/
 
     return 0;
 }

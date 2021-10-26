@@ -91,10 +91,10 @@ link_directories(
 # add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-add_executable(simuSegSave  src/simuSegSave.cpp)
-add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+# add_executable(simuSegSave  src/simuSegSave.cpp)
+# add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-# add_executable(main  src/main.cpp src/intersectionLocation.cpp src/topoMap.cpp include/intersectionLocation.h include/topoMap.h)
-# add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(main  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
+add_executable(main  src/main.cpp src/intersectionLocation.cpp src/topoMap.cpp include/intersectionLocation.h include/topoMap.h)
+add_dependencies(main ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(main  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)

@@ -30,9 +30,11 @@
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudOrigin;
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedTrans;
 pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNoCar;
+ros::Time time_st;
 
 void topHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
+    time_st = msg->header.stamp;
     pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
     pcl::fromROSMsg(*msg, lidarCloudThis);
     // 坐标系转换
@@ -46,6 +48,7 @@ void topHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 
 void leftHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
+    time_st = msg->header.stamp;
     pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
     pcl::fromROSMsg(*msg, lidarCloudThis);
     // 坐标系转换
@@ -59,6 +62,7 @@ void leftHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 
 void rightHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
 {
+    time_st = msg->header.stamp;
     pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
     pcl::fromROSMsg(*msg, lidarCloudThis);
     // 坐标系转换
@@ -116,20 +120,19 @@ void pointCloudSave()
 
     longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, 2.5))); // GT表示大于等于
     longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -3)));  // GT表示大于等于
-
-    lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 0.96)));  // LT表示小于等于
-    lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -0.96))); // LT表示小于等于
+    longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 1)));   // LT表示小于等于
+    longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -1)));  // LT表示小于等于
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudTemp(new pcl::PointCloud<pcl::PointXYZI>());
     condition.setCondition(longitudinal_Condition);
     condition.setInputCloud(cloudCombinedFiltered);
     condition.setKeepOrganized(false);
-    condition.filter(*cloudTemp);
-
-    condition.setCondition(lateral_Condition);
-    condition.setInputCloud(cloudTemp);
-    condition.setKeepOrganized(false);
     condition.filter(*cloudNoCar);
+
+    // condition.setCondition(lateral_Condition);
+    // condition.setInputCloud(cloudTemp);
+    // condition.setKeepOrganized(false);
+    // condition.filter(*cloudNoCar);
 
     // 外围分割
     kdtree.setInputCloud(cloudNoCar); // 设置要搜索的点云，建立KDTree
@@ -240,6 +243,7 @@ int main(int argc, char **argv)
         pointCloudSave();
 
         //发布点云
+        cloudNoCar->header.stamp = time_st.toSec();
         sensor_msgs::PointCloud2 output;
         toROSMsg(*cloudNoCar, output);
         cloudCombined_pub.publish(output);

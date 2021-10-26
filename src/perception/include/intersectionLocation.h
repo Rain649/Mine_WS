@@ -9,6 +9,7 @@
 #include <boost/thread/thread.hpp>
 #include <yaml-cpp/yaml.h>
 #include <fstream>
+#include <omp.h>
 
 //将弧度转换到-π~π区间
 inline void radianTransform(float &radian);

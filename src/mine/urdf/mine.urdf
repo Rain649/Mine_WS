@@ -3,6 +3,7 @@
      Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot name="mine">
+
   <link name="world"/>
 
   <joint name="fixed_joint" type="fixed">
@@ -13,12 +14,11 @@
   <gazebo reference = " map_base_link">
     <material>Gazebo/Grey2</material>
   </gazebo>
-
   <link name="map_base_link">
     <inertial>
-      <origin xyz="130.81 183.95 3.9345" rpy="0 0 0" />
-      <mass value="2387200000" />
-      <inertia ixx="31955000000000" ixy="-826810000000" ixz="-1773300000" iyy="18007000000000" iyz="-5332700000" izz="49921000000000" />
+      <origin xyz="130.791656630179 183.679812025031 3.93639265734445" rpy="0 0 0" />
+      <mass value="2395284620.73989" />
+      <inertia ixx="32026607026425.4" ixy="-842439627183.297" ixz="-1743736450.80421" iyy="18022519118233.7" iyz="-4967746233.79514" izz="50008411542104.2" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />

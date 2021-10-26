@@ -2,6 +2,15 @@
 
 using namespace perception;
 
+//将弧度转换到-π~π区间
+inline void radianTransform(double &radian)
+{
+    while (radian > M_PI)
+        radian -= 2 * M_PI;
+    while (radian <= -M_PI)
+        radian += 2 * M_PI;
+}
+
 int TopoMap::get_entranceVertex_id(const int &edge_id)
 {
     if (edge_Umap.count(edge_id) == 0)
@@ -43,7 +52,9 @@ double TopoMap::get_angleDiff(const int &vertex1_id, const int &vertex2_id)
         return {};
     Vertex v = vertex_Umap[vertex1_id];
     LinkedInfo lI = v.linkedInfo_Umap[vertex2_id];
-    return lI.angleDiff;
+    double ret = lI.angleDiff * M_PI / 180;
+    radianTransform(ret);
+    return ret;
 }
 std::vector<int> TopoMap::get_linkedVertex_Vec(const int &vertex_id)
 {

@@ -218,7 +218,8 @@ public:
 
     void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
-        timeLaserCloudNew = msg->header.stamp.toSec();
+        // timeLaserCloudNew = msg->header.stamp.toSec();
+        // ROS_INFO_STREAM("timeLaserCloudNew : " << timeLaserCloudNew);
         laneRight->clear();
         laserCloudNew->clear();
         laserCloudNewZ->clear();
@@ -474,7 +475,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*laserCloudNewDS_1, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCloudHigh.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudWithInfo Published.");
@@ -484,7 +485,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*laserCloudNewTFDS, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCloudTFDS.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m Cloud Published.");
@@ -494,7 +495,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudFinal, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCloudFinal.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
@@ -504,7 +505,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCluster_1.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
@@ -514,7 +515,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCluster_2.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
@@ -524,7 +525,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCluster_3.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
@@ -534,7 +535,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCluster_4.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
@@ -544,7 +545,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*laneLeft, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubLaneLeft.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m laneLeft Published.");
@@ -554,7 +555,7 @@ public:
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*laneRight, cloudMsgTemp);
-            cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubLaneRight.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
