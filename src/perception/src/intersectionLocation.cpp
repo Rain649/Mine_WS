@@ -36,13 +36,23 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   float maxCorrespondenceDistance = config["maxCorrespondenceDistance"].as<float>();
   float euclideanFitnessEpsilon = config["euclideanFitnessEpsilon"].as<float>();
 
-  float x_pre = config["x"].as<float>();
-  float y_pre = config["y"].as<float>();
-  float yaw_pre = config["yaw"].as<float>() * M_PI / 180;
+  float x_pre;
+  float y_pre;
+  float yaw_pre;
+  /********测试数据********/
+  if (config["menu_bool"].as<bool>())
+  {
+    x_pre = config["x"].as<float>();
+    y_pre = config["y"].as<float>();
+    yaw_pre = config["yaw"].as<float>() * M_PI / 180;
+  }
   /********读取数据********/
-  // float x_pre = pose[0];
-  // float y_pre = pose[1];
-  // float yaw_pre = pose[2];
+  else
+  {
+    x_pre = pose[0];
+    y_pre = pose[1];
+    yaw_pre = pose[2];
+  }
   radianTransform(yaw_pre);
   ROS_INFO("---------------------------------------");
   ROS_INFO_STREAM("yaw_pre =  " << yaw_pre << "; x =  " << x_pre << "; y =  " << y_pre);
@@ -108,7 +118,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
     }
   }
   Eigen::Matrix4f transformation;
-  if (ndt.getFitnessScore() < icp.getFitnessScore() || 1)
+  if (ndt.getFitnessScore() < icp.getFitnessScore())
   {
     transformation = ndt.getFinalTransformation();
     pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);

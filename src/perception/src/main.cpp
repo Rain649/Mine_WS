@@ -159,7 +159,7 @@ void location()
         odom.pose.pose.position.y = pose[1];
         odom.pose.pose.position.z = 0;
         pubOdom.publish(odom);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     return;
 }
