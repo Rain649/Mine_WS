@@ -199,7 +199,7 @@ void beginLocation()
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "intersectionLocation");
+    ros::init(argc, argv, "navigation");
     ros::NodeHandle nh("~");
     pubOdom = nh.advertise<nav_msgs::Odometry>("intersectionOdom", 1);
     pubIntersectionID = nh.advertise<std_msgs::Int32>("intersection_id", 1);

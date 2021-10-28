@@ -62,7 +62,7 @@
     <param name="passZ_max" value="$(arg passZ_max)" />
   </node>
 
-  <!-- <node name="main" pkg="perception" type="main" output="screen"></node> -->
+  <!-- <node name="navigation" pkg="perception" type="navigation" output="screen"></node> -->
 
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_gazebo)/launch/mineSimulation.rviz"/> -->
 
