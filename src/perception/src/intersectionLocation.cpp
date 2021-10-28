@@ -27,7 +27,7 @@ int v2(2); //设置右窗口
 void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::visualization::PCLVisualizer &viewer)
 {
   /********读取数据********/
-  std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/ndtData.yaml";
+  std::string fin = "src/perception/include/ndtData.yaml";
   YAML::Node config = YAML::LoadFile(fin);
   float maximumIterations = config["maximumIterations"].as<float>();
   float resolution = config["resolution"].as<float>();

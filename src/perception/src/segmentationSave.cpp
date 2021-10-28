@@ -54,7 +54,7 @@ void segmentation_1(int index, pcl::PointXYZI thisKeyPoint, int segmentationRadi
     keyPoint_Neighbor = transform2zero(keyPoint_Neighbor, thisKeyPoint);
 
     std::string fileName;
-    fileName = "/home/lsj/dev/Mine_WS/data/" + std::to_string(index) + "_whole.pcd";
+    fileName = "data/" + std::to_string(index) + "_whole.pcd";
     pcl::io::savePCDFileASCII(fileName, *keyPoint_Neighbor); //将点云保存到PCD文件中
     ROS_INFO("Whole PCD saved in  :  [%s]", fileName.c_str());
 
@@ -99,7 +99,7 @@ void segmentation_2(int index, pcl::PointXYZI thisKeyPoint, int segmentationRadi
     float x = (float)((int)(thisKeyPoint.x * 100)) / 100;
     float y = (float)((int)(thisKeyPoint.z * 100)) / 100;
     float z = (float)((int)(thisKeyPoint.y * 100)) / 100;
-    fileName = "/home/lsj/dev/Mine_WS/data/" + std::to_string(index) + "_center" + "_(" +
+    fileName = "data/" + std::to_string(index) + "_center" + "_(" +
                std::to_string(x).substr(0, std::to_string(x).length() - 4) + "," +
                std::to_string(y).substr(0, std::to_string(y).length() - 4) + "," +
                std::to_string(z).substr(0, std::to_string(z).length() - 4) + ").pcd";
@@ -113,7 +113,7 @@ void segmentation_2(int index, pcl::PointXYZI thisKeyPoint, int segmentationRadi
         ROS_ERROR("There is no point in Center !!!");
     }
     /*保存交叉路口岔路点云*/
-    fileName = "/home/lsj/dev/Mine_WS/data/" + std::to_string(index) + "_intersection.pcd";
+    fileName = "data/" + std::to_string(index) + "_intersection.pcd";
     try
     {
         pcl::io::savePCDFileASCII(fileName, *cloudIntersections); //将点云保存到PCD文件中
@@ -183,7 +183,7 @@ void segmentation_3(int index)
         x = (float)((int)(it_Pos->second[0] * 100)) / 100;
         y = (float)((int)(it_Pos->second[2] * 100)) / 100;
         z = (float)((int)(it_Pos->second[1] * 100)) / 100;
-        fileName = "/home/lsj/dev/Mine_WS/data/" + std::to_string(index) + "." + std::to_string(++i) + "_(" +
+        fileName = "data/" + std::to_string(index) + "." + std::to_string(++i) + "_(" +
                    std::to_string(x).substr(0, std::to_string(x).length() - 4) + "," +
                    std::to_string(y).substr(0, std::to_string(y).length() - 4) + "," +
                    std::to_string(z).substr(0, std::to_string(z).length() - 4) + ").pcd";
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
     ROS_INFO("\033[1;32m---->\033[0m Please Drag The PCD File In:");
     std::getline(std::cin, fileName);
     if (fileName == "")
-        fileName = "_/home/lsj/dev/Mine_WS/data/CLOUD_All.pcd__";
+        fileName = "_data/CLOUD_All.pcd__";
     laserCloudAll.reset(new pcl::PointCloud<pcl::PointXYZI>);
     keyPoint_Neighbor.reset(new pcl::PointCloud<pcl::PointXYZI>);
     cloudIntersections.reset(new pcl::PointCloud<pcl::PointXYZI>);
@@ -233,18 +233,18 @@ int main(int argc, char **argv)
         ROS_INFO("\033[1;32m---->\033[0m Please Drag The PCD File In:");
         std::getline(std::cin, fileName);
         if (fileName == "")
-            fileName = "_/home/lsj/dev/Mine_WS/data/CLOUD_All.pcd__";
+            fileName = "_data/CLOUD_All.pcd__";
     }
     ROS_INFO_STREAM("The Number of Points of This PCD File is :  " << laserCloudAll->size());
     /***********************读取点云***********************/
 
     /***********************读取文件***********************/
-    std::ifstream infile; //infile是一个文件流，因此其实还是对流进行的操作
+    std::ifstream infile; // infile是一个文件流，因此其实还是对流进行的操作
     fileName.clear();
     ROS_INFO("Please Drag The Intersection Information File In:");
     std::getline(std::cin, fileName);
     if (fileName == "")
-        fileName = "_/home/lsj/dev/Mine_WS/data/intersection_info.txt__";
+        fileName = "_data/intersection_info.txt__";
     infile.open(fileName.substr(1, fileName.length() - 3));
     while (!infile) //判断是否存在ifstream infile
     {
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
         ROS_INFO("\033[1;32m---->\033[0m Please Drag The Intersection Information File In:");
         std::getline(std::cin, fileName);
         if (fileName == "")
-            fileName = "_/home/lsj/dev/Mine_WS/data/intersection_info.txt__";
+            fileName = "_data/intersection_info.txt__";
         infile.open(fileName.substr(1, fileName.length() - 3));
     }
     ROS_INFO("\033[1;32m---->\033[0m Read File Successfully");

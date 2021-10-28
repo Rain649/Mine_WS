@@ -217,7 +217,7 @@ public:
         ROS_INFO("============== pointsSave ==============");
         std::ofstream outfile;
 
-        outfile.open("/home/lsj/dev/Mine_WS/data/" + save_Name + ".txt");
+        outfile.open("data/" + save_Name + ".txt");
 
         outfile << std::setiosflags(std::ios::left) << std::setw(10) << "index" << std::setw(15) << "keyPoint.x" << std::setw(15) << "keyPoint.y"
                 << std::setw(15) << "keyPoint.z" << std::setw(20) << "cluster_number" << std::setw(20) << "peak_number" << std::setw(10) << "radius" << std::endl;

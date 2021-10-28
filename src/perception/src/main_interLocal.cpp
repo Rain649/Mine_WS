@@ -30,7 +30,7 @@ void visual(pcl::visualization::PCLVisualizer &viewer)
 int main()
 {
     /********读取数据********/
-    std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/ndtData.yaml";
+    std::string fin = "src/perception/include/ndtData.yaml";
     YAML::Node config = YAML::LoadFile(fin);
     float yaw = config["yaw"].as<float>() * M_PI / 180;
     float x = config["x"].as<float>();

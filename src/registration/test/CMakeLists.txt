@@ -33,7 +33,7 @@ if(PCL_FOUND)
 
 	include_directories(${PCL_INCLUDE_DIRS})
 	include_directories(${HEADER_DIR})
-    link_directories("/home/lsj/dev/Mine_WS/src/registration/test/lib")
+    link_directories("src/registration/test/lib")
 	
 	add_definitions(${PCL_DEFINITIONS})
 

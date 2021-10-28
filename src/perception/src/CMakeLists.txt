@@ -9,7 +9,7 @@ project(topomap)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-set(HEADER_DIR /home/lsj/dev/Mine_WS/src/perception/include)
+set(HEADER_DIR src/perception/include)
 # set(HEADER_FILES ${HEADER_DIR}/intersectionLocation.h)
 set(HEADER_FILES ${HEADER_DIR}/topoMap.h)
 
@@ -37,7 +37,7 @@ include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${HEADER_DIR})
 include_directories(${EIGEN3_INCLUDE_DIR})
 link_directories(include ${PCL_LIBRARY_DIRS})
-# link_directories("/home/lsj/dev/Mine_WS/src/registration/test/lib")
+# link_directories("src/registration/test/lib")
 
 add_definitions(${PCL_DEFINITIONS})
 

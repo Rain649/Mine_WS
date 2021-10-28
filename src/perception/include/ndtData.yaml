@@ -16,13 +16,13 @@ euclideanFitnessEpsilon: 0.1
 
 maxCorrespondenceDistance: 1
 
-test1File: /home/lsj/dev/Mine_WS/src/perception/src/test1.pcd
+test1File: src/perception/src/test1.pcd
 
-test2File: /home/lsj/dev/Mine_WS/src/perception/src/test2.pcd
+test2File: src/perception/src/test2.pcd
 
-# test1File: /home/lsj/dev/Mine_WS/src/perception/src/4_whole.pcd
+# test1File: src/perception/src/4_whole.pcd
 
-# test2File: /home/lsj/dev/Mine_WS/src/perception/src/4_whole.pcd
+# test2File: src/perception/src/4_whole.pcd
 
 yaw_pre: 0
 

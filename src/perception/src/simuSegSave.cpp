@@ -152,7 +152,7 @@ void pointCloudSave()
         return;
     // 保存文件
     std::string fileName;
-    fileName = "/home/lsj/dev/Mine_WS/simu_data/" + std::to_string(node_Id) + save_Name;
+    fileName = "simu_data/" + std::to_string(node_Id) + save_Name;
     pcl::io::savePCDFileASCII(fileName, cloudFinal); //将点云保存到PCD文件中
     ROS_INFO("PCD file saved in  :  [%s]", fileName.c_str());
 }

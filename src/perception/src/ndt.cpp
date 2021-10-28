@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   clock_t startTime, endTime;
   startTime = clock(); //计时开始
   /********读取数据********/
-  std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/ndtData.yaml";
+  std::string fin = "src/perception/include/ndtData.yaml";
   YAML::Node config = YAML::LoadFile(fin);
   float yaw = config["yaw"].as<float>() * M_PI / 180;
   float x = config["x"].as<float>();
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
   //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
   ndt.setStepSize(stepSize);
   //设置NDT网格结构的分辨率（VoxelGridCovariance）
-  ndt.setResolution(resolution); //ND体素的大小，单位为m,越小越准确，但占用内存越多
+  ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
   //设置匹配迭代的最大次数
   ndt.setMaximumIterations(maximumIterations);
   // 设置要配准的点云
@@ -140,7 +140,7 @@ int main(int argc, char **argv)
   std::cout << "Normal Distributions Transform has converged: " << ndt.hasConverged()
             << "; score: " << ndt.getFitnessScore() << std::endl; //欧式适合度评分
   //使用创建的变换对未过滤的输入点云进行变换
-  //ndt.getFinalTransformation (）即最终变换
+  // ndt.getFinalTransformation (）即最终变换
   Eigen::Matrix4f transformation = ndt.getFinalTransformation();
   endTime = clock(); //计时结束
   std::cout << "The run time is: " << (int)(endTime - startTime) / CLOCKS_PER_SEC << " s" << std::endl;

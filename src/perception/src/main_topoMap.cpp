@@ -7,9 +7,9 @@
 int main()
 {
     std::string vertexFilePath, edgeFilePath, pcdFilePath;
-    vertexFilePath = "/home/lsj/dev/Mine_WS/simu_data/Vertex.yaml";
-    edgeFilePath = "/home/lsj/dev/Mine_WS/simu_data/Edge.yaml";
-    pcdFilePath = "/home/lsj/dev/Mine_WS/simu_data/";
+    vertexFilePath = "simu_data/Vertex.yaml";
+    edgeFilePath = "simu_data/Edge.yaml";
+    pcdFilePath = "simu_data/";
 
     TopoMap topoMap = loadMap(vertexFilePath, edgeFilePath, pcdFilePath);
 

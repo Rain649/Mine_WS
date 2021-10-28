@@ -33,7 +33,7 @@
 
 using namespace std;
 
-std::string filePath = "/home/lsj/dev/Mine_WS/data/";
+std::string filePath = "data/";
 
 /********yaml数据********/
 struct Position
@@ -325,7 +325,7 @@ private:
     bool transferComplete = false;
     bool intersectionVerifiedPre = false;
 
-    std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/ndtData.yaml";
+    std::string fin = "src/perception/include/ndtData.yaml";
 
     stack<int> trajectory;
 
@@ -595,7 +595,7 @@ public:
         //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
         ndt.setStepSize(stepSize);
         //设置NDT网格结构的分辨率（VoxelGridCovariance）
-        ndt.setResolution(resolution); //ND体素的大小，单位为m,越小越准确，但占用内存越多
+        ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
         //设置匹配迭代的最大次数
         ndt.setMaximumIterations(maximumIterations);
         //设置要配准的点云
@@ -624,7 +624,7 @@ public:
         if (ndt.hasConverged())
             ROS_INFO_STREAM("Normal Distributions Transform Score = " << res);
 
-        //ndt.getFinalTransformation (）即最终变换
+        // ndt.getFinalTransformation (）即最终变换
         Eigen::Matrix4f transformation = ndt.getFinalTransformation();
         //使用创建的变换对未过滤的输入点云进行变换
         pcl::transformPointCloud(*filtered_cloud, *output_cloud, ndt.getFinalTransformation());
@@ -727,7 +727,7 @@ int main(int argc, char **argv)
     /*动态参数调节*/
 
     /********读取拓扑地图信息，构建拓扑地图********/
-    std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/Vertex.yaml";
+    std::string fin = "src/perception/include/Vertex.yaml";
     YAML::Node vertex_YN = YAML::LoadFile(fin);
     GraphLink map_Graph;
     vector<int> notExistIndex;
@@ -756,7 +756,7 @@ int main(int argc, char **argv)
         for (const auto &k : j.adjacent_index)
             map_Graph.insert_Edge(j.index, k);
     }
-    fin = "/home/lsj/dev/Mine_WS/src/perception/include/Edge.yaml";
+    fin = "src/perception/include/Edge.yaml";
     YAML::Node Edge_YN = YAML::LoadFile(fin);
     for (YAML::const_iterator it = Edge_YN.begin(); it != Edge_YN.end(); ++it)
     {
