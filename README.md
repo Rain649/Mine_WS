@@ -61,6 +61,8 @@
 
 ​	1.main.cpp中第39行的std::string dataPath = "/home/lsj/dev/Mine_WS/simu_data/";为放置simu_data的位置。
 
+​	2.intersectionLocation.cpp中第30行的  std::string fin = "/home/lsj/dev/Mine_WS/src/perception/include/ndtData.yaml";为放置ndtData.yaml的位置
+
 
 
 ### 四拓扑地图（函数）

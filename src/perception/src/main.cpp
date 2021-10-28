@@ -36,7 +36,7 @@ std::mutex mtx_visual;
 std::vector<float> pose(3, 0.0);
 // std::vector<int> path;
 std::vector<int> path{2, 11, 12, 13, 16, 17, 18, 1};
-std::string dataPath = "/home/lsj/dev/Mine_WS/simu_data/";
+std::string dataPath = "simu_data/";
 int preVertex_index = 0;
 bool intersectionVerified = false;
 TopoMap topoMap;
