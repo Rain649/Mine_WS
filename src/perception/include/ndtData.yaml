@@ -6,7 +6,7 @@ y: -8
 
 resolution: 18
 
-maximumIterations: 200
+maximumIterations: 100
 
 stepSize: 0.5
 
@@ -16,7 +16,7 @@ euclideanFitnessEpsilon: 0.01
 
 maxCorrespondenceDistance: 2
 
-fitnessScore: 5
+fitnessScore: 2
 
 yaw_thre: 0.5
 

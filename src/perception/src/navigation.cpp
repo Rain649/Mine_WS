@@ -147,6 +147,7 @@ void location()
         }
         mtx_visual.lock();
         intersectionLocation(pose, target_cloud, lidarCloud, viewer);
+        // viewer.spinOnce();
         mtx_visual.unlock();
         nav_msgs::Odometry odom;
         odom.header.stamp = ros::Time::now();
@@ -159,7 +160,7 @@ void location()
         odom.pose.pose.position.y = pose[1];
         odom.pose.pose.position.z = 0;
         pubOdom.publish(odom);
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        // std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     return;
 }

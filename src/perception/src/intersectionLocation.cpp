@@ -134,21 +134,20 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   }
 
   //位姿更新
-  ros::Duration duration = ros::Time::now() - tm;
+  // ros::Duration duration = ros::Time::now() - tm;
   double yaw_registration = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
-  double yaw_speed = (yaw_registration - yaw_pre) / duration.toSec();
-  ROS_ERROR_STREAM("duration.toSec() : " << duration.toSec());
-  if (std::min(icp.getFitnessScore(), ndt.getFitnessScore()) < fitnessScore_thre && abs(yaw_speed) <= yaw_thre)
+  // double yaw_speed = (yaw_registration - yaw_pre) / duration.toSec();
+  // ROS_ERROR_STREAM("duration.toSec() : " << duration.toSec());
+  // if (yaw_speed < 0)
+  //   ROS_ERROR_STREAM("yaw_speed : " << yaw_speed);
+  if (std::min(icp.getFitnessScore(), ndt.getFitnessScore()) <= fitnessScore_thre)
   {
-    if (yaw_speed < 0)
-      ROS_ERROR_STREAM("yaw_speed : " << yaw_speed);
     pose[0] = transformation(0, 3);
     pose[1] = transformation(1, 3);
     pose[2] = yaw_registration;
     radianTransform(pose[2]);
     ROS_INFO_STREAM("yaw =  " << pose[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
-    tm = ros::Time::now();
-    // }
+    // tm = ros::Time::now();
 
     //对目标点云着色（红色）并可视化
     pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
