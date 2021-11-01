@@ -29,7 +29,9 @@
   <arg name="model" default="$(find xacro)/xacro --inorder '$(find car)/urdf/car.xacro'" />
   <param name="robot_description" command="$(arg model)" />
 
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x -8 -z 1.8 "/>
+  <!-- <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x -8 -z 1.8 "/> -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x 150 -y 100 -z 1.8 "/>
+
   <!-- 运动控制 -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
     <param name="publish_frequency" type="double" value="50.0" />

@@ -1,5 +1,4 @@
 #include "intersectionLocation.h"
-#include <ros/ros.h>
 
 // // 初始化点云可视化界面
 // int v1(0); //设置左窗口
@@ -23,6 +22,7 @@ inline void radianTransform(float &radian)
 
 int v1(1); //设置左窗口
 int v2(2); //设置右窗口
+ros::Time tm = ros::TIME_MIN;
 
 void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::visualization::PCLVisualizer &viewer)
 {
@@ -35,6 +35,8 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   float transformationEpsilon = config["transformationEpsilon"].as<float>();
   float maxCorrespondenceDistance = config["maxCorrespondenceDistance"].as<float>();
   float euclideanFitnessEpsilon = config["euclideanFitnessEpsilon"].as<float>();
+  double yaw_thre = config["yaw_thre"].as<double>();
+  double fitnessScore_thre = config["fitnessScore"].as<double>();
 
   float x_pre;
   float y_pre;
@@ -132,36 +134,43 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   }
 
   //位姿更新
-  if (std::min(icp.getFitnessScore(), ndt.getFitnessScore()) < 10)
+  ros::Duration duration = ros::Time::now() - tm;
+  double yaw_registration = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
+  double yaw_speed = (yaw_registration - yaw_pre) / duration.toSec();
+  ROS_ERROR_STREAM("duration.toSec() : " << duration.toSec());
+  if (std::min(icp.getFitnessScore(), ndt.getFitnessScore()) < fitnessScore_thre && abs(yaw_speed) <= yaw_thre)
   {
+    if (yaw_speed < 0)
+      ROS_ERROR_STREAM("yaw_speed : " << yaw_speed);
     pose[0] = transformation(0, 3);
     pose[1] = transformation(1, 3);
-    pose[2] = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
+    pose[2] = yaw_registration;
     radianTransform(pose[2]);
     ROS_INFO_STREAM("yaw =  " << pose[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
+    tm = ros::Time::now();
+    // }
+
+    //对目标点云着色（红色）并可视化
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
+    //对转换前的输入点云着色（绿色）并可视化
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> input_color(filtered_cloud, 0, 255, 0);
+    //对转换后的输入点云着色（蓝色）并可视化
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> output_color(output_cloud, 0, 0, 255);
+
+    viewer.removeAllPointClouds();
+
+    viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud1", v1);
+    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud1");
+    viewer.addPointCloud<pcl::PointXYZ>(filtered_cloud, input_color, "input cloud", v1);
+    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "input cloud");
+
+    //对目标点云着色（红色）并可视化
+    viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud2", v2);
+    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud2");
+    // //对转换后的输入点云着色（蓝色）并可视化
+    viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud", v2);
+    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "output cloud");
   }
-
-  //对目标点云着色（红色）并可视化
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
-  //对转换前的输入点云着色（绿色）并可视化
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> input_color(filtered_cloud, 0, 255, 0);
-  //对转换后的输入点云着色（蓝色）并可视化
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> output_color(output_cloud, 0, 0, 255);
-
-  viewer.removeAllPointClouds();
-
-  viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud1", v1);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud1");
-  viewer.addPointCloud<pcl::PointXYZ>(filtered_cloud, input_color, "input cloud", v1);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "input cloud");
-
-  //对目标点云着色（红色）并可视化
-  viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud2", v2);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud2");
-  // //对转换后的输入点云着色（蓝色）并可视化
-  viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud", v2);
-  viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "output cloud");
-
   return;
 }
 

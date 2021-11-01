@@ -4,17 +4,21 @@ x: -5
 
 y: -8
 
-resolution: 15
+resolution: 18
 
-maximumIterations: 300
+maximumIterations: 200
 
 stepSize: 0.5
 
-transformationEpsilon: 0.1
+transformationEpsilon: 0.01
 
-euclideanFitnessEpsilon: 0.1
+euclideanFitnessEpsilon: 0.01
 
-maxCorrespondenceDistance: 1
+maxCorrespondenceDistance: 2
+
+fitnessScore: 5
+
+yaw_thre: 0.5
 
 test1File: src/perception/src/test1.pcd
 
@@ -30,4 +34,4 @@ x_pre: 0
 
 y_pre: 0
 
-menu_bool: y
+menu_bool: n
