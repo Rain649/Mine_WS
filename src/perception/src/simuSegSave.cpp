@@ -235,7 +235,7 @@ int main(int argc, char **argv)
     // std::thread thread_1(vehicleReference_pub);
     // std::thread thread_2(tfReceive);
 
-    ros::Rate rate(5);
+    ros::Rate rate(20);
     while (ros::ok())
     {
         ros::spinOnce();

@@ -614,7 +614,7 @@ int main(int argc, char **argv)
 
     laneDetection LD;
 
-    ros::Rate rate(5);
+    ros::Rate rate(20);
     while (ros::ok())
     {
         ros::spinOnce();
