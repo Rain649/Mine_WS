@@ -90,8 +90,7 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
     std::unordered_map<int, Vertex> vertex_Umap;
     std::unordered_map<int, Edge> edge_Umap;
     std::vector<int> notExistIndex;
-    std::cout
-        << "Read Vertex Data from " << vertexFilePath << std::endl;
+    std::cout << "Read Vertex Data from " << vertexFilePath << std::endl;
     std::cout << "Read Edge Data from " << edgeFilePath << std::endl;
 #pragma omp parallel sections
     {
@@ -105,7 +104,7 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
                 vertex_Umap.insert(std::pair<int, Vertex>(vertex.id, vertex));
 
                 std::string fileName = pcdFilePath + std::to_string(vertex.id) + "_node.pcd";
-                if (access(fileName.c_str(), 0))
+                if (vertex.id != 0 && access(fileName.c_str(), 0))
                     notExistIndex.push_back(vertex.id);
             }
             if (!notExistIndex.empty())

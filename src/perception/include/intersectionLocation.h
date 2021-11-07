@@ -12,6 +12,8 @@
 #include <fstream>
 #include <omp.h>
 
+#include "registrationConfig.h"
+
 //将弧度转换到-π~π区间
 inline void radianTransform(float &radian);
 
@@ -22,4 +24,4 @@ inline void radianTransform(float &radian);
  * @param input_cloud real-time lidar cloud
  * @param viewer visualization
  */
-void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::visualization::PCLVisualizer &viewer);
+void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer &viewer);

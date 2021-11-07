@@ -1,7 +1,5 @@
 # 矿下感知程序使用手册
 
-将simu_data放置在工作空间根目录下
-
 启动程序： roslaunch perception mineSimulation.launch
 
 ## 一、点云处理（去除车辆、地面点）

@@ -242,11 +242,14 @@ int main(int argc, char **argv)
 
         pointCloudSave();
 
-        //发布点云
-        cloudNoCar->header.stamp = time_st.toSec();
-        sensor_msgs::PointCloud2 output;
-        toROSMsg(*cloudNoCar, output);
-        cloudCombined_pub.publish(output);
+        if (!cloudNoCar->empty())
+        {
+            //发布点云
+            cloudNoCar->header.stamp = time_st.toSec();
+            sensor_msgs::PointCloud2 output;
+            toROSMsg(*cloudNoCar, output);
+            cloudCombined_pub.publish(output);
+        }
 
         cloudOrigin->clear();
         cloudCombinedTrans->clear();

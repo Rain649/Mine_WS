@@ -64,7 +64,11 @@
     <param name="passZ_max" value="$(arg passZ_max)" />
   </node>
 
-  <!-- <node name="navigation" pkg="perception" type="navigation" output="screen"></node> -->
+  <arg name="simu_data_path" default="$(find perception)/simu_data/" />
+
+  <node name="navigation" pkg="perception" type="navigation" output="screen">
+    <param name="simu_data_path" value="$(arg simu_data_path)" />
+  </node>
 
   <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_gazebo)/launch/mineSimulation.rviz"/> -->
 

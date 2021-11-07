@@ -24,29 +24,30 @@ int v1(1); //设置左窗口
 int v2(2); //设置右窗口
 ros::Time tm = ros::TIME_MIN;
 
-void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, pcl::visualization::PCLVisualizer &viewer)
+void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer &viewer)
 {
+  if (input_cloud->empty())
+    return;
   /********读取数据********/
-  std::string fin = "src/perception/include/ndtData.yaml";
-  YAML::Node config = YAML::LoadFile(fin);
-  float maximumIterations = config["maximumIterations"].as<float>();
-  float resolution = config["resolution"].as<float>();
-  float stepSize = config["stepSize"].as<float>();
-  float transformationEpsilon = config["transformationEpsilon"].as<float>();
-  float maxCorrespondenceDistance = config["maxCorrespondenceDistance"].as<float>();
-  float euclideanFitnessEpsilon = config["euclideanFitnessEpsilon"].as<float>();
-  double yaw_thre = config["yaw_thre"].as<double>();
-  double fitnessScore_thre = config["fitnessScore"].as<double>();
+  float maximumIterations = registrationConfig.maximumIterations;
+  float resolution = registrationConfig.resolution;
+  float stepSize = registrationConfig.stepSize;
+  float transformationEpsilon = registrationConfig.transformationEpsilon;
+  float maxCorrespondenceDistance = registrationConfig.maxCorrespondenceDistance;
+  float euclideanFitnessEpsilon = registrationConfig.euclideanFitnessEpsilon;
+  double yaw_thre = registrationConfig.yaw_thre;
+  double fitnessScore_thre = registrationConfig.fitnessScore_thre;
+  bool menu_bool = registrationConfig.menu_bool;
 
   float x_pre;
   float y_pre;
   float yaw_pre;
   /********测试数据********/
-  if (config["menu_bool"].as<bool>())
+  if (menu_bool)
   {
-    x_pre = config["x"].as<float>();
-    y_pre = config["y"].as<float>();
-    yaw_pre = config["yaw"].as<float>() * M_PI / 180;
+    x_pre = registrationConfig.x_pre;
+    y_pre = registrationConfig.y_pre;
+    yaw_pre = registrationConfig.yaw_pre;
   }
   /********读取数据********/
   else
@@ -79,6 +80,11 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
   // 匹配后的点云
   pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+  if (filtered_cloud->empty())
+  {
+    return;
+  }
 #pragma omp parallel sections
   {
 #pragma omp section
@@ -95,7 +101,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
       Eigen::Translation3f init_translation(x_pre, y_pre, 0);
       Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
       icp.align(*output_cloud, init_guess);
-      Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+      Eigen::Matrix4f transformation = icp.getFinalTransformation();
     }
 #pragma omp section
     {
@@ -172,54 +178,3 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   }
   return;
 }
-
-//保存转换的输入点云
-// pcl::io::savePCDFileASCII ("test_transformed.pcd", *output_cloud);
-/////////////////////////////////////
-// // 初始化点云可视化界面
-// boost::shared_ptr<pcl::visualization::PCLVisualizer>
-// viewer_origin (new pcl::visualization::PCLVisualizer ("Origin"));
-// viewer_origin->setBackgroundColor (0, 0, 0);
-// //对目标点云着色（红色）并可视化
-// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-// target_color (output_cloud2, 255, 0, 0);
-// viewer_origin->addPointCloud<pcl::PointXYZ> (target_cloud, target_color, "target cloud");
-// viewer_origin->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-//                                                 1, "target cloud");
-// //对转换后的目标点云着色（绿色）并可视化
-// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-// output_color (output_cloud, 0, 255, 0);
-// viewer_origin->addPointCloud<pcl::PointXYZ> (input_cloud, output_color, "output cloud");
-// viewer_origin->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-//                                                 1, "output cloud");
-// // 启动可视化
-// viewer_origin->addCoordinateSystem (1.0);
-// viewer_origin->initCameraParameters ();
-//////////////////////////////////////////////////////
-
-// // 初始化点云可视化界面
-// boost::shared_ptr<pcl::visualization::PCLVisualizer>
-// viewer_final (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-// viewer_final->setBackgroundColor (0, 0, 0);
-// //对目标点云着色（红色）并可视化
-// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-// // target_color (output_cloud2, 255, 0, 0);
-// viewer_final->addPointCloud<pcl::PointXYZ> (output_cloud2, target_color, "target cloud");
-// viewer_final->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-//                                                 1, "target cloud");
-// //对转换后的目标点云着色（绿色）并可视化
-// pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ>
-// // output_color (output_cloud, 0, 255, 0);
-// viewer_final->addPointCloud<pcl::PointXYZ> (output_cloud, output_color, "output cloud");
-// viewer_final->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE,
-//                                                 1, "output cloud");
-// // 启动可视化
-// viewer_final->addCoordinateSystem (1.0);
-// viewer_final->initCameraParameters ();
-//等待直到可视化窗口关闭。
-// while (!viewer_final->wasStopped ())
-// {
-//   viewer_final->spinOnce (100);
-//   viewer_origin->spinOnce (100);
-//   boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-// }
