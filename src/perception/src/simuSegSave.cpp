@@ -210,11 +210,11 @@ int main(int argc, char **argv)
     std::string lidarTopic_left;
     std::string lidarTopic_right;
     std::string lidarTopic_top;
-    nh.param<std::string>("point_topic", lidarTopic_left, "/velodyne_left");
+    nh.param<std::string>("lidarTopic_left_", lidarTopic_left, "/velodyne_left");
     ROS_INFO("Left lidar topic : %s", lidarTopic_left.c_str());
-    nh.param<std::string>("no_ground_point_topic", lidarTopic_right, "/velodyne_right");
+    nh.param<std::string>("lidarTopic_right_", lidarTopic_right, "/velodyne_right");
     ROS_INFO("Right lidar topic : %s", lidarTopic_right.c_str());
-    nh.param<std::string>("ground_point_topic", lidarTopic_top, "/velodyne_top");
+    nh.param<std::string>("lidarTopic_top_", lidarTopic_top, "/velodyne_top");
     ROS_INFO("Top lidar topic : %s", lidarTopic_top.c_str());
     ROS_INFO("----------------------------------------------------------------------");
 

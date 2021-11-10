@@ -22,7 +22,7 @@
 #include <thread>
 #include <std_msgs/Bool.h>
 #include <dynamic_reconfigure/server.h>
-#include <perception/param_Config.h>
+#include <perception/intersectionDetection_Config.h>
 #include <std_msgs/UInt8.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
@@ -49,10 +49,11 @@ private:
     double Cols[Horizon_SCAN];
     double beamDistance_Vec[Horizon_SCAN];
 
-    bool receivePoints = false;
-    bool over = true;
     bool outlier_Bool;
     bool medianFilter_Bool;
+
+    std::string lidarTopic;
+    std::string frame_id;
 
     std::vector<std::pair<int, double>> beam_Invalid; //有效laser列索引、距离
 
@@ -70,8 +71,8 @@ private:
 
     visualization_msgs::Marker laser_Lane, Edge_Lane, circle_Lane;
 
-    tf::TransformBroadcaster tfBroadcaster;
-    tf::StampedTransform fixedTrans;
+    // tf::TransformBroadcaster tfBroadcaster;
+    // tf::StampedTransform fixedTrans;
 
     pcl::PointXYZI nanPoint;
     pcl::PointXYZI egoPoint;
@@ -119,9 +120,10 @@ private:
 public:
     Detection() : nh("~")
     {
-        std::string lidarTopic;
-        nh.param<std::string>("ground_point_topic", lidarTopic, "/simuSegSave/cloud_Combined");
+        nh.param<std::string>("intersectionDetection_PointCloud_topic_", lidarTopic, "/velodyne_top");
         ROS_INFO("Lidar topic : %s", lidarTopic.c_str());
+        nh.param<std::string>("frame_id_", frame_id, "/vehicle_base_link");
+        ROS_INFO("Frame id : %s", frame_id.c_str());
         ROS_INFO("----------------------------------------------------------------------");
 
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic, 1, &Detection::laserCloudNewHandler, this);
@@ -166,8 +168,8 @@ public:
             Cols[i] = i;
         }
 
-        laser_Lane.header.frame_id = Edge_Lane.header.frame_id = circle_Lane.header.frame_id = "base_link";
-        laser_Lane.ns = Edge_Lane.ns = circle_Lane.ns = "intersection";
+        laser_Lane.header.frame_id = Edge_Lane.header.frame_id = circle_Lane.header.frame_id = frame_id;
+        laser_Lane.ns = Edge_Lane.ns = circle_Lane.ns = "intersectionDetection";
         laser_Lane.action = Edge_Lane.action = circle_Lane.action = visualization_msgs::Marker::ADD;
         laser_Lane.pose.orientation.w = Edge_Lane.pose.orientation.w = circle_Lane.pose.orientation.w = 1.0;
         laser_Lane.type = Edge_Lane.type = visualization_msgs::Marker::LINE_LIST;
@@ -212,10 +214,10 @@ public:
         longitudinal_Condition.reset(new pcl::ConditionAnd<pcl::PointXYZI>());
         lateral_Condition.reset(new pcl::ConditionOr<pcl::PointXYZI>());
 
-        fixedTrans.frame_id_ = "/velodyne";
-        fixedTrans.child_frame_id_ = "/base_link";
-        fixedTrans.setRotation(tf::Quaternion(0, 0, 0, 1));
-        fixedTrans.setOrigin(tf::Vector3(0, 0, 0));
+        // fixedTrans.frame_id_ = "/velodyne";
+        // fixedTrans.child_frame_id_ = "/base_link";
+        // fixedTrans.setRotation(tf::Quaternion(0, 0, 0, 1));
+        // fixedTrans.setOrigin(tf::Vector3(0, 0, 0));
 
         ROS_DEBUG("Allocate Memory Success !!!");
     }
@@ -237,8 +239,6 @@ public:
         Edge_Lane.points.clear();
         beam_Invalid.clear();
 
-        over = true;
-        receivePoints = false;
         intersectionDetected.data = false;
         intersectionVerified.data = false;
 
@@ -266,7 +266,6 @@ public:
             cloud_after_StatisticalRemoval.filter(*outlierRemove_Cloud);
         }
 
-        receivePoints = true;
         ROS_DEBUG("laserCloudNewHandler Success !!!");
     }
 
@@ -575,13 +574,12 @@ public:
         }
 
         /*排除检测为岔道线的最大光束距离*/
-        if (startEnd_Vec.size() == 0)
+        if (startEnd_Vec.empty())
             return;
         for (std::vector<std::pair<int, int>>::iterator itr = startEnd_Vec.begin(); itr != startEnd_Vec.end(); ++itr)
         {
             double thisMin = 20.0;
             std::vector<std::pair<int, int>>::iterator itr_front;
-
             if (itr == startEnd_Vec.begin())
             {
                 itr_front = startEnd_Vec.end() - 1;
@@ -625,13 +623,14 @@ public:
         }
         peakDistance_Max.data = *(std::max_element(peakDistance_Vec.begin(), peakDistance_Vec.end()));
 
-        // if (peak_Num.data > 2)
-        // {
-        //     intersectionDetected.data = true;
-        //     ROS_DEBUG_STREAM("Intersection Number = " << peak_Num.data);
-        //     ROS_INFO("------------------------------------------------------");
-        //     ROS_INFO("****Detect The Intersections !!!****************");
-        // }
+        if (peak_Num.data > 2)
+        {
+            intersectionDetected.data = true;
+            intersectionVerified.data = true;
+            //     ROS_DEBUG_STREAM("Intersection Number = " << peak_Num.data);
+            //     ROS_INFO("------------------------------------------------------");
+            //     ROS_INFO("****Detect The Intersections !!!****************");
+        }
 
         ROS_DEBUG("Intersection Detection Success !!!");
     }
@@ -703,7 +702,7 @@ public:
         cluster_Num.data = 0;
         for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
         {
-            cluster_Num.data++;
+            ++cluster_Num.data;
 
             switch (cluster_Num.data)
             {
@@ -765,7 +764,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*outlierRemove_Cloud, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCloudOutlierRemove.publish(cloudMsgTemp);
         }
 
@@ -774,7 +773,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudWithInfo, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCloudWithInfo.publish(cloudMsgTemp);
         }
 
@@ -783,7 +782,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudFar, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCloudFar.publish(cloudMsgTemp);
         }
 
@@ -792,7 +791,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudIntersections, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCloudIntersection.publish(cloudMsgTemp);
         }
 
@@ -801,7 +800,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCluster_1.publish(cloudMsgTemp);
         }
 
@@ -810,7 +809,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCluster_2.publish(cloudMsgTemp);
         }
 
@@ -819,7 +818,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCluster_3.publish(cloudMsgTemp);
         }
 
@@ -828,7 +827,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_4, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCluster_4.publish(cloudMsgTemp);
         }
 
@@ -837,7 +836,7 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudCluster_5, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-            cloudMsgTemp.header.frame_id = "base_link";
+            cloudMsgTemp.header.frame_id = frame_id;
             pubCluster_5.publish(cloudMsgTemp);
         }
 
@@ -860,8 +859,8 @@ public:
             pubClusterNum.publish(cluster_Num);
             peakDistanceMax.publish(peakDistance_Max);
 
-            fixedTrans.stamp_ = ros::Time().fromSec(timeLaserCloudNew);
-            tfBroadcaster.sendTransform(fixedTrans);
+            // fixedTrans.stamp_ = ros::Time().fromSec(timeLaserCloudNew);
+            // tfBroadcaster.sendTransform(fixedTrans);
 
             std_msgs::Float32MultiArray beam_Dis;
             for (int i = 0; i < Horizon_SCAN; ++i)
@@ -879,9 +878,6 @@ public:
 
     void run()
     {
-        if (receivePoints && over)
-        {
-            over = false;
             getDynamicParameter();
             if (outlier_Bool)
                 cloudWithInfo = getCloudWithInfo(outlierRemove_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
@@ -910,26 +906,26 @@ public:
             }
             publishResult();
             clearMemory();
-        }
+        
     }
 
     void getDynamicParameter()
     {
-        ros::param::get("/intersection/segmentation_radius", segmentationRadius);
-        ros::param::get("/intersection/width_threshold", width_Thre);
-        ros::param::get("/intersection/distance_threshold", distance_Thre);
-        ros::param::get("/intersection/col_minus_threshold", col_minus_Thre);
-        ros::param::get("/intersection/cluster_radius", clusterRadius);
-        ros::param::get("/intersection/cluster_size_min", clusterSize_min);
-        ros::param::get("/intersection/bool_outlier_removal", outlier_Bool);
-        ros::param::get("/intersection/bool_median_filter", medianFilter_Bool);
-        ros::param::get("/intersection/median_size", median_Size);
-        ros::param::get("/intersection/median_coefficient", median_Coefficient);
+        ros::param::get("/intersectionDetection/segmentation_radius", segmentationRadius);
+        ros::param::get("/intersectionDetection/width_threshold", width_Thre);
+        ros::param::get("/intersectionDetection/distance_threshold", distance_Thre);
+        ros::param::get("/intersectionDetection/col_minus_threshold", col_minus_Thre);
+        ros::param::get("/intersectionDetection/cluster_radius", clusterRadius);
+        ros::param::get("/intersectionDetection/cluster_size_min", clusterSize_min);
+        ros::param::get("/intersectionDetection/bool_outlier_removal", outlier_Bool);
+        ros::param::get("/intersectionDetection/bool_median_filter", medianFilter_Bool);
+        ros::param::get("/intersectionDetection/median_size", median_Size);
+        ros::param::get("/intersectionDetection/median_coefficient", median_Coefficient);
     }
 };
 
 //动态调参
-void callback(perception::param_Config &config, uint32_t level)
+void callback(perception::intersectionDetection_Config &config, uint32_t level)
 {
     ROS_INFO("Reconfigure Request: %d %d %d %d %d %d %f %f %s %s",
              config.segmentation_radius,
@@ -946,11 +942,11 @@ void callback(perception::param_Config &config, uint32_t level)
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "intersection");
+    ros::init(argc, argv, "intersectionDetection");
 
     //动态参数调节
-    dynamic_reconfigure::Server<perception::param_Config> server;
-    dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
+    dynamic_reconfigure::Server<perception::intersectionDetection_Config> server;
+    dynamic_reconfigure::Server<perception::intersectionDetection_Config>::CallbackType f;
     f = boost::bind(&callback, _1, _2);
     server.setCallback(f);
 

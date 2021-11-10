@@ -1,5 +1,11 @@
 #顺序：按1.entrance_id；2.exit_id 排序
 
+- edge_id: 0
+  entranceVertex_id: 0
+  exitVertex_id: 1
+  width: 3
+  length: 10
+
 - edge_id: 1
   entranceVertex_id: 1
   exitVertex_id: 2

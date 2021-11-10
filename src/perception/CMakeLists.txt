@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 generate_dynamic_reconfigure_options(
-  cfg/param.cfg
+  cfg/intersectionDetection.cfg
   cfg/topoMap.cfg
   cfg/simuSegSave.cfg
 )
@@ -36,8 +36,8 @@ catkin_package(
 )
 
 include_directories(
-  include ${catkin_INCLUDE_DIRS}
-	include
+  include 
+  ${catkin_INCLUDE_DIRS}
 	${catkin_INCLUDE_DIRS}
 	${PCL_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIR}
@@ -83,9 +83,9 @@ link_directories(
 
 ############################################
 
-add_executable(intersection  src/intersection.cpp)
-add_dependencies(intersection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(intersection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+add_executable(intersectionDetection  src/intersectionDetection.cpp)
+add_dependencies(intersectionDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(intersectionDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
 add_executable(simuSegSave  src/simuSegSave.cpp)
 add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

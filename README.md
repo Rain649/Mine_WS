@@ -20,13 +20,13 @@
 
 #### 1.源码文件：
 
-​	intersection.cpp
+​	intersectionDetection.cpp
 
 #### 2.发送topic
 
-| topic                                | type             | description            |
-| ------------------------------------ | ---------------- | ---------------------- |
-| "/intersection/intersectionVerified" | <std_msgs::Bool> | 判断是否位于交叉路口处 |
+| topic                                         | type             | description            |
+| --------------------------------------------- | ---------------- | ---------------------- |
+| "/intersectionDetection/intersectionVerified" | <std_msgs::Bool> | 判断是否位于交叉路口处 |
 
 
 

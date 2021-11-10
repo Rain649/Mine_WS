@@ -6,13 +6,37 @@
   <!-- - TF -->
   <!-- <node pkg="tf" type="static_transform_publisher" name="base_link2vehicle_reference" args="-2 0 1 0 0 0 /base_link /vehicle_reference 10" /> -->
   <!-- these are the arguments you can pass to this launch file, for example paused:=true -->
+  <!-- 参数 -->
+  <!-- 0.公用参数 -->
+  <arg name="pointCloud_topic_" default="/simuSegSave/cloud_Combined" />
+  <arg name="frame_id_" default="vehicle_base_link" />
+  <!-- 1.gazebo参数 -->
   <arg name="paused" default="true"/>
   <arg name="use_sim_time" default="true"/>
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/>
   <arg name="debug" default="false"/>
+  <!-- 2.车辆模型参数 -->
+  <arg name="model" default="$(find xacro)/xacro --inorder '$(find car)/urdf/car.xacro'" />
+  <param name="robot_description" command="$(arg model)" />
+  <!-- 3.激光雷达融合参数 -->
+  <arg name="lidarTopic_left_" default="/velodyne_left" />
+  <arg name="lidarTopic_right_" default="/velodyne_right" />
+  <arg name="lidarTopic_top_" default="/velodyne_top" />
+  <!-- 4交叉路口检测参数 -->
+  <arg name="intersectionDetection_PointCloud_topic_" default="/velodyne_top" />
+  <!-- 5.车道线拟合参数 -->
+  <arg name="order" default="3" />
+  <arg name="minClusterSize" default="100" />
+  <arg name="clusterRadius" default="1.0" />
+  <arg name="passX_min" default="-5.0" />
+  <arg name="passZ_min" default="-0.8" />
+  <arg name="passZ_max" default="1.0" />
+  <!-- 6.定位导航参数 -->
+  <arg name="simu_data_path" default="$(find perception)/simu_data/" />
 
-  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+
+  <!-- 矿下地图节点 -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="debug" value="$(arg debug)" />
     <arg name="gui" value="$(arg gui)" />
@@ -20,52 +44,46 @@
     <arg name="use_sim_time" value="$(arg use_sim_time)"/>
     <arg name="headless" value="$(arg headless)"/>
   </include>
-
-  <!-- 矿下地图模型 -->
   <node name="spawn_model" pkg="gazebo_ros" type="spawn_model" args="-file $(find mine)/urdf/mine.urdf -urdf -model mine -z 0.5" output="screen" />
   <node name="fake_joint_calibration" pkg="rostopic" type="rostopic" args="pub /calibrated std_msgs/Bool true" />
 
-  <!-- 车辆模型  -->
-  <arg name="model" default="$(find xacro)/xacro --inorder '$(find car)/urdf/car.xacro'" />
-  <param name="robot_description" command="$(arg model)" />
-
+  <!-- 车辆模型节点  -->
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x -10 -z 1.8 "/>
   <!-- <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x 100 -y 150 -z 1.8 "/> -->
 
-  <!-- 运动控制 -->
+  <!-- 运动控制节点 -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
     <param name="publish_frequency" type="double" value="50.0" />
   </node>
 
-  <!--- Run Rviz-->
+  <!--- Run Rviz节点-->
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception)/launch/simulation.rviz" />
 
-  <!-- 感知程序 -->
+  <!-- 激光雷达融合节点 -->
   <node name="simuSegSave" pkg="perception" type="simuSegSave" output="screen"></node>
-  <node name="intersection" pkg="perception" type="intersection" output="screen"></node>
 
-  <arg name="pointCloud_topic_" default="/simuSegSave/cloud_Combined" />
-  <arg name="frame_id_" default="vehicle_base_link" />
-  <arg name="order" default="3" />
-  <arg name="minClusterSize" default="100" />
-  <arg name="clusterRadius" default="1.0" />
-  <arg name="passX_min" default="-5.0" />
-  <arg name="passZ_min" default="-0.8" />
-  <arg name="passZ_max" default="1.0" />
 
+  <!-- 交叉路口检测节点 -->
+  <node name="intersectionDetection" pkg="perception" type="intersectionDetection" output="screen">
+    <param name="lidarTopic_top_" value="$(arg lidarTopic_top_)" />
+    <param name="frame_id_" value="$(arg frame_id_)" />
+  </node>
+
+
+  <!-- 车道线拟合节点 -->
   <node pkg="perception" type="laneDetection" name="laneDetection" output="screen">
     <param name="pointCloud_topic_" value="$(arg pointCloud_topic_)" />
     <param name="frame_id_" value="$(arg frame_id_)" />
     <param name="order" value="$(arg order)" />
     <param name="minClusterSize" value="$(arg minClusterSize)" />
     <param name="clusterRadius" value="$(arg clusterRadius)" />
-    <param name="passX_min" value="$(arg passX_min)" />
+    <param name="passX_min" value="$(arg passX_min)" /> 
     <param name="passZ_min" value="$(arg passZ_min)" />
     <param name="passZ_max" value="$(arg passZ_max)" />
   </node>
 
-  <arg name="simu_data_path" default="$(find perception)/simu_data/" />
 
+  <!-- 定位导航节点 -->
   <node name="navigation" pkg="perception" type="navigation" output="screen">
     <param name="simu_data_path" value="$(arg simu_data_path)" />
   </node>

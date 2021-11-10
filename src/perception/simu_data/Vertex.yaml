@@ -1,6 +1,16 @@
 ---
 #angleDiff: 指到达下一vertex处的角度
 
+- vertex_id: 0
+  # number of linked edges
+  branch_numbers: 1
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 1
+     edge_id: 0
+     angleDiff: 0
+     targetPoint: [13, 0, 0]
+
 - vertex_id: 1
   # number of linked edges
   branch_numbers: 2
