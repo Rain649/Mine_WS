@@ -77,11 +77,12 @@ private:
 
     std::mutex mtx_visual;
     std::vector<float> pose;
-    std::vector<int> path;
-    // std::vector<int> path{0, 1, 2, 11, 12, 13, 16, 17, 18, 1};
+    // std::vector<int> path;
+    std::vector<int> path{0, 1, 2, 11, 12, 13, 16, 17, 18, 1};
     std::string dataPath;
     int preVertex_index = 0;
     bool intersectionVerified = false;
+    bool pathReceived = false;
     TopoMap topoMap;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr lidarCloud;
@@ -123,26 +124,29 @@ public:
         // 定义topic收发
         pubOdom = nh.advertise<nav_msgs::Odometry>("intersectionOdom", 1);
         pubIntersectionID = nh.advertise<std_msgs::Int32>("intersection_id", 1);
-        subIntersection = nh.subscribe<std_msgs::Bool>("/intersection/intersectionVerified", 1, &Navigation::intersectionHandler, this);
+        subIntersection = nh.subscribe<std_msgs::Bool>("/intersectionDetection/intersectionVerified", 1, &Navigation::intersectionHandler, this);
         subLidarCloudCombined = nh.subscribe<sensor_msgs::PointCloud2ConstPtr>("/simuSegSave/cloud_Combined", 1, &Navigation::cloudHandler, this);
         subPath = nh.subscribe<std_msgs::Int32MultiArray>("/pathArray", 1, &Navigation::pathHandler, this);
     }
 
     void pathHandler(const std_msgs::Int32MultiArray msg)
     {
-        if (!path.empty())
+        if (pathReceived)
             return;
-        for (int i = 0; i < msg.data.size(); ++i)
+        else
         {
-            path.push_back(msg.data[i]);
+            path.clear();
+            for (int i = 0; i < msg.data.size(); ++i)
+            {
+                path.push_back(msg.data[i]);
+            }
+            pathReceived = true;
         }
-        return;
     }
 
     void intersectionHandler(const std_msgs::Bool msg)
     {
         intersectionVerified = msg.data;
-        return;
     }
 
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr msg)
@@ -189,14 +193,13 @@ public:
         std::string fileName;
         if (path[preVertex_index] == 0)
         {
-            fileName = dataPath + std::to_string(path[preVertex_index] + 1) + "_node.pcd";
             yaw_pre = 0;
         }
         else
         {
             yaw_pre = topoMap.get_angleDiff(path[preVertex_index], path[preVertex_index + 1]);
-            fileName = dataPath + std::to_string(path[preVertex_index + 1]) + "_node.pcd";
         }
+        fileName = dataPath + std::to_string(path[preVertex_index + 1]) + "_node.pcd";
         pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud(new pcl::PointCloud<pcl::PointXYZ>);
         if (pcl::io::loadPCDFile<pcl::PointXYZ>(fileName, *target_cloud) == -1)
         {
@@ -213,7 +216,7 @@ public:
             // 离开交叉路口
             if (!intersectionVerified)
             {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
+                std::this_thread::sleep_for(std::chrono::seconds(1));
                 if (!intersectionVerified)
                 {
                     ROS_ERROR_STREAM("Leave the vertex  " << path[preVertex_index + 1]);
@@ -297,8 +300,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "navigation");
 
     Navigation navigation_obj;
-    std::thread navigation_thread(&Navigation::navigation, &navigation_obj);
 
+    std::thread navigation_thread(&Navigation::navigation, &navigation_obj);
     ros::Rate rate(10);
     while (ros::ok())
     {

@@ -118,12 +118,12 @@ private:
     ros::Publisher pubCluster_5;
 
 public:
-    Detection() : nh("~")
+    Detection(std::string _lidarTopic, std::string _frame_id) : lidarTopic(_lidarTopic), frame_id(_frame_id), nh("~")
     {
-        nh.param<std::string>("intersectionDetection_PointCloud_topic_", lidarTopic, "/velodyne_top");
-        ROS_INFO("Lidar topic : %s", lidarTopic.c_str());
-        nh.param<std::string>("frame_id_", frame_id, "/vehicle_base_link");
-        ROS_INFO("Frame id : %s", frame_id.c_str());
+        // nh.param<std::string>("intersectionDetection_PointCloud_topic_", lidarTopic, "/velodyne_left");
+        // ROS_INFO("Lidar topic : %s", lidarTopic.c_str());
+        // nh.param<std::string>("frame_id_", frame_id, "/vehicle_base_link");
+        // ROS_INFO("Frame id : %s", frame_id.c_str());
         ROS_INFO("----------------------------------------------------------------------");
 
         subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic, 1, &Detection::laserCloudNewHandler, this);
@@ -239,8 +239,8 @@ public:
         Edge_Lane.points.clear();
         beam_Invalid.clear();
 
-        intersectionDetected.data = false;
-        intersectionVerified.data = false;
+        // intersectionDetected.data = false;
+        // intersectionVerified.data = false;
 
         cloudCluster_1->clear();
         cloudCluster_2->clear();
@@ -569,8 +569,8 @@ public:
         if (cloudFar->points.size() >= 40)
         {
             intersectionVerified.data = true;
-            ROS_INFO("------------------------------------------------------");
-            ROS_INFO("******************Confirm Arriving The Intersections !!!");
+            // ROS_INFO("------------------------------------------------------");
+            // ROS_INFO("******************Confirm Arriving The Intersections !!!");
         }
 
         /*排除检测为岔道线的最大光束距离*/
@@ -631,13 +631,16 @@ public:
             //     ROS_INFO("------------------------------------------------------");
             //     ROS_INFO("****Detect The Intersections !!!****************");
         }
+        if (cloudFar->points.size() < 40 && !intersectionDetected.data)
+        {
+            intersectionVerified.data = false;
+        }
 
-        ROS_DEBUG("Intersection Detection Success !!!");
+            ROS_DEBUG("Intersection Detection Success !!!");
     }
 
     void intersectionDivide()
     {
-
         if (outlier_Bool && false)
         {
             // 创建滤波器对象
@@ -682,7 +685,7 @@ public:
 
     void intersectionCluster()
     {
-        if (cloudIntersections->size() == 0)
+        if (cloudIntersections->empty())
             return;
 
         // Creating the KdTree object for the search method of the extraction
@@ -878,35 +881,41 @@ public:
 
     void run()
     {
-            getDynamicParameter();
-            if (outlier_Bool)
-                cloudWithInfo = getCloudWithInfo(outlierRemove_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
-            else
-                cloudWithInfo = getCloudWithInfo(laserOrigin_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
-            laser_Visualizaton();
-            intersectionDetection();
-            if (intersectionVerified.data)
-            {
-            loop:
-                ROS_DEBUG_STREAM("segmentationRadius  ===========    " << segmentationRadius);
-                intersectionDivide();
-                intersectionCluster();
+        getDynamicParameter();
+        if (outlier_Bool)
+            cloudWithInfo = getCloudWithInfo(outlierRemove_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
+        else
+            cloudWithInfo = getCloudWithInfo(laserOrigin_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
+        laser_Visualizaton();
+        intersectionDetection();
+        // if (intersectionVerified.data)
+        // {
+        // loop:
+        //     ROS_DEBUG_STREAM("segmentationRadius  ===========    " << segmentationRadius);
+        //     intersectionDivide();
+        //     intersectionCluster();
 
-                if (cluster_Num.data < peak_Num.data && segmentationRadius < segmentationRadius_Max)
-                {
-                    segmentationRadius += 2;
-                    cloudIntersections->clear();
-                    cloudCluster_1->clear();
-                    cloudCluster_2->clear();
-                    cloudCluster_3->clear();
-                    cloudCluster_4->clear();
-                    cloudCluster_5->clear();
-                    goto loop;
-                }
-            }
-            publishResult();
-            clearMemory();
-        
+        //     if (cluster_Num.data < peak_Num.data && segmentationRadius < segmentationRadius_Max)
+        //     {
+        //         segmentationRadius += 2;
+        //         cloudIntersections->clear();
+        //         cloudCluster_1->clear();
+        //         cloudCluster_2->clear();
+        //         cloudCluster_3->clear();
+        //         cloudCluster_4->clear();
+        //         cloudCluster_5->clear();
+        //         goto loop;
+        //     }
+        // }
+
+        // publishResult();
+
+        clearMemory();
+    }
+
+    bool get_Verified()
+    {
+        return intersectionVerified.data;
     }
 
     void getDynamicParameter()
@@ -952,13 +961,66 @@ int main(int argc, char **argv)
 
     ROS_INFO("\033[1;32m---->\033[0m Intersection Detection Started.");
 
-    Detection ND;
+    ros::NodeHandle nh("~");
+    std::string lidarTopic_top;
+    std::string lidarTopic_left;
+    std::string lidarTopic_right;
+    std::string lidarFrameID_top;
+    std::string lidarFrameID_left;
+    std::string lidarFrameID_right;
+    // 顶部雷达
+    nh.param<std::string>("lidarTopic_top_", lidarTopic_top, "/velodyne_top");
+    ROS_INFO("Top Lidar Topic : %s", lidarTopic_top.c_str());
+    nh.param<std::string>("top_frame_id_", lidarFrameID_top, "/velodyne_top_base_link");
+    ROS_INFO("Top Lidar Frame id : %s", lidarFrameID_top.c_str());
+    // 左侧雷达
+    nh.param<std::string>("lidarTopic_left_", lidarTopic_left, "/velodyne_left");
+    ROS_INFO("Left Lidar topic : %s", lidarTopic_left.c_str());
+    nh.param<std::string>("left_frame_id_", lidarFrameID_left, "/velodyne_left_base_link");
+    ROS_INFO("Left Lidar Frame id : %s", lidarFrameID_left.c_str());
+    // 右侧雷达
+    nh.param<std::string>("lidarTopic_right_", lidarTopic_right, "/velodyne_right");
+    ROS_INFO("Right Lidar topic : %s", lidarTopic_right.c_str());
+    nh.param<std::string>("right_frame_id_", lidarFrameID_right, "/velodyne_right_base_link");
+    ROS_INFO("Right Lidar Frame id : %s", lidarFrameID_right.c_str());
 
-    ros::Rate rate(4);
+    Detection ND_top(lidarTopic_top, lidarFrameID_top);
+    Detection ND_left(lidarTopic_left, lidarFrameID_left);
+    Detection ND_right(lidarTopic_right, lidarFrameID_right);
+
+    std_msgs::Bool intersectionVerified;
+
+    ros::Publisher pubIntersectionVerified = nh.advertise<std_msgs::Bool>("intersectionVerified", 1);
+
+    ros::Rate rate(10);
     while (ros::ok())
     {
         ros::spinOnce();
-        ND.run();
+        ND_top.run();
+        ND_left.run();
+        ND_right.run();
+
+        if (ND_top.get_Verified() || ND_left.get_Verified() || ND_right.get_Verified())
+        {
+            intersectionVerified.data = true;
+            if (ND_top.get_Verified())
+                ROS_INFO("ND_top ");
+            if (ND_left.get_Verified())
+                ROS_INFO("ND_left ");
+            if (ND_right.get_Verified())
+                ROS_INFO("ND_right ");
+            ROS_INFO("------------------------------------------------------");
+            ROS_INFO("******************Confirm Arriving The Intersections !!!");
+        }
+        else
+        {
+            intersectionVerified.data = false;
+        }
+        // ND_left.publishResult
+
+        //发布交叉路口检测布尔值
+        pubIntersectionVerified.publish(intersectionVerified);
+
         rate.sleep();
     }
 

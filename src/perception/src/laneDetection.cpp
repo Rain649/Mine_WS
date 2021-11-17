@@ -33,7 +33,7 @@
 #include <std_msgs/Float32MultiArray.h>
 
 #include <dynamic_reconfigure/server.h>
-#include <perception/param_Config.h>
+// #include <perception/param_Config.h>
 
 class laneDetection
 {
@@ -589,26 +589,26 @@ public:
     }
 };
 
-void callback(perception::param_Config &config, uint32_t level)
-{
-    //   ROS_INFO("Reconfigure Request: %d %f %s %s %d",
-    //             config.int_param,
-    //             config.double_param,
-    //             config.str_param.c_str(),
-    //             config.bool_param? "True" : "False",
-    //             config.size);
-}
+// void callback(perception::param_Config &config, uint32_t level)
+// {
+//     //   ROS_INFO("Reconfigure Request: %d %f %s %s %d",
+//     //             config.int_param,
+//     //             config.double_param,
+//     //             config.str_param.c_str(),
+//     //             config.bool_param? "True" : "False",
+//     //             config.size);
+// }
 
 int main(int argc, char **argv)
 {
 
     ros::init(argc, argv, "laneDetection");
 
-    //动态参数调节
-    dynamic_reconfigure::Server<perception::param_Config> server;
-    dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
-    f = boost::bind(&callback, _1, _2);
-    server.setCallback(f);
+    // //动态参数调节
+    // dynamic_reconfigure::Server<perception::param_Config> server;
+    // dynamic_reconfigure::Server<perception::param_Config>::CallbackType f;
+    // f = boost::bind(&callback, _1, _2);
+    // server.setCallback(f);
 
     ROS_INFO("\033[1;32m---->\033[0m Lane Detection Started.");
 

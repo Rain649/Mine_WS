@@ -146,6 +146,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   // ROS_ERROR_STREAM("duration.toSec() : " << duration.toSec());
   // if (yaw_speed < 0)
   //   ROS_ERROR_STREAM("yaw_speed : " << yaw_speed);
+  ROS_INFO_STREAM_THROTTLE(1,"FitnessScore:  " << std::min(icp.getFitnessScore(), ndt.getFitnessScore()));
   if (std::min(icp.getFitnessScore(), ndt.getFitnessScore()) <= fitnessScore_thre)
   {
     pose[0] = transformation(0, 3);

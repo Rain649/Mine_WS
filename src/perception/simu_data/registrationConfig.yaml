@@ -16,7 +16,7 @@ euclideanFitnessEpsilon: 0.01
 
 maxCorrespondenceDistance: 2
 
-fitnessScore: 3
+fitnessScore: 10
 
 yaw_thre: 0.5
 
