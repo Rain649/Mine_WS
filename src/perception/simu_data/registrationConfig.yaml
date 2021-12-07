@@ -18,6 +18,8 @@ maxCorrespondenceDistance: 2
 
 fitnessScore: 10
 
+minFitnessScore_thre: 3
+
 yaw_thre: 0.5
 
 test1File: src/perception/src/test1.pcd

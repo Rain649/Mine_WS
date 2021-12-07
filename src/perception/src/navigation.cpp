@@ -61,6 +61,7 @@ RegistrationConfig loadRegistrationConfig(std::string dataPath)
     ret.euclideanFitnessEpsilon = config["euclideanFitnessEpsilon"].as<float>();
     ret.yaw_thre = config["yaw_thre"].as<double>();
     ret.fitnessScore_thre = config["fitnessScore"].as<double>();
+    ret.minFitnessScore_thre = config["minFitnessScore_thre"].as<double>();
     ret.menu_bool = config["menu_bool"].as<bool>();
 
     return ret;
@@ -151,28 +152,34 @@ public:
 
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr msg)
     {
-        // pcl::PointCloud<pcl::PointXYZ>::Ptr cloudCombined(new pcl::PointCloud<pcl::PointXYZ>());
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloudCombined(new pcl::PointCloud<pcl::PointXYZ>());
         // pcl::PointCloud<pcl::PointXYZ>::Ptr cloudNoCar(new pcl::PointCloud<pcl::PointXYZ>());
         // pcl::fromROSMsg(*msg, *cloudCombined);
-        // pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_1;
-        // std::vector<int> index_1;      //保存每个近邻点的索引
-        // std::vector<float> distance_1; //保存每个近邻点与查找点之间的欧式距离平方
+        pcl::fromROSMsg(*msg, *cloudCombined);
+        if (cloudCombined->empty())
+        {
+            return;
+        }
+        std::vector<int> index_1;      //保存每个近邻点的索引
+        std::vector<float> distance_1; //保存每个近邻点与查找点之间的欧式距离平方
+        lidarCloud->clear();
         // // 外围分割
-        // kdtree_1.setInputCloud(cloudCombined); // 设置要搜索的点云，建立KDTree
-        // pcl::ExtractIndices<pcl::PointXYZ> extract_1;
-        // pcl::PointXYZ zeroPoint;
-        // zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
-        // int segmentationRadius = 20;
-        // if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index_1, distance_1) == 0)
-        // {
-        //     ROS_ERROR("There is no point nearby !!!");
-        //     return;
-        // }
-        // extract_1.setInputCloud(cloudCombined);
-        // boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index_1);
-        // extract_1.setIndices(index_ptr);
-        // extract_1.setNegative(false); //如果设为true,可以提取指定index之外的点云
-        // extract_1.filter(*cloudNoCar);
+        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_1;
+        kdtree_1.setInputCloud(cloudCombined); // 设置要搜索的点云，建立KDTree
+        pcl::ExtractIndices<pcl::PointXYZ> extract_1;
+        pcl::PointXYZ zeroPoint;
+        zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
+        int segmentationRadius = 25;
+        if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index_1, distance_1) == 0)
+        {
+            ROS_ERROR("There is no point nearby !!!");
+            return;
+        }
+        extract_1.setInputCloud(cloudCombined);
+        boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index_1);
+        extract_1.setIndices(index_ptr);
+        extract_1.setNegative(false); //如果设为true,可以提取指定index之外的点云
+        extract_1.filter(*lidarCloud);
 
         // pcl::PassThrough<pcl::PointXYZ> groundFilter;
         // groundFilter.setInputCloud(cloudNoCar);
@@ -180,8 +187,6 @@ public:
         // groundFilter.setFilterLimits(-0.8, 10);
         // groundFilter.setFilterLimitsNegative(false);
         // groundFilter.filter(*lidarCloud);
-        lidarCloud->clear();
-        pcl::fromROSMsg(*msg, *lidarCloud);
         ROS_DEBUG_STREAM("lidarCloud :  " << lidarCloud->size());
         return;
     }
@@ -210,16 +215,19 @@ public:
         pose[1] = -10 * sin(yaw_pre);
         pose[2] = yaw_pre;
         radianTransform(pose[2]);
+        double fitnessScore_thre = 10.0;
         //交叉路口定位
+        geometry_msgs::Quaternion geoQuat;
+        nav_msgs::Odometry odom;
         while (ros::ok())
         {
             // 离开交叉路口
             if (!intersectionVerified)
             {
-                std::this_thread::sleep_for(std::chrono::seconds(1));
+                std::this_thread::sleep_for(std::chrono::seconds(2));
                 if (!intersectionVerified)
                 {
-                    ROS_ERROR_STREAM("Leave the vertex  " << path[preVertex_index + 1]);
+                    ROS_INFO_STREAM("Leave the vertex  " << path[preVertex_index + 1]);
                     viewer.removeAllPointClouds();
                     break;
                 }
@@ -227,11 +235,12 @@ public:
             // 定位
             mtx_visual.lock();
             config = loadRegistrationConfig(dataPath);
+            //自适应阈值
+            config.fitnessScore_thre = std::max(fitnessScore_thre, config.minFitnessScore_thre);
             intersectionLocation(pose, target_cloud, lidarCloud, config, viewer);
             mtx_visual.unlock();
             // 发布车辆位姿
-            geometry_msgs::Quaternion geoQuat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose[2]);
-            nav_msgs::Odometry odom;
+            geoQuat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose[2]);
             odom.header.stamp = ros::Time::now();
             odom.pose.pose.orientation.x = geoQuat.x;
             odom.pose.pose.orientation.y = geoQuat.y;
@@ -241,6 +250,9 @@ public:
             odom.pose.pose.position.y = pose[1];
             odom.pose.pose.position.z = 0;
             pubOdom.publish(odom);
+
+            fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
+            // std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
         return;
     }
@@ -283,7 +295,7 @@ public:
     {
         if (path.empty())
         {
-            ROS_ERROR_THROTTLE(2, "No Path Received !!!");
+            ROS_INFO_THROTTLE(2, "No Path Received !!!");
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         else

@@ -57,8 +57,8 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
     yaw_pre = pose[2];
   }
   radianTransform(yaw_pre);
-  ROS_INFO("---------------------------------------");
-  ROS_INFO_STREAM("yaw_pre =  " << yaw_pre << "; x =  " << x_pre << "; y =  " << y_pre);
+  // ROS_INFO("---------------------------------------");
+  // ROS_INFO_STREAM("yaw_pre =  " << yaw_pre << "; x =  " << x_pre << "; y =  " << y_pre);
 
   //将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
   pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -70,7 +70,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   pcl::PassThrough<pcl::PointXYZ> groundFilter;
   groundFilter.setInputCloud(target_cloud);
   groundFilter.setFilterFieldName("z");
-  groundFilter.setFilterLimits(-0.8, 10);
+  groundFilter.setFilterLimits(-0.8, 2);
   groundFilter.setFilterLimitsNegative(false);
   groundFilter.filter(*target_cloud);
 
@@ -125,30 +125,32 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
       Eigen::Matrix4f transformation = ndt.getFinalTransformation();
     }
   }
-  Eigen::Matrix4f transformation;
-  if (ndt.getFitnessScore() < icp.getFitnessScore())
-  {
-    transformation = ndt.getFinalTransformation();
-    pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
-    ROS_INFO_STREAM("NDT WIN, SCORE : " << ndt.getFitnessScore());
-  }
-  else
-  {
-    transformation = icp.getFinalTransformation();
-    pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
-    ROS_INFO_STREAM("ICP WIN, SCORE : " << icp.getFitnessScore());
-  }
 
-  //位姿更新
   // ros::Duration duration = ros::Time::now() - tm;
-  double yaw_registration = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
   // double yaw_speed = (yaw_registration - yaw_pre) / duration.toSec();
   // ROS_ERROR_STREAM("duration.toSec() : " << duration.toSec());
   // if (yaw_speed < 0)
   //   ROS_ERROR_STREAM("yaw_speed : " << yaw_speed);
-  ROS_INFO_STREAM_THROTTLE(1,"FitnessScore:  " << std::min(icp.getFitnessScore(), ndt.getFitnessScore()));
   if (std::min(icp.getFitnessScore(), ndt.getFitnessScore()) <= fitnessScore_thre)
   {
+    // ROS_ERROR_STREAM_THROTTLE(0.5,"FitnessScore:  " << std::min(icp.getFitnessScore(), ndt.getFitnessScore()));
+    Eigen::Matrix4f transformation;
+    if (ndt.getFitnessScore() < icp.getFitnessScore())
+    {
+      transformation = ndt.getFinalTransformation();
+      pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
+      // ROS_INFO_STREAM("NDT WIN, SCORE : " << ndt.getFitnessScore());
+    }
+    else
+    {
+      transformation = icp.getFinalTransformation();
+      pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
+      // ROS_INFO_STREAM("ICP WIN, SCORE : " << icp.getFitnessScore());
+    }
+    //位姿更新
+    double yaw_registration = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
+    if (yaw_registration < -4 * M_PI || yaw_registration > 4 * M_PI)
+      return;
     pose[0] = transformation(0, 3);
     pose[1] = transformation(1, 3);
     pose[2] = yaw_registration;

@@ -78,7 +78,7 @@ void pointCloudSave()
 {
     if (cloudOrigin->empty())
     {
-        ROS_ERROR("No lidar point cloud !!!");
+        // ROS_ERROR_THROTTLE(1, "No lidar point cloud !!!");
         return;
     }
 
@@ -110,7 +110,7 @@ void pointCloudSave()
     pcl::PassThrough<pcl::PointXYZI> groundFilter;
     groundFilter.setInputCloud(cloudCombinedTrans);
     groundFilter.setFilterFieldName("z");
-    groundFilter.setFilterLimits(-0.8, 1);
+    groundFilter.setFilterLimits(-0.8, 2);
     groundFilter.setFilterLimitsNegative(false);
     groundFilter.filter(*cloudCombinedFiltered);
     // 分割车辆
@@ -148,13 +148,14 @@ void pointCloudSave()
     extract_2.setNegative(false); //如果设为true,可以提取指定index之外的点云
     extract_2.filter(cloudFinal);
 
-    if (!save_Bool)
-        return;
     // 保存文件
-    std::string fileName;
-    fileName = "simu_data/" + std::to_string(node_Id) + save_Name;
-    pcl::io::savePCDFileASCII(fileName, cloudFinal); //将点云保存到PCD文件中
-    ROS_INFO("PCD file saved in  :  [%s]", fileName.c_str());
+    if (save_Bool)
+    {
+        std::string fileName;
+        fileName = "/home/lsj/dev/Mine_WS/src/perception/simu_data/" + std::to_string(node_Id) + save_Name;
+        pcl::io::savePCDFileASCII(fileName, cloudFinal); //将点云保存到PCD文件中
+        ROS_INFO("PCD file saved in  :  [%s]", fileName.c_str());
+    }
 }
 
 // void vehicleReference_pub()

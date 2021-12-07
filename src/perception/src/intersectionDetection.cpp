@@ -78,7 +78,6 @@ private:
     pcl::PointXYZI egoPoint;
     pcl::PointCloud<pcl::PointXYZI>::Ptr laserOrigin_Cloud;
     pcl::PointCloud<pcl::PointXYZI>::Ptr outlierRemove_Cloud;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr laserCloudNewTFDS;
     pcl::PointCloud<pcl::PointXYZI>::Ptr straightLine;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudWithInfo;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudFar;
@@ -201,7 +200,6 @@ public:
         memset(index_Array, 0, sizeof(index_Array));
         laserOrigin_Cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
         outlierRemove_Cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
-        laserCloudNewTFDS.reset(new pcl::PointCloud<pcl::PointXYZI>());
         straightLine.reset(new pcl::PointCloud<pcl::PointXYZI>());
         cloudWithInfo.reset(new pcl::PointCloud<pcl::PointXYZI>());
         cloudFar.reset(new pcl::PointCloud<pcl::PointXYZI>());
@@ -229,9 +227,6 @@ public:
         peak_Num.data = 0;
         cluster_Num.data = 0;
 
-        laserOrigin_Cloud->clear();
-        outlierRemove_Cloud->clear();
-        laserCloudNewTFDS->clear();
         straightLine->clear();
         cloudFar->clear();
         cloudIntersections->clear();
@@ -239,8 +234,8 @@ public:
         Edge_Lane.points.clear();
         beam_Invalid.clear();
 
-        // intersectionDetected.data = false;
-        // intersectionVerified.data = false;
+        intersectionDetected.data = false;
+        intersectionVerified.data = false;
 
         cloudCluster_1->clear();
         cloudCluster_2->clear();
@@ -253,12 +248,14 @@ public:
 
     void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
+        laserOrigin_Cloud->clear();
         timeLaserCloudNew = msg->header.stamp.toSec();
         laser_Lane.header.stamp = msg->header.stamp;
         pcl::fromROSMsg(*msg, *laserOrigin_Cloud);
 
         if (outlier_Bool)
         {
+            outlierRemove_Cloud->clear();
             //统计滤波
             cloud_after_StatisticalRemoval.setInputCloud(laserOrigin_Cloud);
             cloud_after_StatisticalRemoval.setMeanK(10);
@@ -575,7 +572,10 @@ public:
 
         /*排除检测为岔道线的最大光束距离*/
         if (startEnd_Vec.empty())
+        {
+            intersectionVerified.data = false;
             return;
+        }
         for (std::vector<std::pair<int, int>>::iterator itr = startEnd_Vec.begin(); itr != startEnd_Vec.end(); ++itr)
         {
             double thisMin = 20.0;
@@ -636,7 +636,7 @@ public:
             intersectionVerified.data = false;
         }
 
-            ROS_DEBUG("Intersection Detection Success !!!");
+        ROS_DEBUG("Intersection Detection Success !!!");
     }
 
     void intersectionDivide()
@@ -881,6 +881,8 @@ public:
 
     void run()
     {
+        clearMemory();
+
         getDynamicParameter();
         if (outlier_Bool)
             cloudWithInfo = getCloudWithInfo(outlierRemove_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
@@ -909,8 +911,6 @@ public:
         // }
 
         // publishResult();
-
-        clearMemory();
     }
 
     bool get_Verified()
@@ -1003,20 +1003,20 @@ int main(int argc, char **argv)
         if (ND_top.get_Verified() || ND_left.get_Verified() || ND_right.get_Verified())
         {
             intersectionVerified.data = true;
-            if (ND_top.get_Verified())
-                ROS_INFO("ND_top ");
-            if (ND_left.get_Verified())
-                ROS_INFO("ND_left ");
-            if (ND_right.get_Verified())
-                ROS_INFO("ND_right ");
-            ROS_INFO("------------------------------------------------------");
-            ROS_INFO("******************Confirm Arriving The Intersections !!!");
+            // if (ND_top.get_Verified())
+            //     ROS_INFO("ND_top ");
+            // if (ND_left.get_Verified())
+            //     ROS_INFO("ND_left ");
+            // if (ND_right.get_Verified())
+            //     ROS_INFO("ND_right ");
+            // ROS_INFO("------------------------------------------------------");
+            ROS_INFO_THROTTLE(1,"Confirm Arriving The Intersections !!!");
         }
         else
         {
             intersectionVerified.data = false;
         }
-        // ND_left.publishResult
+        // ND_top.publishResult();
 
         //发布交叉路口检测布尔值
         pubIntersectionVerified.publish(intersectionVerified);

@@ -81,20 +81,26 @@ link_directories(
 
 # ${OpenCV_LIBS}
 
+##################点云处理##########################
+
+# add_executable(pointCloudProcess  src/pointCloudProcess.cpp )
+# add_dependencies(pointCloudProcess ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(pointCloudProcess  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
+
 ############################################
 
 add_executable(intersectionDetection  src/intersectionDetection.cpp)
 add_dependencies(intersectionDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(intersectionDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-# add_executable(simuSegSave  src/simuSegSave.cpp)
-# add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+add_executable(simuSegSave  src/simuSegSave.cpp)
+add_dependencies(simuSegSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(simuSegSave  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-# add_executable(laneDetection  src/laneDetection.cpp)
-# add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+add_executable(laneDetection  src/laneDetection.cpp)
+add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-# add_executable(navigation  src/navigation.cpp src/intersectionLocation.cpp src/topoMap.cpp include/intersectionLocation.h include/topoMap.h)
-# add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(navigation  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
+add_executable(navigation  src/navigation.cpp src/intersectionLocation.cpp src/topoMap.cpp include/intersectionLocation.h include/topoMap.h)
+add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(navigation  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)

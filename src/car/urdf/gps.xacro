@@ -1,0 +1,21 @@
+<!-- GPS -->
+<gazebo>
+    <plugin name="gps" filename="libhector_gazebo_ros_gps.so">
+        <updateRate>10.0</updateRate>
+        <bodyname>car</bodyname>
+        <topicName>gps</topicName>
+        <!-- (double): 以北度数为单位的参考点纬度（默认为 49.9） -->
+        <referenceLatitude>0.0</referenceLatitude>
+        <!-- (double): 以东经度为单位的参考点的经度（默认为 8.9） -->
+        <referenceLongitude>0.0</referenceLongitude>
+        <!-- (double): 以度为单位的凉亭框架 x 轴的地理方向（默认为 0.0） -->
+        <referenceHeading>0.0</referenceHeading>
+        <!-- (double): 参考点的高度（WGS84 椭球以上的高度），以米为单位（默认为 0.0） -->
+        <referenceAltitude>0.0</referenceAltitude>
+
+        <gaussianNoise>0.0 0.0 0.0</gaussianNoise>
+        <offset>0 0 0</offset>
+        <velocityGaussianNoise>0 0 0</velocityGaussianNoise>
+        <frameId>vehicle_base_link</frameId>
+    </plugin>
+</gazebo>

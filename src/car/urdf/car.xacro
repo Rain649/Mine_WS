@@ -242,6 +242,20 @@
     <origin xyz="0 0 0.695" rpy="0 0 0" />
   </xacro:HDL-32E>
 
+
+  <!-- <plugin name="gps_controller" filename="libhector_gazebo_ros_gps.so">
+    <alwayson>true</alwayson>
+    <updaterate>1.0</updaterate>
+    <bodyname>vehicle_base_link</bodyname>
+    <topicname>/fix</topicname>
+    <velocitytopicname>/fix_velocity</velocitytopicname>
+    <drift>0 0 0</drift>
+    <gaussiannoise>0 0 0</gaussiannoise>
+    <velocitydrift>0 0 0</velocitydrift>
+    <velocitygaussiannoise>0 0 0</velocitygaussiannoise>
+  </plugin> -->
+
+
   <!-- Drive controller -->
   <gazebo>
     <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">

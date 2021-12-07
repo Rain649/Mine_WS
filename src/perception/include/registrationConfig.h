@@ -15,6 +15,7 @@ struct RegistrationConfig
     
     double yaw_thre;
     double fitnessScore_thre;
+    double minFitnessScore_thre;
 
     bool menu_bool;
 };
