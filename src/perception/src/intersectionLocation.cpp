@@ -11,7 +11,6 @@
 // viewer.initCameraParameters();
 // viewer.setCameraPosition(30, 40, 50, -3, -4, -5, 0);
 
-//将弧度转换到-π~π区间
 inline void radianTransform(float &radian)
 {
   while (radian > M_PI)
@@ -22,12 +21,12 @@ inline void radianTransform(float &radian)
 
 int v1(1); //设置左窗口
 int v2(2); //设置右窗口
-ros::Time tm = ros::TIME_MIN;
+// ros::Time tm = ros::TIME_MIN;
 
-void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer &viewer)
+bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer &viewer)
 {
   if (input_cloud->empty())
-    return;
+    return false;
   /********读取数据********/
   float maximumIterations = registrationConfig.maximumIterations;
   float resolution = registrationConfig.resolution;
@@ -73,7 +72,6 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   groundFilter.setFilterLimits(-0.8, 2);
   groundFilter.setFilterLimitsNegative(false);
   groundFilter.filter(*target_cloud);
-
   //创建ICP的实例类
   pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
   //初始化正态分布变换（NDT）
@@ -83,47 +81,56 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
 
   if (filtered_cloud->empty())
   {
-    return;
+    return false;
   }
-#pragma omp parallel sections
+
+  try
   {
-#pragma omp section
+#pragma omp parallel sections
     {
-      // icp配准
-      icp.setInputSource(filtered_cloud);
-      icp.setInputTarget(target_cloud);
-      icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
-      icp.setTransformationEpsilon(transformationEpsilon);
-      icp.setEuclideanFitnessEpsilon(euclideanFitnessEpsilon);
-      icp.setMaximumIterations(maximumIterations);
-      //设置使用机器人测距法得到的初始对准估计结果
-      Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
-      Eigen::Translation3f init_translation(x_pre, y_pre, 0);
-      Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
-      icp.align(*output_cloud, init_guess);
-      Eigen::Matrix4f transformation = icp.getFinalTransformation();
-    }
 #pragma omp section
-    {
-      //为终止条件设置最小转换差异
-      ndt.setTransformationEpsilon(transformationEpsilon); //定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
-      //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
-      ndt.setStepSize(stepSize);
-      //设置NDT网格结构的分辨率（VoxelGridCovariance）
-      ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
-      //设置匹配迭代的最大次数
-      ndt.setMaximumIterations(maximumIterations);
-      // 设置要配准的点云
-      ndt.setInputSource(filtered_cloud);
-      //设置点云配准目标
-      ndt.setInputTarget(target_cloud);
-      //设置使用机器人测距法得到的初始对准估计结果
-      Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
-      Eigen::Translation3f init_translation(x_pre, y_pre, 0);
-      Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
-      ndt.align(*output_cloud, init_guess);
-      Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+      {
+        // icp配准
+        icp.setInputSource(filtered_cloud);
+        icp.setInputTarget(target_cloud);
+        icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
+        icp.setTransformationEpsilon(transformationEpsilon);
+        icp.setEuclideanFitnessEpsilon(euclideanFitnessEpsilon);
+        icp.setMaximumIterations(maximumIterations);
+        //设置使用机器人测距法得到的初始对准估计结果
+        Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
+        Eigen::Translation3f init_translation(x_pre, y_pre, 0);
+        Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
+        icp.align(*output_cloud, init_guess);
+        Eigen::Matrix4f transformation = icp.getFinalTransformation();
+      }
+#pragma omp section
+      {
+        //为终止条件设置最小转换差异
+        ndt.setTransformationEpsilon(transformationEpsilon); //定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
+        //为More-Thuente线搜索设置最大步长，步长越大迭代越快，但也容易导致错误
+        ndt.setStepSize(stepSize);
+        //设置NDT网格结构的分辨率（VoxelGridCovariance）
+        ndt.setResolution(resolution); // ND体素的大小，单位为m,越小越准确，但占用内存越多
+        //设置匹配迭代的最大次数
+        ndt.setMaximumIterations(maximumIterations);
+        // 设置要配准的点云
+        ndt.setInputSource(filtered_cloud);
+        //设置点云配准目标
+        ndt.setInputTarget(target_cloud);
+        //设置使用机器人测距法得到的初始对准估计结果
+        Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
+        Eigen::Translation3f init_translation(x_pre, y_pre, 0);
+        Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
+        ndt.align(*output_cloud, init_guess);
+        Eigen::Matrix4f transformation = ndt.getFinalTransformation();
+      }
     }
+  }
+  catch (...)
+  {
+    ROS_ERROR("ERROR!!!");
+    return false;
   }
 
   // ros::Duration duration = ros::Time::now() - tm;
@@ -150,7 +157,7 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
     //位姿更新
     double yaw_registration = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
     if (yaw_registration < -4 * M_PI || yaw_registration > 4 * M_PI)
-      return;
+      return false;
     pose[0] = transformation(0, 3);
     pose[1] = transformation(1, 3);
     pose[2] = yaw_registration;
@@ -179,5 +186,5 @@ void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
     viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud", v2);
     viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "output cloud");
   }
-  return;
+  return true;
 }

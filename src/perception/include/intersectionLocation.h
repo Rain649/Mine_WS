@@ -14,7 +14,10 @@
 
 #include "registrationConfig.h"
 
-//将弧度转换到-π~π区间
+/**
+ * 将弧度转换到-π~π区间
+ * @param radian 传入弧度值
+ */
 inline void radianTransform(float &radian);
 
 /**
@@ -22,6 +25,7 @@ inline void radianTransform(float &radian);
  * @param pose pose of vehicle
  * @param target_cloud target_cloud, get from topoMap pcd
  * @param input_cloud real-time lidar cloud
+ * @param registrationConfig registration parameters
  * @param viewer visualization
  */
-void intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer &viewer);
+bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer &viewer);

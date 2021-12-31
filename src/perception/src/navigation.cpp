@@ -18,6 +18,7 @@
 #include <pcl/kdtree/kdtree_flann.h>     //kdtree搜索
 #include <pcl/filters/extract_indices.h> //按索引提取
 #include <pcl/filters/passthrough.h>     //直通滤波
+#include <pcl/filters/filter.h>
 
 #include <boost/thread/thread.hpp>
 #include <yaml-cpp/yaml.h>
@@ -34,7 +35,6 @@
 
 #include <unistd.h>
 
-//将弧度转换到-π~π区间
 inline void
 radianTransform(float &radian)
 {
@@ -44,6 +44,10 @@ radianTransform(float &radian)
         radian += 2 * M_PI;
 }
 
+/**
+ * Load registration configuration from yaml file
+ * @param dataPath path of data file
+ */
 RegistrationConfig loadRegistrationConfig(std::string dataPath)
 {
     std::string fin = dataPath + "registrationConfig.yaml";
@@ -77,8 +81,8 @@ private:
     RegistrationConfig config;
 
     std::mutex mtx_visual;
+    std::mutex mtx_cloud;
     std::vector<float> pose;
-    // std::vector<int> path;
     std::vector<int> path{0, 1, 2, 11, 12, 13, 16, 17, 18, 1};
     std::string dataPath;
     int preVertex_index = 0;
@@ -126,7 +130,7 @@ public:
         pubOdom = nh.advertise<nav_msgs::Odometry>("intersectionOdom", 1);
         pubIntersectionID = nh.advertise<std_msgs::Int32>("intersection_id", 1);
         subIntersection = nh.subscribe<std_msgs::Bool>("/intersectionDetection/intersectionVerified", 1, &Navigation::intersectionHandler, this);
-        subLidarCloudCombined = nh.subscribe<sensor_msgs::PointCloud2ConstPtr>("/simuSegSave/cloud_Combined", 1, &Navigation::cloudHandler, this);
+        subLidarCloudCombined = nh.subscribe<sensor_msgs::PointCloud2ConstPtr>("/lidarCloudProcess/cloud_Combined", 1, &Navigation::cloudHandler, this);
         subPath = nh.subscribe<std_msgs::Int32MultiArray>("/pathArray", 1, &Navigation::pathHandler, this);
     }
 
@@ -153,17 +157,22 @@ public:
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr msg)
     {
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloudCombined(new pcl::PointCloud<pcl::PointXYZ>());
-        // pcl::PointCloud<pcl::PointXYZ>::Ptr cloudNoCar(new pcl::PointCloud<pcl::PointXYZ>());
-        // pcl::fromROSMsg(*msg, *cloudCombined);
         pcl::fromROSMsg(*msg, *cloudCombined);
+
+        // pcl::PointCloud<pcl::PointXYZ>::Ptr cloudTemp(new pcl::PointCloud<pcl::PointXYZ>());
+        // pcl::fromROSMsg(*msg, *cloudTemp);
+        // std::vector<int> mapping;
+        // pcl::removeNaNFromPointCloud(*cloudTemp, *cloudCombined, mapping);
+
         if (cloudCombined->empty())
         {
             return;
         }
         std::vector<int> index_1;      //保存每个近邻点的索引
         std::vector<float> distance_1; //保存每个近邻点与查找点之间的欧式距离平方
+        mtx_cloud.lock();
         lidarCloud->clear();
-        // // 外围分割
+        // 外围分割
         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_1;
         kdtree_1.setInputCloud(cloudCombined); // 设置要搜索的点云，建立KDTree
         pcl::ExtractIndices<pcl::PointXYZ> extract_1;
@@ -180,6 +189,7 @@ public:
         extract_1.setIndices(index_ptr);
         extract_1.setNegative(false); //如果设为true,可以提取指定index之外的点云
         extract_1.filter(*lidarCloud);
+        mtx_cloud.unlock();
 
         // pcl::PassThrough<pcl::PointXYZ> groundFilter;
         // groundFilter.setInputCloud(cloudNoCar);
@@ -191,6 +201,9 @@ public:
         return;
     }
 
+    /**
+     * Location at intersection
+     */
     void location()
     {
         // 加载目标点云，获取点云配准先验位姿
@@ -219,12 +232,13 @@ public:
         //交叉路口定位
         geometry_msgs::Quaternion geoQuat;
         nav_msgs::Odometry odom;
+        odom.header.frame_id = "vehicle_base_link";
         while (ros::ok())
         {
             // 离开交叉路口
             if (!intersectionVerified)
             {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
+                std::this_thread::sleep_for(std::chrono::seconds(1));
                 if (!intersectionVerified)
                 {
                     ROS_INFO_STREAM("Leave the vertex  " << path[preVertex_index + 1]);
@@ -237,26 +251,34 @@ public:
             config = loadRegistrationConfig(dataPath);
             //自适应阈值
             config.fitnessScore_thre = std::max(fitnessScore_thre, config.minFitnessScore_thre);
-            intersectionLocation(pose, target_cloud, lidarCloud, config, viewer);
+            mtx_cloud.lock();
+            bool location_bool = intersectionLocation(pose, target_cloud, lidarCloud, config, viewer);
+            mtx_cloud.unlock();
             mtx_visual.unlock();
             // 发布车辆位姿
-            geoQuat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose[2]);
-            odom.header.stamp = ros::Time::now();
-            odom.pose.pose.orientation.x = geoQuat.x;
-            odom.pose.pose.orientation.y = geoQuat.y;
-            odom.pose.pose.orientation.z = geoQuat.z;
-            odom.pose.pose.orientation.w = geoQuat.w;
-            odom.pose.pose.position.x = pose[0];
-            odom.pose.pose.position.y = pose[1];
-            odom.pose.pose.position.z = 0;
-            pubOdom.publish(odom);
+            if (location_bool)
+            {
+                geoQuat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose[2]);
+                odom.header.stamp = ros::Time::now();
+                odom.pose.pose.orientation.x = geoQuat.x;
+                odom.pose.pose.orientation.y = geoQuat.y;
+                odom.pose.pose.orientation.z = geoQuat.z;
+                odom.pose.pose.orientation.w = geoQuat.w;
+                odom.pose.pose.position.x = pose[0];
+                odom.pose.pose.position.y = pose[1];
+                odom.pose.pose.position.z = 0;
+                pubOdom.publish(odom);
 
-            fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
+                fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
+            }
             // std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
         return;
     }
 
+    /**
+     * Location visualization
+     */
     void visual()
     {
         while (ros::ok() && !viewer.wasStopped())
@@ -268,6 +290,9 @@ public:
         return;
     }
 
+    /**
+     * Navigation
+     */
     void navigation()
     {
         while (path.empty())
