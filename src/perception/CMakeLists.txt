@@ -89,9 +89,9 @@ link_directories(
 
 ############################################
 
-add_executable(intersectionDetection  src/intersectionDetection.cpp)
-add_dependencies(intersectionDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(intersectionDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+# add_executable(intersectionDetection  src/intersectionDetection.cpp)
+# add_dependencies(intersectionDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(intersectionDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
 # add_executable(lidarCloudProcess  src/lidarCloudProcess.cpp)
 # add_dependencies(lidarCloudProcess ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

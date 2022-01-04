@@ -873,7 +873,6 @@ public:
         // std_msgs::UInt8 segmentationRadius_Uint8;
         // segmentationRadius_Uint8.data = segmentationRadius;
         // pubSegmentationRadius.publish(segmentationRadius_Uint8);
-
     }
 
     void run()
@@ -985,6 +984,8 @@ int main(int argc, char **argv)
     Detection ND_left(lidarTopic_left, lidarFrameID_left);
     Detection ND_right(lidarTopic_right, lidarFrameID_right);
 
+    //连续三次判定转换成立
+    std::vector<int> que(3, 0);
     std_msgs::Bool intersectionVerified;
 
     ros::Publisher pubIntersectionVerified = nh.advertise<std_msgs::Bool>("intersectionVerified", 1);
@@ -997,9 +998,12 @@ int main(int argc, char **argv)
         ND_left.run();
         ND_right.run();
 
+        for (size_t i = que.size() - 1; i > 0; --i)
+            que[i] = que[i - 1];
+
         if (ND_top.get_Verified() || ND_left.get_Verified() || ND_right.get_Verified())
         {
-            intersectionVerified.data = true;
+            que[0] = 1;
             // if (ND_top.get_Verified())
             //     ROS_INFO("ND_top ");
             // if (ND_left.get_Verified())
@@ -1011,9 +1015,13 @@ int main(int argc, char **argv)
         }
         else
         {
-            intersectionVerified.data = false;
+            que[0] = 0;
         }
         // ND_top.publishResult();
+        if (std::accumulate(que.begin(), que.end(), 0) == que.size())
+            intersectionVerified.data = true;
+        if (std::accumulate(que.begin(), que.end(), 0) == 0)
+            intersectionVerified.data = false;
 
         //发布交叉路口检测布尔值
         pubIntersectionVerified.publish(intersectionVerified);

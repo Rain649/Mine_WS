@@ -71,7 +71,9 @@
         "optional": "cpp",
         "set": "cpp",
         "variant": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "future": "cpp",
+        "codecvt": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

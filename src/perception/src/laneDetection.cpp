@@ -286,43 +286,58 @@ public:
 
         /*为了从点云索引向量中分割出每个聚类，必须迭代访问点云索引，每次创建一个新的点云数据集，并且将所有当前聚类的点写入到点云数据集中。*/
         //迭代访问点云索引cluster_indices，直到分割出所有聚类
+        // int j = 0;
+        // for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+        // {
+        //     switch (++j)
+        //     {
+        //     case 1:
+        //         for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+        //             cloudCluster_1->points.push_back(cloudFinal->points[*pit]);
+
+        //         break;
+
+        //     case 2:
+        //         for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+        //             cloudCluster_2->points.push_back(cloudFinal->points[*pit]);
+
+        //         break;
+
+        //     case 3:
+        //         for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+        //             cloudCluster_3->points.push_back(cloudFinal->points[*pit]);
+
+        //         break;
+
+        //     case 4:
+        //         for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+        //             cloudCluster_4->points.push_back(cloudFinal->points[*pit]);
+
+        //         break;
+        //     default:
+        //         break;
+        //     }
+        // }
+        // 888888888888888888888888888888
+        std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudCluster_vec;
         int j = 0;
         for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
         {
-            switch (++j)
+
+            for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
             {
-            case 1:
-                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                    cloudCluster_1->points.push_back(cloudFinal->points[*pit]);
-
-                break;
-
-            case 2:
-                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                    cloudCluster_2->points.push_back(cloudFinal->points[*pit]);
-
-                break;
-
-            case 3:
-                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                    cloudCluster_3->points.push_back(cloudFinal->points[*pit]);
-
-                break;
-
-            case 4:
-                for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-                    cloudCluster_4->points.push_back(cloudFinal->points[*pit]);
-
-                break;
-            default:
-                break;
+                cloudCluster_1->points.push_back(cloudFinal->points[*pit]);
+                
             }
         }
 
         if (cloudCluster_1->empty())
             return;
+
         kdFirst->setInputCloud(cloudCluster_1);
         kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
+
+        float distance_1 = std::sqrt(pointSearchSqDis[0]);
         double y1 = cloudCluster_1->points[pointSearchInd[0]].y;
         double y2 = 0;
 
