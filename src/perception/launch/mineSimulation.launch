@@ -74,7 +74,7 @@
 
 
   <!-- 车道线拟合节点 -->
-  <!-- <node pkg="perception" type="laneDetection" name="laneDetection" output="screen">
+  <node pkg="perception" type="laneDetection" name="laneDetection" output="screen">
     <param name="pointCloud_topic_" value="$(arg pointCloud_topic_)" />
     <param name="frame_id_" value="$(arg frame_id_)" />
     <param name="order" value="$(arg order)" />
@@ -83,7 +83,7 @@
     <param name="passX_min" value="$(arg passX_min)" />
     <param name="passZ_min" value="$(arg passZ_min)" />
     <param name="passZ_max" value="$(arg passZ_max)" />
-  </node> -->
+  </node>
 
 
   <!-- 定位导航节点 -->

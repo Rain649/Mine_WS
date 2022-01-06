@@ -191,13 +191,6 @@ public:
         extract_1.filter(*lidarCloud);
         mtx_cloud.unlock();
 
-        // pcl::PassThrough<pcl::PointXYZ> groundFilter;
-        // groundFilter.setInputCloud(cloudNoCar);
-        // groundFilter.setFilterFieldName("z");
-        // groundFilter.setFilterLimits(-0.8, 10);
-        // groundFilter.setFilterLimitsNegative(false);
-        // groundFilter.filter(*lidarCloud);
-        ROS_DEBUG_STREAM("lidarCloud :  " << lidarCloud->size());
         return;
     }
 
@@ -219,11 +212,31 @@ public:
         }
         fileName = dataPath + std::to_string(path[preVertex_index + 1]) + "_node.pcd";
         pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-        if (pcl::io::loadPCDFile<pcl::PointXYZ>(fileName, *target_cloud) == -1)
+        target_cloud->header.frame_id = "vehicle_base_link";
+        pcl::PointCloud<pcl::PointXYZ> cloudTemp;
+        if (pcl::io::loadPCDFile<pcl::PointXYZ>(fileName, cloudTemp) == -1)
         {
             PCL_ERROR("Couldn't read file target_cloud.pcd \n");
             return;
         }
+        std::vector<int> mapping;
+        pcl::removeNaNFromPointCloud(cloudTemp, *target_cloud, mapping);
+        pcl::PointCloud<pcl::PointXYZ>::iterator it = target_cloud->points.begin();
+        while (it != target_cloud->points.end())
+        {
+            float x, y, z;
+            x = it->x;
+            y = it->y;
+            z = it->z;
+            if (!pcl_isfinite(x) || !pcl_isfinite(y) || !pcl_isfinite(z))
+            {
+                it = target_cloud->points.erase(it);
+            }
+            else
+                ++it;
+        }
+
+        //-------------------------
         pose[0] = -10 * cos(yaw_pre);
         pose[1] = -10 * sin(yaw_pre);
         pose[2] = yaw_pre;
@@ -247,10 +260,10 @@ public:
                 }
             }
             // 定位
-            mtx_visual.lock();
             config = loadRegistrationConfig(dataPath);
             //自适应阈值
             config.fitnessScore_thre = std::max(fitnessScore_thre, config.minFitnessScore_thre);
+            mtx_visual.lock();
             mtx_cloud.lock();
             bool location_bool = intersectionLocation(pose, target_cloud, lidarCloud, config, viewer);
             mtx_cloud.unlock();

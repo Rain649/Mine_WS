@@ -60,18 +60,36 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   // ROS_INFO_STREAM("yaw_pre =  " << yaw_pre << "; x =  " << x_pre << "; y =  " << y_pre);
 
   //将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
+  pcl::PointCloud<pcl::PointXYZ> cloudTemp;
   pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::ApproximateVoxelGrid<pcl::PointXYZ> approximate_voxel_filter;
   approximate_voxel_filter.setLeafSize(0.1, 0.1, 0.1);
   approximate_voxel_filter.setInputCloud(input_cloud);
-  approximate_voxel_filter.filter(*filtered_cloud);
-  // std::cout << "Filtered cloud contains " << filtered_cloud->size() << " data points from test2.pcd" << std::endl;
-  pcl::PassThrough<pcl::PointXYZ> groundFilter;
-  groundFilter.setInputCloud(target_cloud);
-  groundFilter.setFilterFieldName("z");
-  groundFilter.setFilterLimits(-0.8, 2);
-  groundFilter.setFilterLimitsNegative(false);
-  groundFilter.filter(*target_cloud);
+  approximate_voxel_filter.filter(cloudTemp);
+
+  std::vector<int> mapping;
+  pcl::removeNaNFromPointCloud(cloudTemp, *filtered_cloud, mapping);
+  pcl::PointCloud<pcl::PointXYZ>::iterator it = filtered_cloud->points.begin();
+  while (it != filtered_cloud->points.end())
+  {
+    float x, y, z;
+    x = it->x;
+    y = it->y;
+    z = it->z;
+    // cout << "x: " << x << "  y: " << y << "  z: " << z << "  rgb: " << rgb << endl;
+    if (!pcl_isfinite(x) || !pcl_isfinite(y) || !pcl_isfinite(z))
+    {
+      it = filtered_cloud->points.erase(it);
+    }
+    else
+      ++it;
+  }
+
+  if (filtered_cloud->empty())
+  {
+    return false;
+  }
+
   //创建ICP的实例类
   pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
   //初始化正态分布变换（NDT）
@@ -84,13 +102,12 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
     return false;
   }
 
-  try
-  {
 #pragma omp parallel sections
     {
 #pragma omp section
       {
         // icp配准
+        // icp.setInputSource(input_cloud);
         icp.setInputSource(filtered_cloud);
         icp.setInputTarget(target_cloud);
         icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
@@ -115,6 +132,7 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
         //设置匹配迭代的最大次数
         ndt.setMaximumIterations(maximumIterations);
         // 设置要配准的点云
+        // ndt.setInputSource(input_cloud);
         ndt.setInputSource(filtered_cloud);
         //设置点云配准目标
         ndt.setInputTarget(target_cloud);
@@ -126,12 +144,15 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
         Eigen::Matrix4f transformation = ndt.getFinalTransformation();
       }
     }
-  }
-  catch (...)
-  {
-    ROS_ERROR("ERROR!!!");
-    return false;
-  }
+
+  // try
+  // {
+  // }
+  // catch (...)
+  // {
+  //   ROS_ERROR("ERROR!!!");
+  //   return false;
+  // }
 
   // ros::Duration duration = ros::Time::now() - tm;
   // double yaw_speed = (yaw_registration - yaw_pre) / duration.toSec();
