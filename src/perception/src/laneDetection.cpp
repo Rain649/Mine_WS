@@ -47,6 +47,8 @@ private:
     double passZ_max;
 
     bool intersectionVerified;
+    // bool leftLane_bool;
+    // bool rightLane_bool;
 
     /// *poly fit left coefficients
     std_msgs::Float32MultiArray leftCoefficient_array;
@@ -80,6 +82,9 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_2;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_3;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_4;
+    std::vector<pcl::PointCloud<pcl::PointXYZI>> cloudCluster_vec;
+    std::vector<float> cloudDistance_vec;
+    std::vector<float> yDis_vec;
 
     pcl::PassThrough<pcl::PointXYZI> pass_z;
     pcl::PassThrough<pcl::PointXYZI> pass_x;
@@ -167,6 +172,8 @@ public:
         projection.setModelType(pcl::SACMODEL_PLANE);
 
         intersectionVerified = false;
+        // leftLane_bool = false;
+        // rightLane_bool = false;
 
         allocateMemory();
     }
@@ -214,12 +221,17 @@ public:
         cloudCluster_2->clear();
         cloudCluster_3->clear();
         cloudCluster_4->clear();
+        cloudCluster_vec.clear();
+        cloudDistance_vec.clear();
+        yDis_vec.clear();
 
         Distance.data.clear();
         leftCoefficient_array.data.clear();
         rightCoefficient_array.data.clear();
         leftRange.data.clear();
         rightRange.data.clear();
+        // leftLane_bool = false;
+        // rightLane_bool = false;
     }
 
     void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
@@ -318,58 +330,138 @@ public:
         //         break;
         //     }
         // }
-        // 888888888888888888888888888888
-        std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> cloudCluster_vec;
-        int j = 0;
-        for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
-        {
 
-            for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
-            {
-                cloudCluster_1->points.push_back(cloudFinal->points[*pit]);
-                
-            }
-        }
+        // if (cloudCluster_1->empty())
+        //     return;
 
-        if (cloudCluster_1->empty())
-            return;
+        // kdFirst->setInputCloud(cloudCluster_1);
+        // kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
 
-        kdFirst->setInputCloud(cloudCluster_1);
-        kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
+        // float distance_1 = std::sqrt(pointSearchSqDis[0]);
+        // double y1 = cloudCluster_1->points[pointSearchInd[0]].y;
+        // double y2 = 0;
 
-        float distance_1 = std::sqrt(pointSearchSqDis[0]);
-        double y1 = cloudCluster_1->points[pointSearchInd[0]].y;
-        double y2 = 0;
+        // if (!cloudCluster_2->empty())
+        // {
+        //     kdFirst->setInputCloud(cloudCluster_2);
+        //     kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
+        //     y2 = cloudCluster_2->points[pointSearchInd[0]].y;
+        // }
 
-        if (!cloudCluster_2->empty())
-        {
-            kdFirst->setInputCloud(cloudCluster_2);
-            kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
-            y2 = cloudCluster_2->points[pointSearchInd[0]].y;
-        }
+        // // y2左侧距离，y1右侧距离
+        // if (y1 < y2)
+        // {
+        //     cloudCluster_1->swap(*cloudCluster_2);
+        //     Distance.data.push_back(y2);
+        //     Distance.data.push_back(y1);
+        // }
+        // // y1左侧距离，y2右侧距离
+        // else
+        // {
+        //     Distance.data.push_back(y1);
+        //     Distance.data.push_back(y2);
+        // }
 
-        // y2左侧距离，y1右侧距离
-        if (y1 < y2)
-        {
-            cloudCluster_1->swap(*cloudCluster_2);
-            Distance.data.push_back(y2);
-            Distance.data.push_back(y1);
-        }
-        // y1左侧距离，y2右侧距离
-        else
-        {
-            Distance.data.push_back(y1);
-            Distance.data.push_back(y2);
-        }
-
-        downSizeFilter_2.setInputCloud(cloudCluster_1);
-        downSizeFilter_2.filter(*laneLeft);
-        downSizeFilter_2.setInputCloud(cloudCluster_2);
-        downSizeFilter_2.filter(*laneRight);
+        // downSizeFilter_2.setInputCloud(cloudCluster_1);
+        // downSizeFilter_2.filter(*laneLeft);
+        // downSizeFilter_2.setInputCloud(cloudCluster_2);
+        // downSizeFilter_2.filter(*laneRight);
 
         // std::cout << "Cluster Result Number =  " << j << " data points." << std::endl;
         // std::cout << "Cluster Number 1 =  " << cloudCluster_1->size() << " data points." << std::endl;
         // std::cout << "Cluster Number 2 =  " << cloudCluster_2->size() << " data points." << std::endl;
+        // -----------------------------------------------------------
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCluster_temp(new pcl::PointCloud<pcl::PointXYZI>());
+        int numMax = 0;
+        for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it)
+        {
+            for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit)
+            {
+                cloudCluster_temp->points.push_back(cloudFinal->points[*pit]);
+            }
+            if (!cloudCluster_temp->empty())
+                cloudCluster_vec.push_back(*cloudCluster_temp);
+            cloudCluster_temp->clear();
+            if (++numMax > 4)
+                break;
+        }
+        size_t clusterNum = cloudCluster_vec.size();
+        if (0 == clusterNum)
+            return;
+
+        //根据最近点距离排序，取前两个
+        // for (auto thisCloud : cloudCluster_vec)
+        for (auto itr = cloudCluster_vec.begin(); itr != cloudCluster_vec.end();)
+        {
+            pcl::PointCloud<pcl::PointXYZI> thisCloud = *itr;
+            kdFirst->setInputCloud(thisCloud.makeShared());
+            kdFirst->nearestKSearch(egoPoint, 1, pointSearchInd, pointSearchSqDis);
+            float nearestDistance = std::sqrt(pointSearchSqDis[0]);
+            if (nearestDistance < 10.f)
+            {
+                cloudDistance_vec.push_back(nearestDistance);
+                yDis_vec.push_back(thisCloud.points[pointSearchInd[0]].y);
+                ++itr;
+            }
+            else
+            {
+                itr = cloudCluster_vec.erase(itr);
+                --clusterNum;
+            }
+        }
+        if (0 == clusterNum)
+            return;
+
+        // ROS_INFO("yDis_vec.size() %lu", clusterNum);
+        //冒泡排序
+        if (clusterNum > 1)
+            for (size_t i = 0; i < clusterNum - 1; ++i)
+            {
+                for (size_t j = 0; j < clusterNum - 1 - i; ++j)
+                {
+                    if (abs(yDis_vec[j]) > abs(yDis_vec[j + 1]))
+                    {
+                        int tmp = yDis_vec[j];
+                        yDis_vec[j] = yDis_vec[j + 1];
+                        yDis_vec[j + 1] = tmp;
+                        cloudCluster_vec[j].swap(cloudCluster_vec[j + 1]);
+                    }
+                }
+            }
+
+        double y0 = yDis_vec[0];
+        double y1 = (clusterNum >= 2) ? yDis_vec[1] : 0;
+
+        // y1左侧距离，y0右侧距离
+        if (y0 < y1)
+        {
+            downSizeFilter_2.setInputCloud(cloudCluster_vec[0].makeShared());
+            downSizeFilter_2.filter(*laneRight);
+            Distance.data.push_back(y0);
+            // rightLane_bool = true;
+            if (clusterNum > 1)
+            {
+                downSizeFilter_2.setInputCloud(cloudCluster_vec[1].makeShared());
+                downSizeFilter_2.filter(*laneLeft);
+                Distance.data.push_back(y1);
+                // leftLane_bool = true;
+            }
+        }
+        // y0左侧距离，y1右侧距离
+        else
+        {
+            downSizeFilter_2.setInputCloud(cloudCluster_vec[0].makeShared());
+            downSizeFilter_2.filter(*laneLeft);
+            Distance.data.push_back(y0);
+            // leftLane_bool = true;
+            if (clusterNum > 1)
+            {
+                downSizeFilter_2.setInputCloud(cloudCluster_vec[1].makeShared());
+                downSizeFilter_2.filter(*laneRight);
+                Distance.data.push_back(y1);
+                // rightLane_bool = true;
+            }
+        }
     }
 
     /**
@@ -542,35 +634,35 @@ public:
         //     // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         // }
 
-        // if (pubCluster_1.getNumSubscribers() != 0)
+        if (pubCluster_1.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
-            pcl::toROSMsg(*cloudCluster_1, cloudMsgTemp);
+            pcl::toROSMsg(cloudCluster_vec[0], cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCluster_1.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         }
 
-        // if (pubCluster_2.getNumSubscribers() != 0)
+        if (pubCluster_2.getNumSubscribers() != 0)
         {
             sensor_msgs::PointCloud2 cloudMsgTemp;
-            pcl::toROSMsg(*cloudCluster_2, cloudMsgTemp);
+            pcl::toROSMsg(cloudCluster_vec[1], cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
             cloudMsgTemp.header.frame_id = frame_id_;
             pubCluster_2.publish(cloudMsgTemp);
             // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
         }
 
-        // if (pubCluster_3.getNumSubscribers() != 0)
-        // {
-        //     sensor_msgs::PointCloud2 cloudMsgTemp;
-        //     pcl::toROSMsg(*cloudCluster_3, cloudMsgTemp);
-        //     // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
-        //     cloudMsgTemp.header.frame_id = frame_id_;
-        //     pubCluster_3.publish(cloudMsgTemp);
-        //     // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
-        // }
+        if (pubCluster_3.getNumSubscribers() != 0)
+        {
+            sensor_msgs::PointCloud2 cloudMsgTemp;
+            pcl::toROSMsg(cloudCluster_vec[2], cloudMsgTemp);
+            // cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserCloudNew);
+            cloudMsgTemp.header.frame_id = frame_id_;
+            pubCluster_3.publish(cloudMsgTemp);
+            // ROS_INFO("\033[1;32m--->\033[0m cloudFinal Published.");
+        }
 
         // if (pubCluster_4.getNumSubscribers() != 0)
         // {
