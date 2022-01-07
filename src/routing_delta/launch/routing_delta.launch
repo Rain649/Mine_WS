@@ -1,0 +1,16 @@
+<launch>
+
+    <node pkg="routing_delta" type="main_routing" name="routing" output="screen">
+        <param name="vertexFilePath" value="$(find perception)/simu_data/Vertex.yaml"/>
+        <param name="edgeFilePath" value="$(find perception)/simu_data/Edge.yaml"/>
+        <param name="pcdFilePath" value="$(find perception)/simu_data/"/>
+
+        <param name="topic_intersection" value="/intersectionDetection/intersectionVerified"/>
+
+        <param name="topic_routing_path" value="/pathArray"/>
+        <param name="topic_target_fork" value="/target_fork"/>
+
+        <param name="frame_id" value="vehicle_base_link"/>
+    </node>
+
+</launch>

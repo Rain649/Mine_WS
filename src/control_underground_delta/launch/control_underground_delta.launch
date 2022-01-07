@@ -1,0 +1,22 @@
+<launch>
+
+    <node pkg="control_underground_delta" type="main_path_follow" name="path_follow" output="screen">
+        <param name="topic_path_ug_vehicle" value="/path_ug_vehicle"/>
+        <param name="topic_chassis" value="/chassis_speed_delta"/>
+        
+        <param name="topic_cmd" value="/cmd_delta"/>
+
+        <param name="Veh_L" value="3.5"/>
+
+        <param name="U_max" value="15"/>
+        <param name="U_min" value="5"/>
+
+        <param name="pre_dis_min" value="3"/>
+
+        <param name="Torque_max" value="60"/>
+        <param name="Torque_min" value="-20"/>
+
+        <param name="cmd_sim_lon" value="2"/>
+    </node>
+
+</launch>

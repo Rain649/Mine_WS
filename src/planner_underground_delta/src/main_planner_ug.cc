@@ -4,7 +4,7 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "planner_ug");
 
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
 
     UG_planner planner_ug(nh);
 

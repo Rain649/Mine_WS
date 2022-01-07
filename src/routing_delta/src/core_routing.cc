@@ -6,9 +6,13 @@ namespace dij
 
 Dij::Dij(ros::NodeHandle& nh)
 {
-    PathPuber = nh.advertise<std_msgs::Int32MultiArray>("/pathArray", 1);
+    std::string topic_routing_path;
+    nh.getParam("topic_routing_path", topic_routing_path);
+    PathPuber = nh.advertise<std_msgs::Int32MultiArray>(topic_routing_path, 1);
 
-    ForkSuber = nh.subscribe("/intersectionDetection/intersectionVerified", 1, &Dij::ForkCallback, this);
+    std::string topic_intersection;
+    nh.getParam("topic_intersection", topic_intersection);
+    ForkSuber = nh.subscribe(topic_intersection, 1, &Dij::ForkCallback, this);
 
     RATE = 20;
 
@@ -16,9 +20,12 @@ Dij::Dij(ros::NodeHandle& nh)
 
     fork_flag_old = false;
 
-    TargetPuber = nh.advertise<nav_msgs::Odometry>("/target_fork", 1);
+    std::string topic_target_fork;
+    nh.getParam("topic_target_fork", topic_target_fork);
+    TargetPuber = nh.advertise<nav_msgs::Odometry>(topic_target_fork, 1);
 
-    target_msg.header.frame_id = "map";
+    nh.getParam("frame_id", target_msg.header.frame_id);
+    // target_msg.header.frame_id = "map";
 
     update_flag = false;
 }

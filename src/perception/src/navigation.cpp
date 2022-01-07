@@ -141,10 +141,13 @@ public:
         else
         {
             path.clear();
+            std::cout << "< Path";
             for (int i = 0; i < msg.data.size(); ++i)
             {
+                std::cout << " > " <<msg.data[i];
                 path.push_back(msg.data[i]);
             }
+            std::cout << std::endl;;
             pathReceived = true;
         }
     }

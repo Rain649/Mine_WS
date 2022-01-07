@@ -3,11 +3,17 @@
 DBPlanner::DBPlanner(ros::NodeHandle& nh)
 {
     // subscribe
-    OdomSub = nh.subscribe("/navigation/intersectionOdom", 10, &DBPlanner::OdomCallback, this);
+    std::string topic_odom;
+    nh.getParam("topic_odom", topic_odom);
+    OdomSub = nh.subscribe(topic_odom, 10, &DBPlanner::OdomCallback, this);
     
-    TargetSub = nh.subscribe("/target_fork", 10, &DBPlanner::TargetCallback, this);
+    std::string topic_target;
+    nh.getParam("topic_target", topic_target);
+    TargetSub = nh.subscribe(topic_target, 10, &DBPlanner::TargetCallback, this);
     
-    LidarSub = nh.subscribe("/simuSegSave/cloud_Combined", 10, &DBPlanner::LidarCallback, this);
+    std::string topic_lidar;
+    nh.getParam("topic_lidar", topic_lidar);
+    LidarSub = nh.subscribe(topic_lidar, 10, &DBPlanner::LidarCallback, this);
     
     // callback flag
     odom_flag = false;
@@ -18,20 +24,22 @@ DBPlanner::DBPlanner(ros::NodeHandle& nh)
 
     // path
     PathLocalPub = nh.advertise<nav_msgs::Path>("/path_local", 10);
-
-    path_local_msg.header.frame_id = "map";
+    nh.getParam("frame_id", path_local_msg.header.frame_id);
+    // path_local_msg.header.frame_id = "map";
     
     PathLocalVehPub = nh.advertise<nav_msgs::Path>("/path_local_veh", 10);
-
-    path_local_veh_msg.header.frame_id = "map";
+    nh.getParam("frame_id", path_local_veh_msg.header.frame_id);
+    // path_local_veh_msg.header.frame_id = "map";
 
     PathPdtPub = nh.advertise<nav_msgs::Path>("/path_pdt", 10);
+    nh.getParam("frame_id", path_pdt_msg.header.frame_id);
+    // path_pdt_msg.header.frame_id = "map";
 
-    path_pdt_msg.header.frame_id = "map";
-
-    PathPdtVehPub = nh.advertise<nav_msgs::Path>("/path_pdt_veh", 10);
-
-    path_pdt_veh_msg.header.frame_id = "map";
+    std::string topic_path_pdt_veh;
+    nh.getParam("topic_path_pdt", topic_path_pdt_veh);
+    PathPdtVehPub = nh.advertise<nav_msgs::Path>(topic_path_pdt_veh, 10);
+    nh.getParam("frame_id", path_pdt_veh_msg.header.frame_id);
+    // path_pdt_veh_msg.header.frame_id = "map";
     
     // map
     map_rows = 200;
@@ -42,10 +50,9 @@ DBPlanner::DBPlanner(ros::NodeHandle& nh)
 
     image_map.create(map_rows, map_cols, CV_8UC1);
 
-    MapPub = nh.advertise<nav_msgs::OccupancyGrid>("/map", 1);
-    
-    map_msg.header.frame_id = "map";
-    // map_msg.header.frame_id = "odom";
+    MapPub = nh.advertise<nav_msgs::OccupancyGrid>("/map_local", 1);
+    nh.getParam("frame_id", map_msg.header.frame_id);
+    // map_msg.header.frame_id = "map";
     
     map_msg.info.resolution = map_res;
     map_msg.info.width = map_cols;
@@ -59,9 +66,7 @@ DBPlanner::DBPlanner(ros::NodeHandle& nh)
     Laser_Edge = 20;
 
     pass_z.setFilterFieldName ("z");                        //设置过滤时所需要点云类型的Z字段
-    pass_z.setFilterLimits (-10, 0);                        //设置在过滤字段的范围
-    // pass_z.setFilterLimits (-1.4, 0);                        //设置在过滤字段的范围
-    
+    pass_z.setFilterLimits (-10, 1);                        //设置在过滤字段的范围    
     pass_x.setFilterFieldName ("x");                        //设置过滤时所需要点云类型的Z字段
     pass_x.setFilterLimits (-Laser_Edge, Laser_Edge);       //设置在过滤字段的范围
     pass_y.setFilterFieldName ("y");                        //设置过滤时所需要点云类型的Z字段
@@ -81,7 +86,8 @@ DBPlanner::DBPlanner(ros::NodeHandle& nh)
 
     neighbor_flag.resize(Neighbor_num);
 
-    k_safe = 1.3;//2;
+    nh.getParam("k_safe", k_safe);
+    // k_safe = 1.3;//2;
 
     k_sample = 2;
 
@@ -91,18 +97,22 @@ DBPlanner::DBPlanner(ros::NodeHandle& nh)
 
     laser_point_msg.poses.resize(laser_point.size());
     
-    laser_point_msg.header.frame_id = "map";
+    nh.getParam("frame_id", laser_point_msg.header.frame_id);
+    // laser_point_msg.header.frame_id = "map";
 
     LaserEdgePointPub = nh.advertise<geometry_msgs::PoseArray>("/laser_edge",2);
     
-    laser_edge_msg.header.frame_id = "map";
+    nh.getParam("frame_id", laser_edge_msg.header.frame_id);
+    // laser_edge_msg.header.frame_id = "map";
 
     // vehicle
     Delta_f_max = 20*M_PI/180;
 
-    Lf = 1.81;
+    nh.getParam("Lf", Lf);
+    // Lf = 1.81;
 
-    Lr = 1.69;
+    nh.getParam("Lr", Lr);
+    // Lr = 1.69;
     
     Veh_L = Lf + Lr; //3.5;
 
@@ -121,13 +131,15 @@ DBPlanner::DBPlanner(ros::NodeHandle& nh)
     Infinity = 1.0e4;
 
     // tolerance
-    Tar_tolerance = 1;
+    nh.getParam("Tar_tolerance", Tar_tolerance);
+    // Tar_tolerance = 1;
     
     // based on TangentBug
     dis_v2t_old = Infinity;
 
     // 碰撞检测
-    OBS_DIS = 1;
+    nh.getParam("OBS_DIS", OBS_DIS);
+    // OBS_DIS = 1;
 
     // 更新预测路径
     Phi_alter = M_PI/6;
@@ -143,8 +155,9 @@ DBPlanner::DBPlanner(ros::NodeHandle& nh)
     Counter_MAX = 1 * 20;
 
     // test
-    TargetInVehPub = nh.advertise<nav_msgs::Odometry>("/target_veh", 10);   
-    target_veh_msg.header.frame_id = "map";
+    TargetInVehPub = nh.advertise<nav_msgs::Odometry>("/target_veh", 10);
+    nh.getParam("frame_id", target_veh_msg.header.frame_id);
+    // target_veh_msg.header.frame_id = "map";
     // test
 }
 

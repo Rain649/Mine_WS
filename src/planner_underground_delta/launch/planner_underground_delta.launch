@@ -1,0 +1,30 @@
+<launch>
+
+    <node pkg="planner_underground_delta" type="main_planner_ug" name="planner_ug" output="screen">
+        <param name="frame_id" value="vehicle_base_link"/>
+
+        <!-- LKA -->
+        <param name="topic_rightCoefficient" value="/laneDetection/rightCoefficient"/>
+        <param name="topic_rightRange" value="/laneDetection/rightRange"/>
+
+        <param name="X_step" value="0.2"/>
+        <param name="Y_bias" value="2.5"/>
+
+        <!-- DubinsBug -->
+        <param name="topic_odom" value="/navigation/intersectionOdom"/>
+        <param name="topic_target" value="/target_fork"/>
+        <param name="topic_lidar" value="/lidarCloudProcess/cloud_Combined"/>
+
+        <param name="topic_path_pdt_veh" value="/path_pdt_veh"/>
+
+        <param name="k_safe" value="1.3"/>
+
+        <param name="Lf" value="1.81"/>
+        <param name="Lr" value="1.69"/>
+
+        <param name="Tar_tolerance" value="3"/>
+
+        <param name="OBS_DIS" value="1"/>
+    </node>
+
+</launch>

@@ -4,15 +4,19 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "routing");
     
-    ros::NodeHandle nh;
+    ros::NodeHandle nh("~");
 
     dij::Dij dij_planner(nh);
 
     std::string vertexFilePath, edgeFilePath, pcdFilePath;
     
-    vertexFilePath = "src/perception/simu_data/Vertex.yaml";
-    edgeFilePath = "src/perception/simu_data/Edge.yaml";
-    pcdFilePath = "src/perception/simu_data/";
+    // vertexFilePath = "src/perception/simu_data/Vertex.yaml";
+    // edgeFilePath = "src/perception/simu_data/Edge.yaml";
+    // pcdFilePath = "src/perception/simu_data/";
+    
+    nh.getParam("vertexFilePath", vertexFilePath);
+    nh.getParam("edgeFilePath", edgeFilePath);
+    nh.getParam("pcdFilePath", pcdFilePath);
 
     TopoMap topoMap = loadMap(vertexFilePath, edgeFilePath, pcdFilePath);
 

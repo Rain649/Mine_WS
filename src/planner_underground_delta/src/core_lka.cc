@@ -2,14 +2,18 @@
 
 LKA_planner::LKA_planner(ros::NodeHandle& nh)
 {
-    CoefficientSub = nh.subscribe("/laneDetection/rightCoefficient", 10, &LKA_planner::CoefficientCallback, this);
+    std::string topic_rightCoefficient;
+    nh.getParam("topic_rightCoefficient", topic_rightCoefficient);
+    CoefficientSub = nh.subscribe(topic_rightCoefficient, 10, &LKA_planner::CoefficientCallback, this);
 
-    RangeSub = nh.subscribe("/laneDetection/rightRange", 10, &LKA_planner::RangeCallback, this);
+    std::string topic_rightRange;
+    nh.getParam("topic_rightRange", topic_rightRange);
+    RangeSub = nh.subscribe(topic_rightRange, 10, &LKA_planner::RangeCallback, this);
     
     // PathPub = nh.advertise<nav_msgs::Path>("/path_lka", 10);
 
-    path_msg.header.frame_id = "map";
-    // path_msg.header.frame_id = "velodyne";
+    // path_msg.header.frame_id = "map";
+    nh.getParam("frame_id", path_msg.header.frame_id);
 
     coeff_flag = false;
 
@@ -19,10 +23,11 @@ LKA_planner::LKA_planner(ros::NodeHandle& nh)
 
     // X_max = 10;
 
-    X_step = 0.2;
+    // X_step = 0.2;
+    nh.getParam("X_step", X_step);
 
-    // Y_bias = 1.25;
-    Y_bias = 2.5;
+    // Y_bias = 2.5;
+    nh.getParam("Y_bias", Y_bias);
 
     coeff_counter = 0;
 

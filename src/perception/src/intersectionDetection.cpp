@@ -1004,14 +1004,7 @@ int main(int argc, char **argv)
         if (ND_top.get_Verified() || ND_left.get_Verified() || ND_right.get_Verified())
         {
             que[0] = 1;
-            // if (ND_top.get_Verified())
-            //     ROS_INFO("ND_top ");
-            // if (ND_left.get_Verified())
-            //     ROS_INFO("ND_left ");
-            // if (ND_right.get_Verified())
-            //     ROS_INFO("ND_right ");
-            // ROS_INFO("------------------------------------------------------");
-            ROS_INFO_THROTTLE(1, "Confirm Arriving The Intersections !!!");
+            // ROS_INFO_THROTTLE(1, "Confirm Arriving The Intersections !!!");
         }
         else
         {
