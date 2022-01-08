@@ -6,7 +6,7 @@ y: -8
 
 resolution: 18
 
-maximumIterations: 100
+maximumIterations: 50
 
 stepSize: 0.5
 

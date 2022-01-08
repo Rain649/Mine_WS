@@ -144,10 +144,11 @@ public:
             std::cout << "< Path";
             for (int i = 0; i < msg.data.size(); ++i)
             {
-                std::cout << " > " <<msg.data[i];
+                std::cout << " > " << msg.data[i];
                 path.push_back(msg.data[i]);
             }
-            std::cout << std::endl;;
+            std::cout << std::endl;
+            ;
             pathReceived = true;
         }
     }
@@ -192,6 +193,7 @@ public:
         extract_1.setIndices(index_ptr);
         extract_1.setNegative(false); //如果设为true,可以提取指定index之外的点云
         extract_1.filter(*lidarCloud);
+        lidarCloud->header.stamp = cloudCombined->header.stamp;
         mtx_cloud.unlock();
 
         return;
@@ -224,20 +226,20 @@ public:
         }
         std::vector<int> mapping;
         pcl::removeNaNFromPointCloud(cloudTemp, *target_cloud, mapping);
-        pcl::PointCloud<pcl::PointXYZ>::iterator it = target_cloud->points.begin();
-        while (it != target_cloud->points.end())
-        {
-            float x, y, z;
-            x = it->x;
-            y = it->y;
-            z = it->z;
-            if (!pcl_isfinite(x) || !pcl_isfinite(y) || !pcl_isfinite(z))
-            {
-                it = target_cloud->points.erase(it);
-            }
-            else
-                ++it;
-        }
+        // pcl::PointCloud<pcl::PointXYZ>::iterator it = target_cloud->points.begin();
+        // while (it != target_cloud->points.end())
+        // {
+        //     float x, y, z;
+        //     x = it->x;
+        //     y = it->y;
+        //     z = it->z;
+        //     if (!pcl_isfinite(x) || !pcl_isfinite(y) || !pcl_isfinite(z))
+        //     {
+        //         it = target_cloud->points.erase(it);
+        //     }
+        //     else
+        //         ++it;
+        // }
 
         //-------------------------
         pose[0] = -10 * cos(yaw_pre);
@@ -284,10 +286,12 @@ public:
                 odom.pose.pose.position.y = pose[1];
                 odom.pose.pose.position.z = 0;
                 pubOdom.publish(odom);
+ 
+                double dt = std::pow(10,-6)*(pcl_conversions::toPCL(ros::Time::now()) - lidarCloud->header.stamp);
+                ROS_INFO_STREAM("Location time consumption = " << dt <<"s" );
 
                 fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
             }
-            // std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
         return;
     }
@@ -350,6 +354,7 @@ public:
 
 int main(int argc, char **argv)
 {
+    ios::sync_with_stdio(false);
     ros::init(argc, argv, "navigation");
 
     Navigation navigation_obj;

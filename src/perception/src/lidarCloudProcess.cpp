@@ -93,6 +93,7 @@ public:
         cloudTrans_1.header.frame_id = vehicle_frame_id;
 
         *cloudOrigin += cloudTrans_1;
+        cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
         if (!cloudTrans_1.empty())
             lidarTop_bool = true;
     }
@@ -109,6 +110,7 @@ public:
         cloudTrans_1.header.frame_id = vehicle_frame_id;
 
         *cloudOrigin += cloudTrans_1;
+        cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
     }
 
     void rightHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
@@ -123,6 +125,7 @@ public:
         cloudTrans_1.header.frame_id = vehicle_frame_id;
 
         *cloudOrigin += cloudTrans_1;
+        cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
     }
 
     void pointCloudProcess()
@@ -237,7 +240,7 @@ public:
 
             //发布点云
             // cloudNoCar->header.stamp = time_st.toSec();
-            cloudNoCar->header.stamp = ros::Time::now().toSec();
+            cloudNoCar->header.stamp = cloudOrigin->header.stamp;
             sensor_msgs::PointCloud2 output;
             toROSMsg(*cloudNoCar, output);
             cloudCombined_pub.publish(output);

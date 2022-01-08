@@ -63,27 +63,27 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   pcl::PointCloud<pcl::PointXYZ> cloudTemp;
   pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::ApproximateVoxelGrid<pcl::PointXYZ> approximate_voxel_filter;
-  approximate_voxel_filter.setLeafSize(0.1, 0.1, 0.1);
+  approximate_voxel_filter.setLeafSize(0.3, 0.3, 0.3);
   approximate_voxel_filter.setInputCloud(input_cloud);
   approximate_voxel_filter.filter(cloudTemp);
 
   std::vector<int> mapping;
   pcl::removeNaNFromPointCloud(cloudTemp, *filtered_cloud, mapping);
-  pcl::PointCloud<pcl::PointXYZ>::iterator it = filtered_cloud->points.begin();
-  while (it != filtered_cloud->points.end())
-  {
-    float x, y, z;
-    x = it->x;
-    y = it->y;
-    z = it->z;
-    // cout << "x: " << x << "  y: " << y << "  z: " << z << "  rgb: " << rgb << endl;
-    if (!pcl_isfinite(x) || !pcl_isfinite(y) || !pcl_isfinite(z))
-    {
-      it = filtered_cloud->points.erase(it);
-    }
-    else
-      ++it;
-  }
+  // pcl::PointCloud<pcl::PointXYZ>::iterator it = filtered_cloud->points.begin();
+  // while (it != filtered_cloud->points.end())
+  // {
+  //   float x, y, z;
+  //   x = it->x;
+  //   y = it->y;
+  //   z = it->z;
+  //   // cout << "x: " << x << "  y: " << y << "  z: " << z << "  rgb: " << rgb << endl;
+  //   if (!pcl_isfinite(x) || !pcl_isfinite(y) || !pcl_isfinite(z))
+  //   {
+  //     it = filtered_cloud->points.erase(it);
+  //   }
+  //   else
+  //     ++it;
+  // }
 
   if (filtered_cloud->empty())
   {
@@ -108,8 +108,8 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
 #pragma omp section
       {
         // icp配准
-        icp.setInputSource(input_cloud);
-        // icp.setInputSource(filtered_cloud);
+        // icp.setInputSource(input_cloud);
+        icp.setInputSource(filtered_cloud);
         icp.setInputTarget(target_cloud);
         icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
         icp.setTransformationEpsilon(transformationEpsilon);
@@ -133,8 +133,8 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
         //设置匹配迭代的最大次数
         ndt.setMaximumIterations(maximumIterations);
         // 设置要配准的点云
-        ndt.setInputSource(input_cloud);
-        // ndt.setInputSource(filtered_cloud);
+        // ndt.setInputSource(input_cloud);
+        ndt.setInputSource(filtered_cloud);
         //设置点云配准目标
         ndt.setInputTarget(target_cloud);
         //设置使用机器人测距法得到的初始对准估计结果

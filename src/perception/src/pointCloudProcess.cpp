@@ -25,7 +25,6 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "pointCloudProcess");
     ros::NodeHandle nh("~");
 
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud(new pcl::PointCloud<pcl::PointXYZ>());
     std::string simu_path = "/home/lsj/dev/Mine_WS/src/perception/simu_data/";
