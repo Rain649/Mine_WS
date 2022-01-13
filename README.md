@@ -2,98 +2,128 @@
 
 ## 一、程序介绍：
 
-​	本程序为矿下感知定位程序，具备激光雷达点云融合、交叉路口检测、车道线拟合、交叉路口定位的功能。在gazebo中搭建了地图和车辆模型，搭配规划、控制算法，可不依赖于定位的基础设施完成单车智能驾驶。
+```
+本程序为矿下感知定位程序，具备激光雷达点云融合、交叉路口检测、车道线拟合、交叉路口定位的功能。在gazebo中搭建了地图和车辆模型，搭配规划、控制算法，可不依赖于定位的基础设施完成单车智能驾驶。
+```
 
 ## 1.点云处理（去除车辆、地面点）
 
 #### 1).源码文件：
 
-​	simuSegSave.cpp
+```
+lidarCloudProcess.cpp
+```
 
 #### 2).发送topic
 
-| topic                         | type                       | description              |
-| ----------------------------- | -------------------------- | ------------------------ |
-| "/simuSegSave/cloud_Combined" | <sensor_msgs::PointCloud2> | 去除地面点、车辆点的点云 |
+| topic                               | type                                              | description              |
+| ----------------------------------- | ------------------------------------------------- | ------------------------ |
+| "/lidarCloudProcess/cloud_Combined" | [sensor_msgs::PointCloud2](sensor_msgs::PointCloud2) | 去除地面点、车辆点的点云 |
 
 ## 2.交叉路口检测
 
 #### 1).源码文件：
 
-​	intersectionDetection.cpp
+```
+intersectionDetection.cpp
+```
 
 #### 2).发送topic
 
-| topic                                         | type             | description            |
-| --------------------------------------------- | ---------------- | ---------------------- |
-| "/intersectionDetection/intersectionVerified" | <std_msgs::Bool> | 判断是否位于交叉路口处 |
-
-
+| topic                                         | type                          | description            |
+| --------------------------------------------- | ----------------------------- | ---------------------- |
+| "/intersectionDetection/intersectionVerified" | [std_msgs::Bool](std_msgs::Bool) | 判断是否位于交叉路口处 |
 
 ## 3.车道线拟合
 
 #### 1).源码文件：
 
-​	laneDetection.cpp
+```
+laneDetection.cpp
+```
 
 #### 2).发送topic
 
-| topic                             | type                          | description                                          |
-| --------------------------------- | ----------------------------- | ---------------------------------------------------- |
-| "/laneDetection/leftCoefficient"  | <std_msgs::Float32MultiArray> | 左侧墙壁3阶曲线拟合系数                              |
-| "/laneDetection/rightCoefficient" | <std_msgs::Float32MultiArray> | 右侧墙壁3阶曲线拟合系数                              |
-| "/laneDetection/leftRange"        | <std_msgs::Float32MultiArray> | 左侧曲线拟合x轴范围（两个值：0是轴正向、1是x轴负向） |
-| "/laneDetection/rightRange"       | <std_msgs::Float32MultiArray> | 右侧曲线拟合x轴范围（两个值：0是轴正向、1是x轴负向） |
-| "/laneDetection/Distance"         | <std_msgs::Float32MultiArray> | 左、右侧墙壁距离（两个值：0左侧、1右侧）             |
+| topic                             | type                                                    | description                                          |
+| --------------------------------- | ------------------------------------------------------- | ---------------------------------------------------- |
+| "/laneDetection/leftCoefficient"  | [std_msgs::Float32MultiArray](std_msgs::Float32MultiArray) | 左侧墙壁3阶曲线拟合系数                              |
+| "/laneDetection/rightCoefficient" | [std_msgs::Float32MultiArray](std_msgs::Float32MultiArray) | 右侧墙壁3阶曲线拟合系数                              |
+| "/laneDetection/leftRange"        | [std_msgs::Float32MultiArray](std_msgs::Float32MultiArray) | 左侧曲线拟合x轴范围（两个值：0是轴正向、1是x轴负向） |
+| "/laneDetection/rightRange"       | [std_msgs::Float32MultiArray](std_msgs::Float32MultiArray) | 右侧曲线拟合x轴范围（两个值：0是轴正向、1是x轴负向） |
+| "/laneDetection/Distance"         | [std_msgs::Float32MultiArray](std_msgs::Float32MultiArray) | 左、右侧墙壁距离（两个值：0左侧、1右侧）             |
 
 ## 4.节点定位
 
 #### 1).源码文件：
 
-​	navigation.cpp
+```
+navigation.cpp
+```
 
-​	intersectionLocation.cpp
+```
+intersectionLocation.cpp
+```
 
-​	topoMap.cpp
+```
+topoMap.cpp
+```
 
-​	intersectionLocation.h 
+```
+intersectionLocation.h
+```
 
-​	topoMap.h
+```
+topoMap.h
+```
 
 #### 2).发送topic
 
-| topic                          | type                 | description                |
-| ------------------------------ | -------------------- | -------------------------- |
-| "/navigation/intersectionOdom" | <nav_msgs::Odometry> | 交叉路口处的定位           |
-| "/navigation/intersection_id"  | <std_msgs::Int32>    | 车辆下一个经过的交叉路口ID |
+| topic                          | type                                  | description                |
+| ------------------------------ | ------------------------------------- | -------------------------- |
+| "/navigation/intersectionOdom" | [nav_msgs::Odometry](nav_msgs::Odometry) | 交叉路口处的定位           |
+| "/navigation/intersection_id"  | [std_msgs::Int32](std_msgs::Int32)       | 车辆下一个经过的交叉路口ID |
 
 #### 3).接收topic
 
-| topic        | type                        | description                                                  |
-| ------------ | --------------------------- | ------------------------------------------------------------ |
-| "/pathArray" | <std_msgs::Int32MultiArray> | 需要获得规划的路径，路径数组第一个值需要设定为第一个经过节点前最后经过的节点，若是起始位置在1号节点，则需补0 |
+| topic        | type                                                | description                                                                                                  |
+| ------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| "/pathArray" | [std_msgs::Int32MultiArray](std_msgs::Int32MultiArray) | 需要获得规划的路径，路径数组第一个值需要设定为第一个经过节点前最后经过的节点，若是起始位置在1号节点，则需补0 |
 
 ## 5.拓扑地图（函数）
 
 #### 1).源码文件：
 
-​	topoMap.h
+```
+topoMap.h
+```
 
-​	topoMap.cpp
+```
+topoMap.cpp
+```
 
 #### 2).函数
 
-​	TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath, const std::string &pcdFilePath);
+```
+TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath, const std::string &pcdFilePath);
+```
 
-​	1.vertexFilePath为Edge.yaml路径
+```
+1.vertexFilePath为Edge.yaml路径
+```
 
-​	2.edgeFilePath为Vertex.yaml路径
+```
+2.edgeFilePath为Vertex.yaml路径
+```
 
-​	3.pcdFilePath为节点点云pcd文件夹路径
+```
+3.pcdFilePath为节点点云pcd文件夹路径
+```
 
 ## 二、安装与卸载：
 
-​	直接将包放在工作空间编译。
+```
+直接将包放在工作空间编译。
+```
 
 ## 三、依赖介绍
 
@@ -117,8 +147,6 @@
 | ----------------- | ----------------------------------- |
 | pointCloud_topic_ | 多个激光雷达融合、处理后的点云topic |
 | frame_id_         | 车辆坐标系frame_id                  |
-
-
 
 ### 1.gazebo参数
 
@@ -169,17 +197,9 @@
 
 ## 六、测试
 
-## 六、测试
-
-启动程序： roslaunch perception mineSimulation.launch
-
-点击开始运行按钮
-
-启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py 
-
-
-
-
-
-
-
+1. 启动仿真模型及定位程序： roslaunch perception mineSimulation.launch
+2. 点击开始运行按钮
+3. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+4. 启动全局路径规划程序：roslaunch routing_delta routing_delta.launch
+5. 启动局部路径规划程序：roslaunch planner_underground_delta planner_underground_delta.launch
+6. 启动路径规划程序：roslaunch control_underground_delta control_underground_delta.launch

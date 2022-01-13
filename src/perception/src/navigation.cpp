@@ -88,6 +88,7 @@ private:
     int preVertex_index = 0;
     bool intersectionVerified = false;
     bool pathReceived = false;
+    bool newLidarCloud_bool = false;
     TopoMap topoMap;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr lidarCloud;
@@ -163,37 +164,32 @@ public:
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloudCombined(new pcl::PointCloud<pcl::PointXYZ>());
         pcl::fromROSMsg(*msg, *cloudCombined);
 
-        // pcl::PointCloud<pcl::PointXYZ>::Ptr cloudTemp(new pcl::PointCloud<pcl::PointXYZ>());
-        // pcl::fromROSMsg(*msg, *cloudTemp);
-        // std::vector<int> mapping;
-        // pcl::removeNaNFromPointCloud(*cloudTemp, *cloudCombined, mapping);
-
         if (cloudCombined->empty())
-        {
             return;
-        }
-        std::vector<int> index_1;      //保存每个近邻点的索引
-        std::vector<float> distance_1; //保存每个近邻点与查找点之间的欧式距离平方
-        mtx_cloud.lock();
-        lidarCloud->clear();
+
+        std::vector<int> index;      //保存每个近邻点的索引
+        std::vector<float> distance; //保存每个近邻点与查找点之间的欧式距离平方
         // 外围分割
         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_1;
         kdtree_1.setInputCloud(cloudCombined); // 设置要搜索的点云，建立KDTree
-        pcl::ExtractIndices<pcl::PointXYZ> extract_1;
+        pcl::ExtractIndices<pcl::PointXYZ> extract;
         pcl::PointXYZ zeroPoint;
         zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
         int segmentationRadius = 25;
-        if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index_1, distance_1) == 0)
+        if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index, distance) == 0)
         {
             ROS_ERROR("There is no point nearby !!!");
             return;
         }
-        extract_1.setInputCloud(cloudCombined);
-        boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index_1);
-        extract_1.setIndices(index_ptr);
-        extract_1.setNegative(false); //如果设为true,可以提取指定index之外的点云
-        extract_1.filter(*lidarCloud);
+        extract.setInputCloud(cloudCombined);
+        boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index);
+        extract.setIndices(index_ptr);
+        extract.setNegative(false); //如果设为true,可以提取指定index之外的点云
+        mtx_cloud.lock();
+        lidarCloud->clear();
+        extract.filter(*lidarCloud);
         lidarCloud->header.stamp = cloudCombined->header.stamp;
+        newLidarCloud_bool = true;
         mtx_cloud.unlock();
 
         return;
@@ -246,11 +242,14 @@ public:
         pose[1] = -10 * sin(yaw_pre);
         pose[2] = yaw_pre;
         radianTransform(pose[2]);
-        double fitnessScore_thre = 10.0;
         //交叉路口定位
         geometry_msgs::Quaternion geoQuat;
         nav_msgs::Odometry odom;
         odom.header.frame_id = "vehicle_base_link";
+        //配准参数
+        config = loadRegistrationConfig(dataPath);
+        double fitnessScore_thre = 10.0;
+
         while (ros::ok())
         {
             // 离开交叉路口
@@ -264,33 +263,40 @@ public:
                     break;
                 }
             }
-            // 定位
-            config = loadRegistrationConfig(dataPath);
-            //自适应阈值
-            config.fitnessScore_thre = std::max(fitnessScore_thre, config.minFitnessScore_thre);
-            mtx_visual.lock();
-            mtx_cloud.lock();
-            bool location_bool = intersectionLocation(pose, target_cloud, lidarCloud, config, viewer);
-            mtx_cloud.unlock();
-            mtx_visual.unlock();
-            // 发布车辆位姿
-            if (location_bool)
+            // 收到新点云定位
+            if (newLidarCloud_bool)
             {
-                geoQuat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose[2]);
-                odom.header.stamp = ros::Time::now();
-                odom.pose.pose.orientation.x = geoQuat.x;
-                odom.pose.pose.orientation.y = geoQuat.y;
-                odom.pose.pose.orientation.z = geoQuat.z;
-                odom.pose.pose.orientation.w = geoQuat.w;
-                odom.pose.pose.position.x = pose[0];
-                odom.pose.pose.position.y = pose[1];
-                odom.pose.pose.position.z = 0;
-                pubOdom.publish(odom);
- 
-                double dt = std::pow(10,-6)*(pcl_conversions::toPCL(ros::Time::now()) - lidarCloud->header.stamp);
-                ROS_INFO_STREAM("Location time consumption = " << dt <<"s" );
+                // ros::Time time_start = ros::Time::now();
+                //自适应阈值
+                config.fitnessScore_thre = std::max(fitnessScore_thre, config.minFitnessScore_thre);
 
-                fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
+                mtx_visual.lock();
+                mtx_cloud.lock();
+                bool location_bool = intersectionLocation(pose, target_cloud, lidarCloud, config, viewer);
+                newLidarCloud_bool = false;
+                mtx_cloud.unlock();
+                mtx_visual.unlock();
+                // 发布车辆位姿
+                if (location_bool)
+                {
+                    geoQuat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose[2]);
+                    odom.header.stamp = ros::Time::now();
+                    odom.pose.pose.orientation.x = geoQuat.x;
+                    odom.pose.pose.orientation.y = geoQuat.y;
+                    odom.pose.pose.orientation.z = geoQuat.z;
+                    odom.pose.pose.orientation.w = geoQuat.w;
+                    odom.pose.pose.position.x = pose[0];
+                    odom.pose.pose.position.y = pose[1];
+                    odom.pose.pose.position.z = 0;
+                    pubOdom.publish(odom);
+
+                    double dt = std::pow(10, -6) * (pcl_conversions::toPCL(ros::Time::now()) - lidarCloud->header.stamp);
+                    ROS_INFO_STREAM("Location time consumption = " << dt << "s");
+
+                    fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
+                }
+                // ros::Duration dur = ros::Time::now() - time_start;
+                // ROS_INFO_STREAM("location_only time consumption = " << dur.toSec() << "s");
             }
         }
         return;

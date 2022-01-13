@@ -24,7 +24,7 @@
 
         <param name="Tar_tolerance" value="3"/>
 
-        <param name="OBS_DIS" value="1"/>
+        <param name="OBS_DIS" value="2"/>
     </node>
 
 </launch>

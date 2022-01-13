@@ -6,9 +6,9 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "/opt/ros/melodic/include/**",
-                "/home/lsj/dev/Mine_WS/**",
-                "/usr/include/pcl-1.8/**"
+                "/opt/ros/noetic/include/**",
+                "~/dev/Mine_WS/**",
+                "/usr/include/pcl-1.10/**"
             ],
             "name": "ROS"
         }

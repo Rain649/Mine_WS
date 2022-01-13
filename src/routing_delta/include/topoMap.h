@@ -11,6 +11,8 @@
 #include <string>
 #include <omp.h>
 #include <yaml-cpp/yaml.h>
+#include <cmath>
+#include <unistd.h>
 
 inline void radianTransform(double &radian);
 namespace perception
