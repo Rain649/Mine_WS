@@ -197,12 +197,14 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 
 ## 六、测试
 
-1. 启动roscore：roscore
-2. 启动仿真模型及感知定位程序： roslaunch perception mineSimulation.launch
-3. （测试）单独启动定位程序： rosrun perception navigation
-4. 启动局部路径规划程序：roslaunch planner_underground_delta planner_underground_delta.launch
-5. 启动控制程序：roslaunch control_underground_delta control_underground_delta.launch
-6. 启动全局路径规划程序：roslaunch routing_delta routing_delta.launch
-7. 输入起始节点id和目标节点id
-8. gazebo点击开始运行按钮
-9. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+1. 安装gps插件：sudo apt-get install ros-melodic-geographic-msgs
+2. 安装velodyne激光雷达驱动：sudo apt-get install ros-melodic-velodyne-*
+3. 启动roscore：roscore
+4. 启动仿真模型及感知定位程序： roslaunch perception mineSimulation.launch
+5. （测试）单独启动定位程序： rosrun perception navigation
+6. 启动局部路径规划程序：roslaunch planner_underground_delta planner_underground_delta.launch
+7. 启动控制程序：roslaunch control_underground_delta control_underground_delta.launch
+8. 启动全局路径规划程序：roslaunch routing_delta routing_delta.launch
+9. 输入起始节点id和目标节点id
+10. gazebo点击开始运行按钮
+11. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
