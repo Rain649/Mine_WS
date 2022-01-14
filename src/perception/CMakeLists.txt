@@ -89,17 +89,17 @@ link_directories(
 
 ############################################
 
-# add_executable(lidarCloudProcess  src/lidarCloudProcess.cpp)
-# add_dependencies(lidarCloudProcess ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(lidarCloudProcess  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+add_executable(lidarCloudProcess  src/lidarCloudProcess.cpp)
+add_dependencies(lidarCloudProcess ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(lidarCloudProcess  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-# add_executable(intersectionDetection  src/intersectionDetection.cpp)
-# add_dependencies(intersectionDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(intersectionDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+add_executable(intersectionDetection  src/intersectionDetection.cpp)
+add_dependencies(intersectionDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(intersectionDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-# add_executable(laneDetection  src/laneDetection.cpp)
-# add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+add_executable(laneDetection  src/laneDetection.cpp)
+add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
 add_executable(navigation  src/navigation.cpp src/intersectionLocation.cpp src/topoMap.cpp include/intersectionLocation.h include/topoMap.h)
 add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

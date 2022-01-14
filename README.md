@@ -197,9 +197,12 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 
 ## 六、测试
 
-1. 启动仿真模型及定位程序： roslaunch perception mineSimulation.launch
-2. 点击开始运行按钮
-3. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
-4. 启动全局路径规划程序：roslaunch routing_delta routing_delta.launch
-5. 启动局部路径规划程序：roslaunch planner_underground_delta planner_underground_delta.launch
-6. 启动路径规划程序：roslaunch control_underground_delta control_underground_delta.launch
+1. 启动roscore：roscore
+2. 启动仿真模型及感知定位程序： roslaunch perception mineSimulation.launch
+3. （测试）单独启动定位程序： rosrun perception navigation
+4. 启动局部路径规划程序：roslaunch planner_underground_delta planner_underground_delta.launch
+5. 启动控制程序：roslaunch control_underground_delta control_underground_delta.launch
+6. 启动全局路径规划程序：roslaunch routing_delta routing_delta.launch
+7. 输入起始节点id和目标节点id
+8. gazebo点击开始运行按钮
+9. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
