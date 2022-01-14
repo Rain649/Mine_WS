@@ -290,8 +290,8 @@ public:
                     odom.pose.pose.position.z = 0;
                     pubOdom.publish(odom);
 
-                    double dt = std::pow(10, -6) * (pcl_conversions::toPCL(ros::Time::now()) - lidarCloud->header.stamp);
-                    ROS_INFO_STREAM("Location time consumption = " << dt << "s");
+                    // double dt = std::pow(10, -6) * (pcl_conversions::toPCL(ros::Time::now()) - lidarCloud->header.stamp);
+                    // ROS_INFO_STREAM("Location time consumption = " << dt << "s");
 
                     fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
                 }
