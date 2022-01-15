@@ -29,6 +29,21 @@ bool DBPlanner::CallbackFlag(void)
     return odom_flag && target_flag && lidar_flag;
 }
 
+void DBPlanner::ResetDB(void)
+{
+    db_rs_flag = false;
+
+    dis_v2t_old = Infinity;
+
+    path_local.clear();
+
+    path_local_veh.clear();
+
+    path_pdt.clear();
+
+    path_pdt_veh.clear();
+}
+
 void DBPlanner::BugPlanner(DubinsStateSpace& db)
 {
     std::cout << "cur_x = " << current_state.x << ' '

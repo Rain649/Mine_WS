@@ -22,9 +22,9 @@
         <param name="Lf" value="1.81"/>
         <param name="Lr" value="1.69"/>
 
-        <param name="Tar_tolerance" value="3"/>
+        <param name="Tar_tolerance" value="2"/>
 
-        <param name="OBS_DIS" value="2"/>
+        <param name="OBS_DIS" value="1.5"/>
     </node>
 
 </launch>

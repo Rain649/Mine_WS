@@ -1,12 +1,13 @@
 # 矿下局部规划
 
-- rosrun planner_underground_delta main_planner_ug
+- roslaunch planner_underground_delta planner_underground_delta.launch
 
 ## Topic
 
-- 输出路径 = /path_ug_vehicle, frame id = map
-- occupancy grid map = /map, frame id = map
-- laser points = /laser_points, frame id = map
+- output path = /path_ug_vehicle
+- occupancy grid map = /map_local
+- local targrt set = /laser_edge
+- target in vehicle frame = /target_veh
 
 ## LKA planner
 

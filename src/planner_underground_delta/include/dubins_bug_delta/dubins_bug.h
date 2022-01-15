@@ -126,6 +126,8 @@ class DBPlanner
 
         int Counter_MAX;
 
+        void ResetDB(void);
+
     private:
         // subscribe
         ros::Subscriber OdomSub, TargetSub, LidarSub;

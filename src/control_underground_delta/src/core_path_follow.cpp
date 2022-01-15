@@ -11,10 +11,8 @@ bool PathFollow::CallbackFlag(void)
     // std::cout << "odom_flag = " << odom_flag << std::endl;
     std::cout << "veh_flag = " << veh_flag << std::endl;
     std::cout << "path_flag = " << path_flag << std::endl;
-    
-    return path_flag;
 
-    // return veh_flag && path_flag;
+    return veh_flag && path_flag;
 
     // return odom_flag && veh_flag && path_flag;
     
@@ -134,7 +132,15 @@ void PathFollow::GenLatCmd(void)
 
         cmd_steer = atan(Veh_L/pre_r);
 
-        cmd_sim.angular.z = cmd_sim.linear.x * 2 / pre_r;
+        // sim cmd
+        if (fabs(state_now.u) == 0)
+        {
+            cmd_sim.angular.z = cmd_sim_lon / pre_r;
+        }
+        else
+        {
+            cmd_sim.angular.z = fabs(state_now.u) / pre_r;
+        }
     }
     
     if (cmd_steer > Steer_max)
@@ -148,8 +154,20 @@ void PathFollow::GenLatCmd(void)
 
 void PathFollow::GenLonCmd(void)
 {
-    cmd_sim.linear.x = cmd_sim_lon;
-    
+    // sim cmd
+    if (fabs(cmd_sim.angular.z) > cmd_sim_lat * 0.5)
+    {
+        cmd_sim.linear.x = cmd_sim_lon * 0.2;
+    }
+    else if (fabs(cmd_sim.angular.z) > cmd_sim_lat * 0.3)
+    {
+        cmd_sim.linear.x = cmd_sim_lon * 0.5;
+    }
+    else
+    {
+        cmd_sim.linear.x = cmd_sim_lon;
+    }
+
     return;
 
     // // 起步    

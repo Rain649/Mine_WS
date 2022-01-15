@@ -81,6 +81,7 @@ class PathFollow
         ros::Publisher CmdSimPub;
         geometry_msgs::Twist cmd_sim;
         float cmd_sim_lon;
+        float cmd_sim_lat;
 
         // path
         std::vector<PathNode> path_ref;

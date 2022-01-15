@@ -2,7 +2,8 @@
 
     <node pkg="control_underground_delta" type="main_path_follow" name="path_follow" output="screen">
         <param name="topic_path_ug_vehicle" value="/path_ug_vehicle"/>
-        <param name="topic_chassis" value="/chassis_speed_delta"/>
+        <!-- <param name="topic_chassis" value="/chassis_speed_delta"/> -->
+        <param name="topic_chassis" value="/odom"/>
         
         <param name="topic_cmd" value="/cmd_delta"/>
 

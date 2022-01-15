@@ -9,6 +9,8 @@ void UG_planner::ForkCallback(const std_msgs::Bool& msg)
     if (fork_flag && !fork_flag_old)
     {
         ResetMsgFlag();
+
+        DBPlanner::ResetDB();
     }
 
     valid_counter = 0;

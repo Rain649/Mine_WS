@@ -1,8 +1,7 @@
 # 矿下拓扑地图规划
 
 - /include 中的 topoMap.h 和 /src 中的 topoMap.cpp 需要与其他包保持一致
-- 在 main_routing.cpp 中修改读取拓扑地图文件的地址
-- rosrun routing_delta main_routing
+- roslaunch routing_delta routing_delta.launch
 
 ## 输入
 

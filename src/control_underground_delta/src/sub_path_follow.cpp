@@ -45,18 +45,20 @@ PathFollow::PathFollow(ros::NodeHandle& nh)
     cmd.data[2] = 1;    // > 0.5 自动模式，< 0.5 手动模式
     cmd.data[3] = 0;    // > 0.5 需要紧急制动，< 0.5 不需要紧急制动
 
-    CmdSimPub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
-    
-    nh.getParam("cmd_sim_lon", cmd_sim_lon);
-    
-    cmd_sim.linear.x = 0;
-    cmd_sim.angular.z = 0;
-
     // vehicle
     nh.getParam("Veh_L", Veh_L);
     // Veh_L = 3.5;
 
     Steer_max = 30*M_PI/180;
+
+    // sim cmd
+    CmdSimPub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 10);
+        
+    cmd_sim.linear.x = 0;
+    cmd_sim.angular.z = 0;
+
+    nh.getParam("cmd_sim_lon", cmd_sim_lon);
+    cmd_sim_lat = cmd_sim_lon * tan(Steer_max) / Veh_L;
 
     // 根据路径曲率计算参考车速
     nh.getParam("U_max", U_max);

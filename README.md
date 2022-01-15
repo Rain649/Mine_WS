@@ -2,9 +2,9 @@
 
 ## 一、程序介绍：
 
-```
 本程序为矿下感知定位程序，具备激光雷达点云融合、交叉路口检测、车道线拟合、交叉路口定位的功能。在gazebo中搭建了地图和车辆模型，搭配规划、控制算法，可不依赖于定位的基础设施完成单车智能驾驶。
-```
+
+**作者**：刘仕杰	**版本**：v1.0
 
 ## 1.点云处理（去除车辆、地面点）
 
@@ -119,11 +119,11 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 3.pcdFilePath为节点点云pcd文件夹路径
 ```
 
-## 二、安装与卸载：
+## 二、安装：
 
-```
-直接将包放在工作空间编译。
-```
+1. 安装gps插件：sudo apt-get install ros-melodic-geographic-msgs
+2. 安装velodyne激光雷达驱动：sudo apt-get install ros-melodic-velodyne-*
+3. 编译：catkin_make
 
 ## 三、依赖介绍
 
@@ -197,14 +197,12 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 
 ## 六、测试
 
-1. 安装gps插件：sudo apt-get install ros-melodic-geographic-msgs
-2. 安装velodyne激光雷达驱动：sudo apt-get install ros-melodic-velodyne-*
-3. 启动roscore：roscore
-4. 启动仿真模型及感知定位程序： roslaunch perception mineSimulation.launch
-5. （测试）单独启动定位程序： rosrun perception navigation
-6. 启动局部路径规划程序：roslaunch planner_underground_delta planner_underground_delta.launch
-7. 启动控制程序：roslaunch control_underground_delta control_underground_delta.launch
-8. 启动全局路径规划程序：roslaunch routing_delta routing_delta.launch
-9. 输入起始节点id和目标节点id
-10. gazebo点击开始运行按钮
-11. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+1. 启动roscore：roscore
+3. 启动仿真模型及感知定位程序： roslaunch perception mineSimulation.launch
+4. （测试）单独启动定位程序： rosrun perception navigation
+5. 启动局部路径规划程序：roslaunch planner_underground_delta planner_underground_delta.launch
+6. 启动控制程序：roslaunch control_underground_delta control_underground_delta.launch
+7. 启动全局路径规划程序：roslaunch routing_delta routing_delta.launch
+8. 输入起始节点id和目标节点id
+9. gazebo点击开始运行按钮
+10. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
