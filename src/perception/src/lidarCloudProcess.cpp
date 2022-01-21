@@ -90,9 +90,6 @@ public:
         time_st = msg->header.stamp;
         pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         pcl::fromROSMsg(*msg, lidarCloudThis);
-        // 坐标系转换
-        // tf::TransformListener listener;
-        // listener_top.waitForTransform(vehicle_frame_id, "velodyne_top_base_link", ros::Time(0), ros::Duration(1));
         
         pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_top);
         cloudTrans.header.frame_id = vehicle_frame_id;
@@ -110,9 +107,6 @@ public:
         time_st = msg->header.stamp;
         pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         pcl::fromROSMsg(*msg, lidarCloudThis);
-        // 坐标系转换
-        // tf::TransformListener listener(ros::Duration(1));
-        // listener.waitForTransform(vehicle_frame_id, "velodyne_left_base_link", ros::Time(0), ros::Duration(1));
 
         pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_left);
         cloudTrans.header.frame_id = vehicle_frame_id;
@@ -126,9 +120,6 @@ public:
         time_st = msg->header.stamp;
         pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         pcl::fromROSMsg(*msg, lidarCloudThis);
-        // 坐标系转换
-        // tf::TransformListener listener;
-        // listener.waitForTransform(vehicle_frame_id, "velodyne_right_base_link", ros::Time(0), ros::Duration(1));
 
         pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_right);
         cloudTrans.header.frame_id = vehicle_frame_id;
