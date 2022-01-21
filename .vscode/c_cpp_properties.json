@@ -1,13 +1,9 @@
 {
     "configurations": [
         {
-            "browse": {
-                "databaseFilename": "",
-                "limitSymbolsToIncludedHeaders": true
-            },
             "includePath": [
-                "/opt/ros/noetic/include/**",
                 "~/dev/Mine_WS/**",
+                "/opt/ros/noetic/include/**",
                 "/usr/include/pcl-1.10/**"
             ],
             "name": "ROS"

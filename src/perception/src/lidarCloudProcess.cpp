@@ -50,6 +50,10 @@ private:
     ros::Subscriber subLidarCloudTop;
     ros::Publisher cloudCombined_pub;
 
+    tf::TransformListener listener_top;
+    tf::TransformListener listener_left;
+    tf::TransformListener listener_right;
+
     bool lidarTop_bool;
 
 public:
@@ -68,7 +72,7 @@ public:
 
         subLidarCloudLeft = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_left, 1, &lidarCloudProcess::leftHandler, this);
         subLidarCloudRight = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_right, 1, &lidarCloudProcess::rightHandler, this);
-        subLidarCloudTop = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_top, 1, &lidarCloudProcess::topHandler, this);
+        subLidarCloudTop = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_top, 2, &lidarCloudProcess::topHandler, this);
         cloudCombined_pub = nh.advertise<sensor_msgs::PointCloud2>("cloud_Combined", 1);
 
         cloudNoCar.reset(new pcl::PointCloud<pcl::PointXYZI>());
@@ -84,47 +88,52 @@ public:
     void topHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
         time_st = msg->header.stamp;
-        pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
+        pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         pcl::fromROSMsg(*msg, lidarCloudThis);
         // 坐标系转换
-        tf::TransformListener listener_1;
-        listener_1.waitForTransform(vehicle_frame_id, "velodyne_top_base_link", ros::Time(0), ros::Duration(1));
-        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans_1, listener_1);
-        cloudTrans_1.header.frame_id = vehicle_frame_id;
+        // tf::TransformListener listener;
+        // listener_top.waitForTransform(vehicle_frame_id, "velodyne_top_base_link", ros::Time(0), ros::Duration(1));
+        
+        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_top);
+        cloudTrans.header.frame_id = vehicle_frame_id;
 
-        *cloudOrigin += cloudTrans_1;
+        *cloudOrigin += cloudTrans;
         cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
-        if (!cloudTrans_1.empty())
+        if (!cloudTrans.empty())
+        {
             lidarTop_bool = true;
+        }
     }
 
     void leftHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
         time_st = msg->header.stamp;
-        pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
+        pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         pcl::fromROSMsg(*msg, lidarCloudThis);
         // 坐标系转换
-        tf::TransformListener listener_1(ros::Duration(1));
-        listener_1.waitForTransform(vehicle_frame_id, "velodyne_left_base_link", ros::Time(0), ros::Duration(1));
-        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans_1, listener_1);
-        cloudTrans_1.header.frame_id = vehicle_frame_id;
+        // tf::TransformListener listener(ros::Duration(1));
+        // listener.waitForTransform(vehicle_frame_id, "velodyne_left_base_link", ros::Time(0), ros::Duration(1));
 
-        *cloudOrigin += cloudTrans_1;
+        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_left);
+        cloudTrans.header.frame_id = vehicle_frame_id;
+
+        *cloudOrigin += cloudTrans;
         cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
     }
 
     void rightHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
         time_st = msg->header.stamp;
-        pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans_1;
+        pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         pcl::fromROSMsg(*msg, lidarCloudThis);
         // 坐标系转换
-        tf::TransformListener listener_1;
-        listener_1.waitForTransform(vehicle_frame_id, "velodyne_right_base_link", ros::Time(0), ros::Duration(1));
-        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans_1, listener_1);
-        cloudTrans_1.header.frame_id = vehicle_frame_id;
+        // tf::TransformListener listener;
+        // listener.waitForTransform(vehicle_frame_id, "velodyne_right_base_link", ros::Time(0), ros::Duration(1));
 
-        *cloudOrigin += cloudTrans_1;
+        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_right);
+        cloudTrans.header.frame_id = vehicle_frame_id;
+
+        *cloudOrigin += cloudTrans;
         cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
     }
 
@@ -230,9 +239,16 @@ public:
     //             ROS_INFO("NO Receive Tranform !!!!");
     //     }
     // }
+    void listen2tf()
+    {
+        listener_left.waitForTransform(vehicle_frame_id, "velodyne_left_base_link", ros::Time(0), ros::Duration(100));
+        listener_right.waitForTransform(vehicle_frame_id, "velodyne_right_base_link", ros::Time(0), ros::Duration(100));
+        listener_top.waitForTransform(vehicle_frame_id, "velodyne_top_base_link", ros::Time(0), ros::Duration(100));
+    }
 
     void run()
     {
+        
         // if (lidarTop_bool)
         if (!cloudOrigin->empty())
         {
@@ -281,6 +297,8 @@ int main(int argc, char **argv)
 
     // std::thread thread_1(vehicleReference_pub);
     // std::thread thread_2(tfReceive);
+
+    lidarCloudProcess_obj.listen2tf();
 
     ros::Rate rate(10);
     while (ros::ok())

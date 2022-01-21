@@ -315,25 +315,16 @@ public:
 
                     // 发布坐标变换
                     tf::Transform transform;
-
                     float x_temp = -pose[0] * cos(pose[2]) - pose[1] * sin(pose[2]);
                     float y_temp = pose[0] * sin(pose[2]) - pose[1] * cos(pose[2]);
-                    printf("x_temp : %f\n", x_temp);
-                    printf("y_temp : %f\n", y_temp);
+                    
                     transform.setOrigin(tf::Vector3(x_temp, y_temp, 0));
                     geometry_msgs::Quaternion geoQuat_inv = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -pose[2]);
                     transform.setRotation(tf::Quaternion(geoQuat_inv.x, geoQuat_inv.y, geoQuat_inv.z, geoQuat_inv.w));
 
                     tf::StampedTransform st(transform, ros::Time::now(), "vehicle_base_link", "localMap");
                     tb_local.sendTransform(st);
-
-                    // // 接受坐标变换
-                    // tf::TransformListener listener(ros::Duration(1));
-                    // if (listener.waitForTransform("vehicle_base_link", "localMap", ros::Time::now(), ros::Duration(1)))
-                    //     ROS_INFO("YES Receive Tranform !!!!");
-                    // else
-                    //     ROS_INFO("NO Receive Tranform !!!!");
-
+                    
                     // 发布目标点位姿
                     geoQuat_target = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw_target);
                     odom_target.header.stamp = ros::Time::now();

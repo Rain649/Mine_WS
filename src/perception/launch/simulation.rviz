@@ -320,41 +320,6 @@ Visualization Manager:
       Topic: /target_fork
       Unreliable: false
       Value: true
-    - Angle Tolerance: 0.10000000149011612
-      Class: rviz/Odometry
-      Covariance:
-        Orientation:
-          Alpha: 0.5
-          Color: 255; 255; 127
-          Color Style: Unique
-          Frame: Local
-          Offset: 1
-          Scale: 1
-          Value: true
-        Position:
-          Alpha: 0.30000001192092896
-          Color: 204; 51; 204
-          Scale: 1
-          Value: true
-        Value: true
-      Enabled: true
-      Keep: 1
-      Name: targetPoint
-      Position Tolerance: 0.10000000149011612
-      Queue Size: 10
-      Shape:
-        Alpha: 1
-        Axes Length: 1
-        Axes Radius: 0.10000000149011612
-        Color: 0; 255; 0
-        Head Length: 1
-        Head Radius: 0.5
-        Shaft Length: 1
-        Shaft Radius: 0.20000000298023224
-        Value: Arrow
-      Topic: /navigation/targetPoint
-      Unreliable: false
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -382,20 +347,26 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: -2.1700150966644287
-      Class: rviz/TopDownOrtho
+      Class: rviz/ThirdPersonFollower
+      Distance: 68.37297821044922
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
+      Field of View: 0.7853981852531433
+      Focal Point:
+        X: -2.101787567138672
+        Y: -0.1270366907119751
+        Z: 9.5367431640625e-07
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 18.816652297973633
+      Pitch: 0.6957967877388
       Target Frame: <Fixed Frame>
-      X: 0.8886049389839172
-      Y: -2.4508185386657715
+      Yaw: 3.741595506668091
     Saved: ~
 Window Geometry:
   Displays:

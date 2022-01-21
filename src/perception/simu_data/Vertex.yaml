@@ -19,11 +19,11 @@
    - linkedVertex_id: 2
      edge_id: 1
      angleDiff: 0
-     targetPoint: [13, 0, 0]
+     targetPoint: [15, 0, 0]
    - linkedVertex_id: 17
      edge_id: 3
      angleDiff: 90
-     targetPoint: [0, 13, 90]
+     targetPoint: [0, 17, 90]
 
 - vertex_id: 2
   # number of linked edges
@@ -33,15 +33,14 @@
    - linkedVertex_id: 1
      edge_id: 2
      angleDiff: 180
-     targetPoint: [-13, 0, 180]
+     targetPoint: [-15, 0, 180]
    - linkedVertex_id: 3
      edge_id: 5
      angleDiff: 0
-     targetPoint: [13, 0, 0]
+     targetPoint: [17, 0, 0]
    - linkedVertex_id: 11
      edge_id: 7
      angleDiff: 71
-    #  targetPoint: [6.5, 10.8, 71]
      targetPoint: [6, 16, 71]
 
 - vertex_id: 3
@@ -52,15 +51,15 @@
    - linkedVertex_id: 2
      edge_id: 6
      angleDiff: 180
-     targetPoint: [-13, 0, 180]
+     targetPoint: [-15, 0, 180]
    - linkedVertex_id: 4
      edge_id: 9
      angleDiff: 0
-     targetPoint: [13, 0, 0]
+     targetPoint: [15, 0, 0]
    - linkedVertex_id: 10
      edge_id: 11
      angleDiff: 90
-     targetPoint: [0, 13, 90]
+     targetPoint: [0, 17, 90]
 
 - vertex_id: 4
   # number of linked edges
@@ -197,19 +196,19 @@
    - linkedVertex_id: 2
      edge_id: 8
      angleDiff: 251
-     targetPoint: [-4.2, -12.2, 251]
+     targetPoint: [-6, -15, 251]
    - linkedVertex_id: 10
      edge_id: 32
      angleDiff: 0
-     targetPoint: [13, 0, 0]
+     targetPoint: [17, -1, 0]
    - linkedVertex_id: 12
      edge_id: 35
      angleDiff: 180
-     targetPoint: [-13, 0, 180]
+     targetPoint: [-17, -0.5, 180]
    - linkedVertex_id: 14
      edge_id: 37
      angleDiff: 90
-     targetPoint: [0, 13, 90]
+     targetPoint: [0.5, 20, 90]
 
 - vertex_id: 12
   # number of linked edges

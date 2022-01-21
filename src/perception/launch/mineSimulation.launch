@@ -61,7 +61,7 @@
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception)/launch/simulation.rviz" />
 
   <!-- 激光雷达融合节点 -->
-  <node name="lidarCloudProcess" pkg="perception" type="lidarCloudProcess" output="screen"></node>
+  <!-- <node name="lidarCloudProcess" pkg="perception" type="lidarCloudProcess" output="screen"></node> -->
 
 
   <!-- 交叉路口检测节点 -->
