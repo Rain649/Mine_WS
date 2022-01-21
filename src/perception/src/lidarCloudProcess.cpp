@@ -23,9 +23,16 @@
 #include <pcl/filters/passthrough.h>           //直通滤波
 #include <pcl/filters/conditional_removal.h>   //条件滤波
 #include <pcl/filters/filter.h>                //移除无效点
+#include <message_filters/subscriber.h>        //同步接收
+#include <message_filters/time_synchronizer.h> //时间同步
+#include <message_filters/sync_policies/approximate_time.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <perception/lidarCloudProcess_Config.h>
+
+// typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2>
+//     MySyncPolicy;
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, sensor_msgs::PointCloud2, sensor_msgs::PointCloud2> MySyncPolicy;
 
 class lidarCloudProcess
 {
@@ -44,6 +51,10 @@ private:
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedTrans;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNoCar;
     ros::Time time_st;
+
+    message_filters::Subscriber<sensor_msgs::PointCloud2> subLidarCloudLeft;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> subLidarCloudRight;
+    message_filters::Subscriber<sensor_msgs::PointCloud2> subLidarCloudTop;
 
     ros::Subscriber subLidarCloudLeft;
     ros::Subscriber subLidarCloudRight;
@@ -70,9 +81,25 @@ public:
         ROS_INFO("Top lidar topic : %s", lidarTopic_top.c_str());
         ROS_INFO("----------------------------------------------------------------------");
 
-        subLidarCloudLeft = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_left, 1, &lidarCloudProcess::leftHandler, this);
-        subLidarCloudRight = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_right, 1, &lidarCloudProcess::rightHandler, this);
-        subLidarCloudTop = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_top, 2, &lidarCloudProcess::topHandler, this);
+        auto subLidarCloudLeft = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_left, 1);
+        auto subLidarCloudRight = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_right, 1);
+        auto subLidarCloudTop = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_top, 1);
+
+        auto sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10), *subLidarCloudLeft, *subLidarCloudRight, *subLidarCloudTop);
+
+        // message_filters::Subscriber<sensor_msgs::PointCloud2> subLidarCloudLeft(nh, lidarTopic_left, 1);
+        // message_filters::Subscriber<sensor_msgs::PointCloud2> subLidarCloudRight(nh, lidarTopic_right, 1);
+        // message_filters::Subscriber<sensor_msgs::PointCloud2> subLidarCloudTop(nh, lidarTopic_top, 1);
+
+        // message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), subLidarCloudLeft, subLidarCloudRight);
+
+        // message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), subLidarCloudLeft, subLidarCloudRight, subLidarCloudTop);
+        sync->registerCallback(boost::bind(&lidarCloudProcess::combineCallback, this, _1, _2,_3));
+
+        // subLidarCloudLeft = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_left, 1, &lidarCloudProcess::leftHandler, this);
+        // subLidarCloudRight = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_right, 1, &lidarCloudProcess::rightHandler, this);
+        // subLidarCloudTop = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic_top, 2, &lidarCloudProcess::topHandler, this);
+
         cloudCombined_pub = nh.advertise<sensor_msgs::PointCloud2>("cloud_Combined", 1);
 
         cloudNoCar.reset(new pcl::PointCloud<pcl::PointXYZI>());
@@ -85,12 +112,37 @@ public:
         cloudNoCar->header.frame_id = vehicle_frame_id;
     }
 
+    // void combineCallback(const sensor_msgs::PointCloud2ConstPtr &msg_left, const sensor_msgs::PointCloud2ConstPtr &msg_right)
+    void combineCallback(const sensor_msgs::PointCloud2ConstPtr &msg_left, const sensor_msgs::PointCloud2ConstPtr &msg_right, const sensor_msgs::PointCloud2ConstPtr &msg_top)
+    {
+        time_st = msg_right->header.stamp;
+        pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
+        cloudTrans.header.frame_id = vehicle_frame_id;
+        pcl::fromROSMsg(*msg_left, lidarCloudThis);
+        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_left);
+        *cloudOrigin += cloudTrans;
+        lidarCloudThis.clear();
+        cloudTrans.clear();
+
+        pcl::fromROSMsg(*msg_right, lidarCloudThis);
+        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_right);
+        *cloudOrigin += cloudTrans;
+        lidarCloudThis.clear();
+        cloudTrans.clear();
+
+        pcl::fromROSMsg(*msg_top, lidarCloudThis);
+        pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_top);
+        *cloudOrigin += cloudTrans;
+
+        cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
+    }
+
     void topHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
         time_st = msg->header.stamp;
         pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         pcl::fromROSMsg(*msg, lidarCloudThis);
-        
+
         pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_top);
         cloudTrans.header.frame_id = vehicle_frame_id;
 
@@ -239,7 +291,7 @@ public:
 
     void run()
     {
-        
+
         // if (lidarTop_bool)
         if (!cloudOrigin->empty())
         {
