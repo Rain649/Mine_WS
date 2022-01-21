@@ -19,8 +19,10 @@
 #include <pcl/filters/extract_indices.h> //按索引提取
 #include <pcl/filters/passthrough.h>     //直通滤波
 #include <pcl/filters/filter.h>
+#include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 
-#include <boost/thread/thread.hpp>
+// #include <boost/thread/thread.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include <std_msgs/Int32.h>
@@ -83,7 +85,7 @@ private:
     std::mutex mtx_visual;
     std::mutex mtx_cloud;
     std::vector<float> pose;
-    std::vector<int> path{0, 1, 2, 11, 12, 13, 16, 17, 18, 1};
+    std::vector<int> path{1, 2, 11, 12, 13, 16, 17, 18, 1};
     std::string dataPath;
     int preVertex_index = 0;
     bool intersectionVerified = false;
@@ -92,11 +94,14 @@ private:
     TopoMap topoMap;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr lidarCloud;
-
     pcl::visualization::PCLVisualizer viewer;
+
+    ///* 车体坐标向局部变换
+    tf::TransformBroadcaster tb_local;
 
     ros::NodeHandle nh;
     ros::Publisher pubOdom;
+    ros::Publisher pubTarget;
     ros::Publisher pubIntersectionID;
 
     ros::Subscriber subIntersection;
@@ -129,6 +134,7 @@ public:
 
         // 定义topic收发
         pubOdom = nh.advertise<nav_msgs::Odometry>("intersectionOdom", 1);
+        pubTarget = nh.advertise<nav_msgs::Odometry>("targetPoint", 1);
         pubIntersectionID = nh.advertise<std_msgs::Int32>("intersection_id", 1);
         subIntersection = nh.subscribe<std_msgs::Bool>("/intersectionDetection/intersectionVerified", 1, &Navigation::intersectionHandler, this);
         subLidarCloudCombined = nh.subscribe<sensor_msgs::PointCloud2ConstPtr>("/lidarCloudProcess/cloud_Combined", 1, &Navigation::cloudHandler, this);
@@ -202,6 +208,11 @@ public:
     {
         // 加载目标点云，获取点云配准先验位姿
         float yaw_pre;
+        std::vector<double> target_point = topoMap.get_targetPoint(path[preVertex_index + 1], path[preVertex_index + 2]);
+        float x_target = target_point[0];
+        float y_target = target_point[1];
+        float yaw_target = target_point[2] * M_PI / 180;
+        radianTransform(yaw_target);
         std::string fileName;
         if (path[preVertex_index] == 0)
         {
@@ -245,7 +256,14 @@ public:
         //交叉路口定位
         geometry_msgs::Quaternion geoQuat;
         nav_msgs::Odometry odom;
+        geometry_msgs::Quaternion geoQuat_localMap;
+        geometry_msgs::Quaternion geoQuat_target;
+        nav_msgs::Odometry odom_target;
         odom.header.frame_id = "vehicle_base_link";
+        odom.header.stamp = ros::Time::now();
+        odom_target.header.frame_id = "localMap";
+        odom_target.header.stamp = ros::Time::now();
+
         //配准参数
         config = loadRegistrationConfig(dataPath);
         double fitnessScore_thre = 10.0;
@@ -276,9 +294,9 @@ public:
                 newLidarCloud_bool = false;
                 mtx_cloud.unlock();
                 mtx_visual.unlock();
-                // 发布车辆位姿
                 if (location_bool)
                 {
+                    // 发布车辆位姿
                     geoQuat = tf::createQuaternionMsgFromRollPitchYaw(0, 0, pose[2]);
                     odom.header.stamp = ros::Time::now();
                     odom.pose.pose.orientation.x = geoQuat.x;
@@ -294,6 +312,39 @@ public:
                     // ROS_INFO_STREAM("Location time consumption = " << dt << "s");
 
                     fitnessScore_thre -= (fitnessScore_thre <= 0) ? 0 : 1;
+
+                    // 发布坐标变换
+                    tf::Transform transform;
+
+                    float x_temp = -pose[0] * cos(pose[2]) - pose[1] * sin(pose[2]);
+                    float y_temp = pose[0] * sin(pose[2]) - pose[1] * cos(pose[2]);
+                    printf("x_temp : %f\n", x_temp);
+                    printf("y_temp : %f\n", y_temp);
+                    transform.setOrigin(tf::Vector3(x_temp, y_temp, 0));
+                    geometry_msgs::Quaternion geoQuat_inv = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -pose[2]);
+                    transform.setRotation(tf::Quaternion(geoQuat_inv.x, geoQuat_inv.y, geoQuat_inv.z, geoQuat_inv.w));
+
+                    tf::StampedTransform st(transform, ros::Time::now(), "vehicle_base_link", "localMap");
+                    tb_local.sendTransform(st);
+
+                    // // 接受坐标变换
+                    // tf::TransformListener listener(ros::Duration(1));
+                    // if (listener.waitForTransform("vehicle_base_link", "localMap", ros::Time::now(), ros::Duration(1)))
+                    //     ROS_INFO("YES Receive Tranform !!!!");
+                    // else
+                    //     ROS_INFO("NO Receive Tranform !!!!");
+
+                    // 发布目标点位姿
+                    geoQuat_target = tf::createQuaternionMsgFromRollPitchYaw(0, 0, yaw_target);
+                    odom_target.header.stamp = ros::Time::now();
+                    odom_target.pose.pose.orientation.x = geoQuat_target.x;
+                    odom_target.pose.pose.orientation.y = geoQuat_target.y;
+                    odom_target.pose.pose.orientation.z = geoQuat_target.z;
+                    odom_target.pose.pose.orientation.w = geoQuat_target.w;
+                    odom_target.pose.pose.position.x = x_target;
+                    odom_target.pose.pose.position.y = y_target;
+                    odom_target.pose.pose.position.z = 0;
+                    pubTarget.publish(odom_target);
                 }
                 // ros::Duration dur = ros::Time::now() - time_start;
                 // ROS_INFO_STREAM("location_only time consumption = " << dur.toSec() << "s");

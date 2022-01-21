@@ -265,6 +265,8 @@ bool DBPlanner::UpdatePdtPath(void)
     }
     else
     {
+        return true;
+        
         PathWorld2Veh(path_pdt, path_pdt_veh);
 
         near_index = FindNearPoint(path_pdt, current_state);

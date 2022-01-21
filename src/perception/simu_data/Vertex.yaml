@@ -41,7 +41,8 @@
    - linkedVertex_id: 11
      edge_id: 7
      angleDiff: 71
-     targetPoint: [6.5, 10.8, 71]
+    #  targetPoint: [6.5, 10.8, 71]
+     targetPoint: [6, 16, 71]
 
 - vertex_id: 3
   # number of linked edges

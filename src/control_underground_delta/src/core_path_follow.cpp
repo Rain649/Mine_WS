@@ -133,14 +133,15 @@ void PathFollow::GenLatCmd(void)
         cmd_steer = atan(Veh_L/pre_r);
 
         // sim cmd
-        if (fabs(state_now.u) == 0)
-        {
-            cmd_sim.angular.z = cmd_sim_lon / pre_r;
-        }
-        else
-        {
-            cmd_sim.angular.z = fabs(state_now.u) / pre_r;
-        }
+        cmd_sim.angular.z = cmd_sim_lon / pre_r;
+        // if (fabs(state_now.u) == 0)
+        // {
+        //     cmd_sim.angular.z = cmd_sim_lon / pre_r;
+        // }
+        // else
+        // {
+        //     cmd_sim.angular.z = fabs(state_now.u) / pre_r;
+        // }
     }
     
     if (cmd_steer > Steer_max)
@@ -155,11 +156,11 @@ void PathFollow::GenLatCmd(void)
 void PathFollow::GenLonCmd(void)
 {
     // sim cmd
-    if (fabs(cmd_sim.angular.z) > cmd_sim_lat * 0.5)
+    if (fabs(cmd_sim.angular.z) > cmd_sim_lat * 0.3)
     {
-        cmd_sim.linear.x = cmd_sim_lon * 0.2;
+        cmd_sim.linear.x = cmd_sim_lon * 0;
     }
-    else if (fabs(cmd_sim.angular.z) > cmd_sim_lat * 0.3)
+    else if (fabs(cmd_sim.angular.z) > cmd_sim_lat * 0.2)
     {
         cmd_sim.linear.x = cmd_sim_lon * 0.5;
     }
