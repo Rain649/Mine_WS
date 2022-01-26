@@ -123,7 +123,10 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 
 1. 安装gps插件：sudo apt-get install ros-melodic-geographic-msgs
 2. 安装velodyne激光雷达驱动：sudo apt-get install ros-melodic-velodyne-*
-3. 编译：catkin_make
+3. 安装阿克曼转向驱动：sudo apt-get install ros-melodic-ackermann-msgs
+4. 安装弹性元件驱动：sudo apt-get install ros-melodic-effort-controllers
+5. 编译：catkin_make
+
 
 ## 三、依赖介绍
 

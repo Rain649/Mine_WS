@@ -40,10 +40,11 @@ class laneDetection
 private:
     int order;
     int minClusterSize;
+
+    double ground_remove_height;
     double clusterRadius;
     double timeLaserCloudNew;
     double passX_min;
-    double passZ_min;
     double passZ_max;
 
     bool intersectionVerified;
@@ -121,6 +122,9 @@ private:
 public:
     laneDetection() : nh("~")
     {
+        //加载参数
+        nh.param<double>("ground_remove_height_", ground_remove_height, -1.0);
+        ROS_INFO("Ground remove height : %f", ground_remove_height);
         nh.param<std::string>("pointCloud_topic_", pointCloud_topic_, "/lidarCloudProcess/cloud_Combined");
         ROS_INFO("Input Point Cloud: %s", pointCloud_topic_.c_str());
         nh.param<std::string>("frame_id_", frame_id_, "vehicle_base_link");
@@ -133,8 +137,6 @@ public:
         ROS_INFO("Cluster Radius: %f", clusterRadius);
         nh.param("passX_min", passX_min, -5.0);
         ROS_INFO("PassThrough Filter X Minimum: %f", passX_min);
-        nh.param("passZ_min", passZ_min, -0.8);
-        ROS_INFO("PassThrough Filter Z Minimum: %f", passZ_min);
         nh.param("passZ_max", passZ_max, 1.0);
         ROS_INFO("PassThrough Filter Z Maximum: %f", passZ_max);
 
@@ -163,7 +165,7 @@ public:
         downSizeFilter_1.setLeafSize(0.2, 0.2, 0.4);
         downSizeFilter_2.setLeafSize(2.0, 2.0, 2.0);
         pass_z.setFilterFieldName("z");
-        pass_z.setFilterLimits(passZ_min, passZ_max);
+        pass_z.setFilterLimits(ground_remove_height, passZ_max);
         pass_z.setFilterLimitsNegative(false);
         pass_x.setFilterFieldName("x");
         pass_x.setFilterLimits(passX_min, FLT_MAX);

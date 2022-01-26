@@ -1,0 +1,485 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="car">
+  <xacro:arg name="gpu" default="false"/>
+  <xacro:property name="gpu" value="$(arg gpu)" />
+  <xacro:arg name="organize_cloud" default="false"/>
+  <xacro:property name="organize_cloud" value="$(arg organize_cloud)" />
+
+  <!-- <origin xyz="1.5552 0.63 -0.695" rpy="0 0 0" />
+<parent link="vehicle_base_link" /> -->
+
+
+  <!-- hub_dia and tire_dia are the diameters of the hub and tire,
+       respectively. hex_hub_depth is the distance that the hex hub is
+       inset from the outer edge of the tire. It is set so that each wheel
+       is a "zero offset" wheel. hex_hub_depth = tire_width / 2 -
+       axle_length. -->
+  <xacro:property name="hub_dia" value="0.1"/>
+  <xacro:property name="tire_dia" value="0.3"/>
+  <xacro:property name="tire_width" value="0.1"/>
+  <xacro:property name="hex_hub_depth" value="0.02"/>
+  <xacro:property name="wheel_mass" value="0.3"/>
+  <!-- hex_hub_dist is the distance between left and right hex hubs when
+       the shock absorbers are fully extended. axle_length is the distance
+       from a U joint to the corresponding hex hub. wheel_travel is the
+       vertical wheel travel. -->
+  <xacro:property name="wheelbase" value="3.1104"/>
+  <xacro:property name="hex_hub_dist" value="0.365"/>
+  <xacro:property name="axle_length" value="0.03"/>
+  <xacro:property name="wheel_travel" value="0.084"/>
+  <xacro:property name="shock_z_offset" value="0.0655"/>
+
+  <!-- shock_eff_limit is 2 * ((shock_stroke / 2) * shock_spring_constant) N.
+       shock_stroke is 0.028575 meters. shock_spring_constant, an approximation
+       of a Traxxas Ultra Shock shock absorber spring's constant, is
+       437.817 N/m. -->
+  <xacro:property name="shock_eff_limit" value="12.5106"/>
+  <xacro:property name="shock_vel_limit" value="1000"/>
+  <!-- The specifications for a Titan(R) 550 motor could not be found, so the
+       stall torque of a Mabuchi Motor(R) RS-550VC-7525 motor was used instead.
+
+       num_spur_gear_teeth = 68
+       num_pinion_gear_teeth = 19
+       final_gear_ratio = (num_spur_gear_teeth / num_pinion_gear_teeth) *
+         5.22 = 18.68
+       stall_torque = 0.549 N m
+       axle_eff_limit = ((2 * stall_torque) * final_gear_ratio) / 4 =
+         5.12766 N m
+
+       max_speed = 40 mph (30+ mph) = 17.8816 m/s
+       axle_vel_limit = (2 * pi) * (max_speed / (pi * tire_dia)) =
+         244.8696 rad/s -->
+  <xacro:property name="axle_eff_limit" value="5.12766"/>
+  <xacro:property name="axle_vel_limit" value="244.8696"/>
+
+  <!-- These constants are used to simulate a Traxxas 2056 servo operated at
+       6 V. servo_stall_torque is measured in N m. servo_no_load_speed is
+       measured in rad/s. -->
+  <xacro:property name="servo_stall_torque" value="0.5649"/>
+  <xacro:property name="servo_no_load_speed" value="4.553"/>
+
+  <!-- ###################### -->
+
+  <gazebo reference = "vehicle_base_link">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <gazebo reference = "wheel_lf">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "wheel_lr">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "wheel_rf">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "wheel_rr">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <gazebo reference = "plate_l">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <gazebo reference = "plate_r">
+    <material>Gazebo/Orange</material>
+  </gazebo>
+
+  <link name="vehicle_base_link">
+    <inertial>
+      <origin xyz="-0.446594834274452 1.10140809459871E-14 -0.0812605354829313" rpy="0 0 0" />
+      <!-- <mass value="17432.032798497" />
+      <inertia ixx="9357.94654211181" ixy="-1.25947873442229E-10" ixz="-1547.1262306227" iyy="42349.3870226843" iyz="-9.50421805128393E-12" izz="46064.4886813343" /> -->
+      <!-- <mass value="10000" />
+      <inertia ixx="6000" ixy="0" ixz="-1000" iyy="28000" iyz="0" izz="15000" /> -->
+      <mass value="100" />
+      <inertia ixx="400" ixy="0" ixz="-0.1" iyy="100" iyz="0" izz="1" />
+
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
+      </geometry>
+      <material name="Orange">
+        <color rgba="1.0 0.33 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="wheel_lf">
+    <inertial>
+      <origin xyz="0.00818093352436322 0.16 0.00575085442955692" rpy="0 0 0" />
+      <!-- <mass value="195.872333513578" />
+      <inertia ixx="10.0526194504852" ixy="-2.40997915164867E-14" ixz="6.55520207342926E-17" iyy="16.8524046276173" iyz="-1.27333631675207E-16" izz="10.0526194504852" /> -->
+      <mass value="0.2" />
+      <inertia ixx="10.0526194504852" ixy="-2.40997915164867E-14" ixz="6.55520207342926E-17" iyy="16.8524046276173" iyz="-1.27333631675207E-16" izz="0.3" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_lf.STL" />
+      </geometry>
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_lf.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_lf" type="continuous">
+    <origin xyz="1.5552 0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="wheel_lf" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <link name="wheel_lr">
+    <inertial>
+      <origin xyz="-8.88178419700125E-16 0.16 0" rpy="0 0 0" />
+      <!-- <mass value="195.872333513578" />
+      <inertia ixx="10.0526194504852" ixy="-2.41411214140486E-14" ixz="3.69237933083238E-30" iyy="16.8524046276173" iyz="-1.3532984430688E-31" izz="10.0526194504852" /> -->
+      <mass value="0.2" />
+      <inertia ixx="10.0526194504852" ixy="-2.40997915164867E-14" ixz="6.55520207342926E-17" iyy="16.8524046276173" iyz="-1.27333631675207E-16" izz="0.3" />
+
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_lr.STL" />
+      </geometry>
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_lr.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_lr" type="continuous">
+    <origin xyz="-1.6666 0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="wheel_lr" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <link name="wheel_rf">
+    <inertial>
+      <origin xyz="6.66133814775094E-16 -0.16 -1.11022302462516E-16" rpy="0 0 0" />
+      <!-- <mass value="195.872333513578" />
+      <inertia ixx="10.0526194504852" ixy="-2.41227541210537E-14" ixz="1.03944522260315E-17" iyy="16.8524046276173" iyz="3.48321257960907E-17" izz="10.0526194504852" /> -->
+      <mass value="0.2" />
+      <inertia ixx="10.0526194504852" ixy="-2.40997915164867E-14" ixz="6.55520207342926E-17" iyy="16.8524046276173" iyz="-1.27333631675207E-16" izz="0.3" />
+
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_rf.STL" />
+      </geometry>
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_rf.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_rf" type="continuous">
+    <!-- <origin xyz="1.5634 -0.63 -0.695" rpy="0 0 0" /> -->
+    <origin xyz="1.5552 -0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="wheel_rf" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <link name="wheel_rr">
+    <inertial>
+      <origin xyz="2.22044604925031E-16 -0.16 0" rpy="0 0 0" />
+      <!-- <mass value="195.872333513578" />
+      <inertia ixx="10.0526194504852" ixy="-2.41411214140486E-14" ixz="3.69237933083238E-30" iyy="16.8524046276173" iyz="-1.3532984430688E-31" izz="10.0526194504852" /> -->
+      <mass value="0.2" />
+      <inertia ixx="10.0526194504852" ixy="-2.40997915164867E-14" ixz="6.55520207342926E-17" iyy="16.8524046276173" iyz="-1.27333631675207E-16" izz="0.3" />
+
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_rr.STL" />
+      </geometry>
+      <material name="Black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/wheel_rr.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_rr" type="continuous">
+    <origin xyz="-1.6666 -0.63 -0.695" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="wheel_rr" />
+    <axis xyz="0 1 0" />
+  </joint>
+  <link name="plate_l">
+    <inertial>
+      <origin xyz="-4.44089209850063E-16 -2.22044604925031E-16 0.00100000000000067" rpy="0 0 0" />
+      <mass value="0.0831265416139861" />
+      <inertia ixx="0.000101857722324338" ixy="-6.70850094225479E-21" ixz="3.74007284466562E-19" iyy="0.000101857722324338" iyz="9.60487555893223E-23" izz="0.000203660026954266" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_l.STL" />
+      </geometry>
+      <material name="Orange">
+        <color rgba="1.0 0.33 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_l.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_pl" type="fixed">
+    <origin xyz="2.1934 0.95 0.27" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="plate_l" />
+    <axis xyz="0 0 0" />
+  </joint>
+  <link name="plate_r">
+    <inertial>
+      <origin xyz="-4.44089209850063E-16 1.11022302462516E-16 0.00100000000000039" rpy="0 0 0" />
+      <mass value="0.0831265416139861" />
+      <inertia ixx="0.000101857722324338" ixy="3.76876721968964E-21" ixz="3.74111586635625E-19" iyy="0.000101857722324338" iyz="7.8828622518223E-23" izz="0.000203660026954266" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_r.STL" />
+      </geometry>
+      <material name="Orange">
+        <color rgba="1.0 0.33 0.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://car/meshes/plate_r.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_pr" type="fixed">
+    <origin xyz="2.1934 -0.95 0.27" rpy="0 0 0" />
+    <parent link="vehicle_base_link" />
+    <child link="plate_r" />
+    <axis xyz="0 0 0" />
+  </joint>
+  <!-- Shock absorber -->
+  <xacro:macro name="shock" params="lr_prefix fr_prefix lr_reflect fr_reflect child">
+    <joint name="${lr_prefix}_${fr_prefix}_shock" type="prismatic">
+      <parent link="vehicle_base_link"/>
+      <child link="${child}"/>
+
+      <origin xyz="${fr_reflect * wheelbase / 2}
+                   ${lr_reflect * ((hex_hub_dist / 2) - axle_length)}
+                   ${(wheel_travel / 2) - shock_z_offset}"/>
+      <axis xyz="0 0 -1"/>
+      <limit lower="${-wheel_travel / 2}" upper="${wheel_travel / 2}" effort="${shock_eff_limit}" velocity="${shock_vel_limit}"/>
+    </joint>
+    <transmission name="${lr_prefix}_${fr_prefix}_shock_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${lr_prefix}_${fr_prefix}_shock">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${lr_prefix}_${fr_prefix}_shock_act">
+        <!-- This hardwareInterface element exists for compatibility
+             with ROS Hydro. -->
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+
+  <!-- Null inertial element. This is needed to make the model work with
+       Gazebo. -->
+  <xacro:macro name="null_inertial">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- The "wheel" macro defines an axle carrier, axle, and wheel. -->
+  <xacro:macro name="wheel" params="lr_prefix fr_prefix lr_reflect">
+    <link name="${lr_prefix}_${fr_prefix}_axle_carrier">
+      <xacro:null_inertial/>
+    </link>
+
+    <!-- The left and right axles have the same axis so that identical
+         rotation values cause the wheels to rotate in the same direction. -->
+    <joint name="${lr_prefix}_${fr_prefix}_axle" type="continuous">
+      <parent link="${lr_prefix}_${fr_prefix}_axle_carrier"/>
+      <child link="${lr_prefix}_${fr_prefix}_wheel"/>
+      <origin rpy="${degrees_90} 0 0"/>
+      <axis xyz="0 0 -1"/>
+      <limit effort="${axle_eff_limit}" velocity="${axle_vel_limit}"/>
+    </joint>
+    <transmission name="${lr_prefix}_${fr_prefix}_axle_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${lr_prefix}_${fr_prefix}_axle">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${lr_prefix}_${fr_prefix}_axle_act">
+        <!-- This hardwareInterface element exists for compatibility
+             with ROS Hydro. -->
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <link name="${lr_prefix}_${fr_prefix}_wheel">
+      <visual>
+        <origin xyz="0
+                     ${lr_reflect * (axle_length - (tire_width /
+                     2 - hex_hub_depth))}
+                     0"/>
+        <geometry>
+          <cylinder radius="${tire_dia / 2}" length="${tire_width}"/>
+        </geometry>
+        <material name="tire_mat"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0
+                     ${lr_reflect * (axle_length - (tire_width /
+                     2 - hex_hub_depth))}
+                     0"/>
+        <geometry>
+          <cylinder radius="${tire_dia / 2}" length="${tire_width}"/>
+        </geometry>
+      </collision>
+
+      <xacro:thick_walled_tube_inertial inner_rad="${hub_dia / 2}" outer_rad="${tire_dia / 2}" height="${tire_width}" mass="${wheel_mass}"/>
+    </link>
+
+    <gazebo reference="${lr_prefix}_${fr_prefix}_wheel">
+      <material>Gazebo/Black</material>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Front wheel -->
+  <xacro:macro name="front_wheel" params="lr_prefix fr_prefix lr_reflect fr_reflect">
+    <xacro:shock lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" lr_reflect="${lr_reflect}" fr_reflect="${fr_reflect}" child="${lr_prefix}_steering_link"/>
+
+    <link name="${lr_prefix}_steering_link">
+      <xacro:null_inertial/>
+    </link>
+
+    <joint name="${lr_prefix}_steering_joint" type="revolute">
+      <parent link="${lr_prefix}_steering_link"/>
+      <child link="${lr_prefix}_${fr_prefix}_axle_carrier"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${-degrees_45}" upper="${degrees_45}" effort="${servo_stall_torque}" velocity="${servo_no_load_speed}"/>
+    </joint>
+    <transmission name="${lr_prefix}_steering_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${lr_prefix}_steering_joint">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${lr_prefix}_steering_act">
+        <!-- This hardwareInterface element exists for compatibility
+             with ROS Hydro. -->
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" lr_reflect="${lr_reflect}"/>
+  </xacro:macro>
+
+  <!-- Rear wheel -->
+  <xacro:macro name="rear_wheel" params="lr_prefix fr_prefix lr_reflect fr_reflect">
+    <xacro:shock lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" lr_reflect="${lr_reflect}" fr_reflect="${fr_reflect}" child="${lr_prefix}_${fr_prefix}_axle_carrier"/>
+    <xacro:wheel lr_prefix="${lr_prefix}" fr_prefix="${fr_prefix}" lr_reflect="${lr_reflect}"/>
+  </xacro:macro>
+
+  <!-- Wheels -->
+  <xacro:front_wheel lr_prefix="left" fr_prefix="front" lr_reflect="1" fr_reflect="1"/>
+  <xacro:front_wheel lr_prefix="right" fr_prefix="front" lr_reflect="-1" fr_reflect="1"/>
+  <xacro:rear_wheel lr_prefix="left" fr_prefix="rear" lr_reflect="1" fr_reflect="-1"/>
+  <xacro:rear_wheel lr_prefix="right" fr_prefix="rear" lr_reflect="-1" fr_reflect="-1"/>
+
+  <!-- 左前16线激光雷达 -->
+  <xacro:include filename="VLP-16.urdf.xacro"/>
+  <xacro:VLP-16 parent="plate_l" name="velodyne_left" topic="/velodyne_left" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
+    <origin xyz="0 0 0.002" rpy="0 0 0" />
+  </xacro:VLP-16>
+
+  <!-- 右前16线激光雷达 -->
+  <xacro:include filename="VLP-16.urdf.xacro"/>
+  <xacro:VLP-16 parent="plate_r" name="velodyne_right" topic="/velodyne_right" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
+    <origin xyz="0 0 0.002" rpy="0 0 0" />
+  </xacro:VLP-16>
+
+  <!-- 顶部32线激光雷达 -->
+  <xacro:include filename="HDL-32E.urdf.xacro"/>
+  <xacro:HDL-32E parent="vehicle_base_link" name="velodyne_top" topic="/velodyne_top" organize_cloud="${organize_cloud}" hz="10" samples="220" gpu="${gpu}">
+    <origin xyz="0 0 0.695" rpy="0 0 0" />
+  </xacro:HDL-32E>
+
+
+  <!-- <plugin name="gps_controller" filename="libhector_gazebo_ros_gps.so">
+    <alwayson>true</alwayson>
+    <updaterate>1.0</updaterate>
+    <bodyname>vehicle_base_link</bodyname>
+    <topicname>/fix</topicname>
+    <velocitytopicname>/fix_velocity</velocitytopicname>
+    <drift>0 0 0</drift>
+    <gaussiannoise>0 0 0</gaussiannoise>
+    <velocitydrift>0 0 0</velocitydrift>
+    <velocitygaussiannoise>0 0 0</velocitygaussiannoise>
+  </plugin> -->
+
+
+  <!-- Drive controller -->
+  <gazebo>
+    <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+      <updateRate>100.0</updateRate>
+      <robotNamespace>/</robotNamespace>
+      <leftFrontJoint>joint_lf</leftFrontJoint>
+      <rightFrontJoint>joint_rf</rightFrontJoint>
+      <leftRearJoint>joint_lr</leftRearJoint>
+      <rightRearJoint>joint_rr</rightRearJoint>
+      <wheelSeparation>4</wheelSeparation>
+      <wheelDiameter>0.41</wheelDiameter>
+      <robotBaseFrame>vehicle_base_link</robotBaseFrame>
+      <!-- <torque>5000000</torque> -->
+      <torque>200</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <broadcastTF>true</broadcastTF>
+    </plugin>
+  </gazebo>
+</robot>

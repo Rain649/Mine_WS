@@ -37,6 +37,8 @@ class lidarCloudProcess
 private:
     ros::NodeHandle nh;
 
+    double ground_remove_height;
+
     std::vector<int> mapping;
 
     std::string lidarTopic_left;
@@ -67,6 +69,8 @@ public:
     lidarCloudProcess() : nh("~")
     {
         //加载参数
+        nh.param<double>("ground_remove_height_", ground_remove_height, -1.0);
+        ROS_INFO("Ground remove height : %f", ground_remove_height);
         nh.param<std::string>("frame_id_", vehicle_frame_id, "vehicle_base_link");
         ROS_INFO("vehicle_frame_id_: %s", vehicle_frame_id.c_str());
         nh.param<std::string>("lidarTopic_left_", lidarTopic_left, "/velodyne_left");
@@ -75,7 +79,8 @@ public:
         ROS_INFO("Right lidar topic : %s", lidarTopic_right.c_str());
         nh.param<std::string>("lidarTopic_top_", lidarTopic_top, "/velodyne_top");
         ROS_INFO("Top lidar topic : %s", lidarTopic_top.c_str());
-        ROS_INFO("----------------------------------------------------------------------");
+        
+            ROS_INFO("----------------------------------------------------------------------");
 
         subLidarCloudLeft = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_left, 1);
         subLidarCloudRight = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_right, 1);
@@ -152,7 +157,7 @@ public:
         pcl::PassThrough<pcl::PointXYZI> groundFilter;
         groundFilter.setInputCloud(cloudCombinedTrans);
         groundFilter.setFilterFieldName("z");
-        groundFilter.setFilterLimits(-0.8, 2);
+        groundFilter.setFilterLimits(ground_remove_height, 2);
         groundFilter.setFilterLimitsNegative(false);
         groundFilter.filter(*cloudCombinedFiltered);
         // 分割车辆
@@ -161,8 +166,8 @@ public:
 
         conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, 2.5))); // GT表示大于等于
         conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -3)));  // GT表示大于等于
-        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 1)));   // LT表示小于等于
-        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -1)));  // LT表示小于等于
+        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 1.1)));   // LT表示小于等于
+        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -1.1)));  // LT表示小于等于
 
         pcl::PointCloud<pcl::PointXYZI> cloudTemp;
         condition.setCondition(conditionOr);

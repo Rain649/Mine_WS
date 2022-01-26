@@ -43,6 +43,8 @@ private:
     int col_minus_Thre;
     int clusterSize_min;
     int index_Array[Horizon_SCAN];
+
+    double ground_remove_height;
     double clusterRadius;
     double median_Coefficient;
     double timeLaserCloudNew;
@@ -113,7 +115,9 @@ private:
 public:
     Detection(std::string _lidarTopic, std::string _frame_id) : lidarTopic(_lidarTopic), frame_id(_frame_id), nh("~")
     {
-        //读取参数
+        //加载参数
+        nh.param<double>("ground_remove_height_", ground_remove_height, -1.0);
+        ROS_INFO("Ground remove height : %f", ground_remove_height);
         nh.param("segmentation_radius_", segmentationRadius, 8);
         ROS_INFO("Segmentation Radius: %d", segmentationRadius);
         nh.param("width_threshold_", width_Thre, 4);

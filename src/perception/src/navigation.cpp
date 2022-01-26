@@ -80,6 +80,8 @@ private:
     int v1{1}; //设置左窗口
     int v2{2}; //设置右窗口
 
+    double ground_remove_height;
+
     RegistrationConfig config;
 
     std::mutex mtx_visual;
@@ -112,6 +114,8 @@ public:
     Navigation() : nh("~")
     {
         //加载参数
+        nh.param<double>("ground_remove_height_", ground_remove_height, -1.0);
+        ROS_INFO("Ground remove height : %f", ground_remove_height);
         nh.param<std::string>("simu_data_path", dataPath, "src/perception/simu_data/");
         ROS_INFO("simu_data path: %s", dataPath.c_str());
         // 分配内存
@@ -176,13 +180,13 @@ public:
         std::vector<int> index;      //保存每个近邻点的索引
         std::vector<float> distance; //保存每个近邻点与查找点之间的欧式距离平方
         // 外围分割
-        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_1;
-        kdtree_1.setInputCloud(cloudCombined); // 设置要搜索的点云，建立KDTree
+        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+        kdtree.setInputCloud(cloudCombined); // 设置要搜索的点云，建立KDTree
         pcl::ExtractIndices<pcl::PointXYZ> extract;
         pcl::PointXYZ zeroPoint;
         zeroPoint.x = zeroPoint.y = zeroPoint.z = 0;
         int segmentationRadius = 25;
-        if (kdtree_1.radiusSearch(zeroPoint, segmentationRadius, index, distance) == 0)
+        if (kdtree.radiusSearch(zeroPoint, segmentationRadius, index, distance) == 0)
         {
             ROS_ERROR("There is no point nearby !!!");
             return;
