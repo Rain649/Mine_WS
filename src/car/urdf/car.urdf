@@ -5,192 +5,25 @@
 <robot name="car">
   <link name="vehicle_base_link">
     <inertial>
-      <origin xyz="-0.446594834274452 1.10140809459871E-14 -0.0812605354829313" rpy="0 0 0" />
-      <mass value="17432.032798497" />
-      <inertia ixx="9357.94654211181" ixy="-1.25947873442229E-10" ixz="-1547.1262306227" iyy="42349.3870226843" iyz="-9.50421805128393E-12" izz="46064.4886813343" />
+      <origin xyz="0 0 0.6" rpy="0 0 0" />
+      <mass value="500" />
+      <inertia ixx="200" ixy="0" ixz="0" iyy="1000" iyz="0" izz="1100" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
+        <mesh filename="package://car/meshes/car.STL" />
       </geometry>
       <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+        <color rgba="0.79216 0.81961 0.93333 1" />
+        <texture filename="package://car/textures/" />
       </material>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
+        <mesh filename="package://car/meshes/car.STL" />
       </geometry>
     </collision>
   </link>
-  <link name="wheel_lf">
-    <inertial>
-      <origin xyz="0.00818093352436322 0.16 0.00575085442955692" rpy="0 0 0" />
-      <mass value="195.872333513578" />
-      <inertia ixx="10.0526194504852" ixy="-2.40997915164867E-14" ixz="6.55520207342926E-17" iyy="16.8524046276173" iyz="-1.27333631675207E-16" izz="10.0526194504852" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_lf.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="1 1 1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_lf.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint name="joint_lf" type="continuous">
-    <origin xyz="1.5552 0.63 -0.70076" rpy="0 0 0" />
-    <parent link="vehicle_base_link" />
-    <child link="wheel_lf" />
-    <axis xyz="0 1 0" />
-  </joint>
-  <link name="wheel_lr">
-    <inertial>
-      <origin xyz="-8.88178419700125E-16 0.16 0" rpy="0 0 0" />
-      <mass value="195.872333513578" />
-      <inertia ixx="10.0526194504852" ixy="-2.41411214140486E-14" ixz="3.69237933083238E-30" iyy="16.8524046276173" iyz="-1.3532984430688E-31" izz="10.0526194504852" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_lr.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="1 1 1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_lr.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint name="joint_lr" type="continuous">
-    <origin xyz="-1.6666 0.63 -0.695" rpy="0 0 0" />
-    <parent link="vehicle_base_link" />
-    <child link="wheel_lr" />
-    <axis xyz="0 1 0" />
-  </joint>
-  <link name="wheel_rf">
-    <inertial>
-      <origin xyz="6.66133814775094E-16 -0.16 -1.11022302462516E-16" rpy="0 0 0" />
-      <mass value="195.872333513578" />
-      <inertia ixx="10.0526194504852" ixy="-2.41227541210537E-14" ixz="1.03944522260315E-17" iyy="16.8524046276173" iyz="3.48321257960907E-17" izz="10.0526194504852" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_rf.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="1 1 1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_rf.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint name="joint_rf" type="continuous">
-    <origin xyz="1.5634 -0.63 -0.695" rpy="0 0 0" />
-    <parent link="vehicle_base_link" />
-    <child link="wheel_rf" />
-    <axis xyz="0 -1 0" />
-  </joint>
-  <link name="wheel_rr">
-    <inertial>
-      <origin xyz="2.22044604925031E-16 -0.16 0" rpy="0 0 0" />
-      <mass value="195.872333513578" />
-      <inertia ixx="10.0526194504852" ixy="-2.41411214140486E-14" ixz="3.69237933083238E-30" iyy="16.8524046276173" iyz="-1.3532984430688E-31" izz="10.0526194504852" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_rr.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="1 1 1 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/wheel_rr.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint name="joint_rr" type="continuous">
-    <origin xyz="-1.6666 -0.63 -0.695" rpy="0 0 0" />
-    <parent link="vehicle_base_link" />
-    <child link="wheel_rr" />
-    <axis xyz="0 1 0" />
-  </joint>
-  <link name="plate_l">
-    <inertial>
-      <origin xyz="-4.44089209850063E-16 -2.22044604925031E-16 0.00100000000000067" rpy="0 0 0" />
-      <mass value="0.0831265416139861" />
-      <inertia ixx="0.000101857722324338" ixy="-6.70850094225479E-21" ixz="3.74007284466562E-19" iyy="0.000101857722324338" iyz="9.60487555893223E-23" izz="0.000203660026954266" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/plate_l.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/plate_l.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint name="joint_pl" type="fixed">
-    <origin xyz="2.1934 0.95 0.27" rpy="0 0 0" />
-    <parent link="vehicle_base_link" />
-    <child link="plate_l" />
-    <axis xyz="0 0 0" />
-  </joint>
-  <link name="plate_r">
-    <inertial>
-      <origin xyz="-4.44089209850063E-16 1.11022302462516E-16 0.00100000000000039" rpy="0 0 0" />
-      <mass value="0.0831265416139861" />
-      <inertia ixx="0.000101857722324338" ixy="3.76876721968964E-21" ixz="3.74111586635625E-19" iyy="0.000101857722324338" iyz="7.8828622518223E-23" izz="0.000203660026954266" />
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/plate_r.STL" />
-      </geometry>
-      <material name="">
-        <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <geometry>
-        <mesh filename="package://car/meshes/plate_r.STL" />
-      </geometry>
-    </collision>
-  </link>
-  <joint name="joint_pr" type="fixed">
-    <origin xyz="2.1934 -0.95 0.27" rpy="0 0 0" />
-    <parent link="vehicle_base_link" />
-    <child link="plate_r" />
-    <axis xyz="0 0 0" />
-  </joint>
 </robot>

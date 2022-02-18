@@ -26,9 +26,9 @@ car:
   left_steering_hinge_position_controller:
     joint: left_steering_joint
     type: effort_controllers/JointPositionController
-    pid: {p: 10.0, i: 0.0, d: 0.5}
+    pid: {p: 400.0, i: 100.0, d: 200}
   right_steering_hinge_position_controller:
     joint: right_steering_joint
     type: effort_controllers/JointPositionController
-    pid: {p: 10.0, i: 0.0, d: 0.5}
+    pid: {p: 400.0, i: 100.0, d: 200}
 

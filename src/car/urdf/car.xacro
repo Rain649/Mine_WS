@@ -17,17 +17,19 @@
        Gazebo. -->
   <xacro:macro name="null_inertial">
     <inertial>
-      <mass value="0.001"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      <mass value="2.0"/>
+      <!-- <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/> -->
+      <inertia ixx="10000" ixy="0" ixz="0" iyy="10000" iyz="0" izz="100"/>
+
     </inertial>
   </xacro:macro>
 
   <!-- Degree-to-radian conversions -->
   <xacro:property name="degrees_45" value="0.785398163"/>
   <xacro:property name="degrees_90" value="1.57079633"/>
-  
-  
-  <xacro:property name="mass_body" value="20"/>
+
+
+  <xacro:property name="mass_body" value="200"/>
 
 
   <!-- hub_dia and tire_dia are the diameters of the hub and tire,
@@ -37,27 +39,27 @@
        axle_length. -->
   <xacro:property name="hub_dia" value="0.2"/>
   <xacro:property name="tire_dia" value="0.8"/>
-  <xacro:property name="tire_width" value="0.32"/>
-  <xacro:property name="hex_hub_depth" value="0.08"/>
-  <xacro:property name="wheel_mass" value="1"/>
-  <xacro:property name="wheel_height" value="-0.7"/>
+  <xacro:property name="tire_width" value="0.3"/>
+  <xacro:property name="axle_length" value="0.1"/>
+  <xacro:property name="hex_hub_depth" value="${tire_width/2 - axle_length}"/>
+  <xacro:property name="wheel_mass" value="0.1"/>
+  <xacro:property name="wheel_height" value="0.0"/>
 
   <!-- hex_hub_dist is the distance between left and right hex hubs when
        the shock absorbers are fully extended. axle_length is the distance
        from a U joint to the corresponding hex hub. wheel_travel is the
        vertical wheel travel. -->
-  <xacro:property name="wheelbase" value="3"/>
-  <xacro:property name="hex_hub_dist" value="2"/>
-  <xacro:property name="axle_length" value="0.1"/>
-  <xacro:property name="wheel_travel" value="0.03"/>
-  <xacro:property name="shock_z_offset" value="0.04"/>
+  <xacro:property name="wheelbase" value="3.2"/>
+  <xacro:property name="hex_hub_dist" value="${1.9- tire_width + 2*hex_hub_depth}"/>
+  <xacro:property name="wheel_travel" value="0.038"/>
+  <xacro:property name="shock_z_offset" value="-0.01"/>
 
   <!-- shock_eff_limit is 2 * ((shock_stroke / 2) * shock_spring_constant) N.
        shock_stroke is 0.028575 meters. shock_spring_constant, an approximation
        of a Traxxas Ultra Shock shock absorber spring's constant, is
        437.817 N/m. -->
-  <xacro:property name="shock_eff_limit" value="30"/>
-  <xacro:property name="shock_vel_limit" value="100"/>
+  <xacro:property name="shock_eff_limit" value="900"/>
+  <xacro:property name="shock_vel_limit" value="1000"/>
   <!-- The specifications for a Titan(R) 550 motor could not be found, so the
        stall torque of a Mabuchi Motor(R) RS-550VC-7525 motor was used instead.
 
@@ -72,14 +74,14 @@
        max_speed = 40 mph (30+ mph) = 17.8816 m/s
        axle_vel_limit = (2 * pi) * (max_speed / (pi * tire_dia)) =
          244.8696 rad/s -->
-  <xacro:property name="axle_eff_limit" value="10"/>
-  <xacro:property name="axle_vel_limit" value="20"/>
+  <xacro:property name="axle_eff_limit" value="90000"/>
+  <xacro:property name="axle_vel_limit" value="1000"/>
 
   <!-- These constants are used to simulate a Traxxas 2056 servo operated at
        6 V. servo_stall_torque is measured in N m. servo_no_load_speed is
        measured in rad/s. -->
-  <xacro:property name="servo_stall_torque" value="1000"/>
-  <xacro:property name="servo_no_load_speed" value="2"/>
+  <xacro:property name="servo_stall_torque" value="500"/>
+  <xacro:property name="servo_no_load_speed" value="1"/>
   <!-- Inertia of a thick-walled cylindrical tube with open ends. Height is
        measured along the z axis, which is the tube's axis. inner_rad and
        outer_rad are the tube's inner and outer radii, respectively. -->
@@ -124,19 +126,14 @@
 
   <link name="vehicle_base_link">
     <inertial>
-      <origin xyz="-0.446594834274452 1.10140809459871E-14 -0.0812605354829313" rpy="0 0 0" />
-      <!-- <mass value="17432.032798497" />
-      <inertia ixx="9357.94654211181" ixy="-1.25947873442229E-10" ixz="-1547.1262306227" iyy="42349.3870226843" iyz="-9.50421805128393E-12" izz="46064.4886813343" /> -->
-      <!-- <mass value="10000" />
-      <inertia ixx="6000" ixy="0" ixz="-1000" iyy="28000" iyz="0" izz="15000" /> -->
+      <origin xyz="0 0 0.6" rpy="0 0 0" />
       <mass value="${mass_body}" />
-      <inertia ixx="3000" ixy="0" ixz="0" iyy="8000" iyz="0" izz="100" />
-
+      <inertia ixx="2000" ixy="0" ixz="0" iyy="1000" iyz="0" izz="1100" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
+        <mesh filename="package://car/meshes/car.STL" />
       </geometry>
       <material name="Orange">
         <color rgba="1.0 0.33 0.0 1.0"/>
@@ -145,15 +142,15 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://car/meshes/vehicle_base_link.STL" />
+        <mesh filename="package://car/meshes/car.STL" />
       </geometry>
     </collision>
   </link>
 
   <link name="plate_l">
     <inertial>
-      <origin xyz="-4.44089209850063E-16 -2.22044604925031E-16 0.00100000000000067" rpy="0 0 0" />
-      <mass value="0.0831265416139861" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.1" />
       <inertia ixx="0.000101857722324338" ixy="-6.70850094225479E-21" ixz="3.74007284466562E-19" iyy="0.000101857722324338" iyz="9.60487555893223E-23" izz="0.000203660026954266" />
     </inertial>
     <visual>
@@ -173,15 +170,15 @@
     </collision>
   </link>
   <joint name="joint_pl" type="fixed">
-    <origin xyz="2.1934 0.95 0.27" rpy="0 0 0" />
+    <origin xyz="2.6 0.95 1.0" rpy="0 0 0" />
     <parent link="vehicle_base_link" />
     <child link="plate_l" />
     <axis xyz="0 0 0" />
   </joint>
   <link name="plate_r">
     <inertial>
-      <origin xyz="-4.44089209850063E-16 1.11022302462516E-16 0.00100000000000039" rpy="0 0 0" />
-      <mass value="0.0831265416139861" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="0.1" />
       <inertia ixx="0.000101857722324338" ixy="3.76876721968964E-21" ixz="3.74111586635625E-19" iyy="0.000101857722324338" iyz="7.8828622518223E-23" izz="0.000203660026954266" />
     </inertial>
     <visual>
@@ -201,7 +198,7 @@
     </collision>
   </link>
   <joint name="joint_pr" type="fixed">
-    <origin xyz="2.1934 -0.95 0.27" rpy="0 0 0" />
+    <origin xyz="2.6 -0.95 1.0" rpy="0 0 0" />
     <parent link="vehicle_base_link" />
     <child link="plate_r" />
     <axis xyz="0 0 0" />
@@ -212,9 +209,9 @@
       <parent link="vehicle_base_link"/>
       <child link="${child}"/>
 
-      <origin xyz="${fr_reflect * wheelbase / 2}
+      <origin xyz="${fr_reflect * wheelbase / 2 + 0.05}
                    ${lr_reflect * ((hex_hub_dist / 2) - axle_length)}
-                   ${wheel_height + (wheel_travel / 2) - shock_z_offset}"/>
+                   ${wheel_height - shock_z_offset}"/>
       <axis xyz="0 0 -1"/>
       <limit lower="${-wheel_travel / 2}" upper="${wheel_travel / 2}" effort="${shock_eff_limit}" velocity="${shock_vel_limit}"/>
     </joint>
@@ -348,7 +345,7 @@
   <!-- 顶部32线激光雷达 -->
   <xacro:include filename="HDL-32E.urdf.xacro"/>
   <xacro:HDL-32E parent="vehicle_base_link" name="velodyne_top" topic="/velodyne_top" organize_cloud="${organize_cloud}" hz="10" samples="220" gpu="${gpu}">
-    <origin xyz="0 0 0.695" rpy="0 0 0" />
+    <origin xyz="0 0 1.4" rpy="0 0 0" />
   </xacro:HDL-32E>
 
 

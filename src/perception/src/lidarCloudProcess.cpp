@@ -164,8 +164,8 @@ public:
         pcl::ConditionOr<pcl::PointXYZI>::Ptr conditionOr(new pcl::ConditionOr<pcl::PointXYZI>()); //条件滤波
         pcl::ConditionalRemoval<pcl::PointXYZI> condition;
 
-        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, 2.5))); // GT表示大于等于
-        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -3)));  // GT表示大于等于
+        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, 2.65))); // GT表示大于等于
+        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -2.85)));  // GT表示大于等于
         conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 1.1)));   // LT表示小于等于
         conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -1.1)));  // LT表示小于等于
 

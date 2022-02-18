@@ -11,7 +11,7 @@
   <!-- 0.公用参数 -->
   <arg name="pointCloud_topic_" default="/lidarCloudProcess/cloud_Combined" />
   <arg name="frame_id_" default="vehicle_base_link" />
-  <arg name="ground_remove_height_" default="-0.6" />
+  <arg name="ground_remove_height_" default="-0.1" />
 
   <!-- 1.gazebo参数 -->
   <arg name="paused" default="true"/>
@@ -52,7 +52,7 @@
   <!-- 车辆模型节点  -->
   <!-- 车辆模型  -->
   <param name="robot_description" command="$(arg model)" />
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x 0 -y 0 -z 2 "/>
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x 0 -y 0 -z 1 "/>
 
 
   <!-- 运动控制 -->
