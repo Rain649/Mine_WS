@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <arg name="mpc_max_angle" default="20 * M_PI / 180" />
+  <arg name="simu_data_dir" default="$(find perception)/../common/simu_data/" />
+  <arg name="path_dir" default="$(find perception)/../common/map/PathPlanned.yaml" />
+
+  <!-- server节点 -->
+  <node pkg="perception" type="service" name="service">
+    <param name="path_dir" value="$(arg path_dir)" />
+  </node>
+
+  <!-- navigation节点 -->
+  <node pkg="perception" type="navigation" name="navigation" respawn="true">
+    <param name="simu_data_dir" value="$(arg simu_data_dir)" />
+  </node>
+
+  <!-- mpc节点 -->
+  <node pkg="mpc" type="mpc" name="mpc" respawn="true" output="screen">
+    <param name="simu_data_dir" value="$(arg simu_data_dir)" />
+    <param name="mpc_max_angle" value="$(arg mpc_max_angle)" />
+
+  </node>
+
+
+</launch>
+
+<!-- output="screen" -->

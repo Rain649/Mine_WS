@@ -1,19 +1,36 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(perception)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -O1")
 
-find_package(catkin REQUIRED)
+# SET(CMAKE_BUILD_TYPE "Debug")
+SET(CMAKE_BUILD_TYPE "RELEASE")
+
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} ${OpenMP_CXX_FLAGS} -std=c++14 -O2 -Wall -g -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} ${OpenMP_CXX_FLAGS} -std=c++14 -O2 -Wall")
+
+
+set(commonPath ../common)
+
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
+  message_generation 
   roscpp
   pcl_ros
   pcl_conversions
-
   std_msgs
   sensor_msgs
-
-  dynamic_reconfigure
+  visualization_msgs
+  interactive_markers
 )
+
+find_package(PCL REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(OpenMP REQUIRED)
+
+add_service_files(
+    FILES
+    mineServer.srv
+ )
 
 generate_dynamic_reconfigure_options(
   cfg/intersectionDetection.cfg
@@ -22,81 +39,43 @@ generate_dynamic_reconfigure_options(
   cfg/lidarCloudProcess.cfg
 )
 
-find_package(Boost COMPONENTS thread filesystem date_time system REQUIRED)
-find_package(PCL REQUIRED QUIET)
-find_package(Eigen3 REQUIRED)
-find_package(OpenMP)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-
+generate_messages(
+    DEPENDENCIES
+    std_msgs
+)
 catkin_package(
-  DEPENDS PCL EIGEN3
+  DEPENDS roscpp std_msgs PCL EIGEN3 message_generation
 )
 
 include_directories(
   include 
+  ${commonPath}/include
 	${catkin_INCLUDE_DIRS}
 	${PCL_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIR}
-	${EIGEN3_INCLUDE_DIR} 
+	${EIGEN3_INCLUDE_DIR}
 )
 
-link_directories(
-	include
-	${PCL_LIBRARY_DIRS}
-)
-
-
-# add_executable(keyPointSave
-#   src/keyPointSave.cpp
-# )
-# add_dependencies(keyPointSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(keyPointSave
-#   ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
-# )
-
-# add_executable(segmentationSave
-#   src/segmentationSave.cpp
-# )
-# add_dependencies(segmentationSave ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(segmentationSave
-#   ${catkin_LIBRARIES}  ${PCL_LIBRARIES} 
-# )
-
-# add_executable(topoMap
-#   src/topoMap.cpp
-# )
-# add_dependencies(topoMap ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(topoMap
-#   ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp
-# )
-
-# add_executable(ndt src/ndt.cpp)
-# add_dependencies(ndt ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(ndt  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  yaml-cpp)
-
-# ${OpenCV_LIBS}
-
-##################点云处理##########################
-
-# add_executable(pointCloudProcess  src/pointCloudProcess.cpp )
-# add_dependencies(pointCloudProcess ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(pointCloudProcess  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
-
-############################################
 
 add_executable(lidarCloudProcess  src/lidarCloudProcess.cpp)
 add_dependencies(lidarCloudProcess ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(lidarCloudProcess  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+target_link_libraries(lidarCloudProcess  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} )
 
 add_executable(intersectionDetection  src/intersectionDetection.cpp)
 add_dependencies(intersectionDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(intersectionDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 
-add_executable(laneDetection  src/laneDetection.cpp)
+add_executable(laneDetection  src/laneDetection.cpp ${commonPath}/src/polyfit.cpp)
 add_dependencies(laneDetection ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
+target_link_libraries(laneDetection  ${catkin_LIBRARIES}  ${PCL_LIBRARIES}  OpenMP::OpenMP_CXX)
 
-add_executable(navigation  src/navigation.cpp src/intersectionLocation.cpp src/topoMap.cpp include/intersectionLocation.h include/topoMap.h)
-add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(navigation  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp)
+add_executable(navigation  src/navigation.cpp src/intersectionLocation.cpp ${commonPath}/src/topoMap.cpp)
+add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} perception_gencpp)
+target_link_libraries(navigation  ${catkin_LIBRARIES}  ${PCL_LIBRARIES} yaml-cpp OpenMP::OpenMP_CXX)
+
+add_executable(service src/service.cpp)
+target_link_libraries(service ${catkin_LIBRARIES} yaml-cpp)
+add_dependencies(service perception_gencpp)
+
+add_executable(client src/client.cpp)
+target_link_libraries(client ${catkin_LIBRARIES} yaml-cpp)
+add_dependencies(client perception_gencpp)

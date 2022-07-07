@@ -1,0 +1,307 @@
+#顺序：按1.entrance_id；2.exit_id 排序
+
+- edge_id: 0
+  entranceVertex_id: 0
+  exitVertex_id: 1
+  width: 3
+  length: 10
+
+- edge_id: 1
+  entranceVertex_id: 1
+  exitVertex_id: 2
+  width: 3
+  length: 50
+
+- edge_id: 2
+  entranceVertex_id: 2
+  exitVertex_id: 1
+  width: 3
+  length: 50
+
+- edge_id: 3
+  entranceVertex_id: 1
+  exitVertex_id: 17
+  width: 3
+  length: 330
+
+- edge_id: 4
+  entranceVertex_id: 17
+  exitVertex_id: 1
+  width: 3
+  length: 330
+
+- edge_id: 5
+  entranceVertex_id: 2
+  exitVertex_id: 3
+  width: 3
+  length: 100
+
+- edge_id: 6
+  entranceVertex_id: 3
+  exitVertex_id: 2
+  width: 3
+  length: 100
+
+- edge_id: 7
+  entranceVertex_id: 2
+  exitVertex_id: 11
+  width: 3
+  length: 158
+
+- edge_id: 8
+  entranceVertex_id: 11
+  exitVertex_id: 2
+  width: 3
+  length: 158
+
+- edge_id: 9
+  entranceVertex_id: 3
+  exitVertex_id: 4
+  width: 3
+  length: 50
+
+- edge_id: 10
+  entranceVertex_id: 4
+  exitVertex_id: 3
+  width: 3
+  length: 50
+
+- edge_id: 11
+  entranceVertex_id: 3
+  exitVertex_id: 10
+  width: 3
+  length: 150
+
+- edge_id: 12
+  entranceVertex_id: 10
+  exitVertex_id: 3
+  width: 3
+  length: 150
+
+- edge_id: 13
+  entranceVertex_id: 4
+  exitVertex_id: 5
+  width: 3
+  length: 30
+
+- edge_id: 14
+  entranceVertex_id: 5
+  exitVertex_id: 4
+  width: 3
+  length: 30
+
+- edge_id: 15
+  entranceVertex_id: 4
+  exitVertex_id: 9
+  width: 3
+  length: 100
+
+- edge_id: 16
+  entranceVertex_id: 9
+  exitVertex_id: 4
+  width: 3
+  length: 100
+
+- edge_id: 17
+  entranceVertex_id: 5
+  exitVertex_id: 6
+  width: 3
+  length: 30
+
+- edge_id: 18
+  entranceVertex_id: 6
+  exitVertex_id: 5
+  width: 3
+  length: 30
+
+- edge_id: 19
+  entranceVertex_id: 5
+  exitVertex_id: 8
+  width: 3
+  length: 100
+
+- edge_id: 20
+  entranceVertex_id: 8
+  exitVertex_id: 5
+  width: 3
+  length: 100
+
+- edge_id: 21
+  entranceVertex_id: 6
+  exitVertex_id: 7
+  width: 3
+  length: 100
+
+- edge_id: 22
+  entranceVertex_id: 7
+  exitVertex_id: 6
+  width: 3
+  length: 100
+
+- edge_id: 23
+  entranceVertex_id: 7
+  exitVertex_id: 8
+  width: 3
+  length: 30
+
+- edge_id: 24
+  entranceVertex_id: 8
+  exitVertex_id: 7
+  width: 3
+  length: 30
+
+- edge_id: 25
+  entranceVertex_id: 7
+  exitVertex_id: 18
+  width: 3
+  length: 408
+
+- edge_id: 26
+  entranceVertex_id: 18
+  exitVertex_id: 7
+  width: 3
+  length: 408
+
+- edge_id: 27
+  entranceVertex_id: 8
+  exitVertex_id: 9
+  width: 3
+  length: 30
+
+- edge_id: 28
+  entranceVertex_id: 9
+  exitVertex_id: 8
+  width: 3
+  length: 30
+
+- edge_id: 29
+  entranceVertex_id: 9
+  exitVertex_id: 10
+  width: 3
+  length: 71
+
+- edge_id: 30
+  entranceVertex_id: 10
+  exitVertex_id: 9
+  width: 3
+  length: 71
+
+- edge_id: 31
+  entranceVertex_id: 10
+  exitVertex_id: 11
+  width: 3
+  length: 50
+
+- edge_id: 32
+  entranceVertex_id: 11
+  exitVertex_id: 10
+  width: 3
+  length: 50
+
+- edge_id: 33
+  entranceVertex_id: 10
+  exitVertex_id: 15
+  width: 3
+  length: 100
+
+- edge_id: 34
+  entranceVertex_id: 15
+  exitVertex_id: 10
+  width: 3
+  length: 100
+
+- edge_id: 35
+  entranceVertex_id: 11
+  exitVertex_id: 12
+  width: 3
+  length: 50
+
+- edge_id: 36
+  entranceVertex_id: 12
+  exitVertex_id: 11
+  width: 3
+  length: 50
+
+- edge_id: 37
+  entranceVertex_id: 11
+  exitVertex_id: 14
+  width: 3
+  length: 100
+
+- edge_id: 38
+  entranceVertex_id: 14
+  exitVertex_id: 11
+  width: 3
+  length: 100
+
+- edge_id: 39
+  entranceVertex_id: 12
+  exitVertex_id: 13
+  width: 3
+  length: 100
+
+- edge_id: 40
+  entranceVertex_id: 13
+  exitVertex_id: 12
+  width: 3
+  length: 100
+
+- edge_id: 41
+  entranceVertex_id: 13
+  exitVertex_id: 14
+  width: 3
+  length: 50
+
+- edge_id: 42
+  entranceVertex_id: 14
+  exitVertex_id: 13
+  width: 3
+  length: 50
+
+- edge_id: 43
+  entranceVertex_id: 14
+  exitVertex_id: 15
+  width: 3
+  length: 50
+
+- edge_id: 44
+  entranceVertex_id: 15
+  exitVertex_id: 14
+  width: 3
+  length: 50
+
+- edge_id: 45
+  entranceVertex_id: 13
+  exitVertex_id: 16
+  width: 3
+  length: 80
+
+- edge_id: 46
+  entranceVertex_id: 16
+  exitVertex_id: 13
+  width: 3
+  length: 80
+
+- edge_id: 47
+  entranceVertex_id: 16
+  exitVertex_id: 17
+  width: 3
+  length: 50
+
+- edge_id: 48
+  entranceVertex_id: 17
+  exitVertex_id: 16
+  width: 3
+  length: 50
+
+- edge_id: 49
+  entranceVertex_id: 17
+  exitVertex_id: 18
+  width: 3
+  length: 30
+
+- edge_id: 50
+  entranceVertex_id: 18
+  exitVertex_id: 17
+  width: 3
+  length: 30

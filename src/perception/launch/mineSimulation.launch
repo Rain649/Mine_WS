@@ -28,6 +28,7 @@
   <arg name="lidarTopic_right_" default="/velodyne_right" />
   <arg name="lidarTopic_top_" default="/velodyne_top" />
   <!-- 4交叉路口检测参数 -->
+  <arg name="jump_times_" default="2" />
   <!-- 5.车道线拟合参数 -->
   <arg name="order" default="3" />
   <arg name="minClusterSize" default="80" />
@@ -35,8 +36,7 @@
   <arg name="passX_min" default="-5.0" />
   <arg name="passZ_max" default="1.0" />
   <!-- 6.定位导航参数 -->
-  <arg name="simu_data_path" default="$(find perception)/simu_data/" />
-
+  <arg name="simu_data_path" default="src/common/simu_data/" />
 
   <!-- 矿下地图节点 -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -52,8 +52,7 @@
   <!-- 车辆模型节点  -->
   <!-- 车辆模型  -->
   <param name="robot_description" command="$(arg model)" />
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x 0 -y 0 -z 1 "/>
-
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model car -param robot_description -x -10 -y 0 -z 1 "/>
 
   <!-- 运动控制 -->
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
@@ -72,27 +71,23 @@
   <node pkg="car" type="servo_commands.py" name="servo_commands" output="screen">
   </node>
 
-
-  <!--- Run Rviz节点-->
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception)/launch/simulation.rviz" />
-
   <!-- 激光雷达融合节点 -->
-  <node name="lidarCloudProcess" pkg="perception" type="lidarCloudProcess" output="screen">
+  <node name="lidarCloudProcess" pkg="perception" type="lidarCloudProcess" respawn="true" output="screen">
     <param name="ground_remove_height_" value="$(arg ground_remove_height_)" />
   </node>
 
   <!-- 交叉路口检测节点 -->
-  <node name="intersectionDetection" pkg="perception" type="intersectionDetection" output="screen">
+  <node name="intersectionDetection" pkg="perception" type="intersectionDetection" respawn="true" output="screen">
     <param name="ground_remove_height_" value="$(arg ground_remove_height_)" />
     <param name="lidarTopic_left_" value="$(arg lidarTopic_left_)" />
     <param name="lidarTopic_right_" value="$(arg lidarTopic_right_)" />
     <param name="lidarTopic_top_" value="$(arg lidarTopic_top_)" />
     <param name="frame_id_" value="$(arg frame_id_)" />
+    <param name="jump_times_" value="$(arg jump_times_)" />
   </node>
 
-
   <!-- 车道线拟合节点 -->
-  <node pkg="perception" type="laneDetection" name="laneDetection" output="screen">
+  <node pkg="perception" type="laneDetection" name="laneDetection" respawn="true" output="screen">
     <param name="pointCloud_topic_" value="$(arg pointCloud_topic_)" />
     <param name="frame_id_" value="$(arg frame_id_)" />
     <param name="order" value="$(arg order)" />
@@ -104,13 +99,10 @@
   </node>
 
 
-  <!-- 定位导航节点 -->
-  <!-- <node name="navigation" pkg="perception" type="navigation" output="screen"><param name="ground_remove_height_" value="$(arg ground_remove_height_)" />
+  <!-- 调试 -->  
+  <!--- Run Rviz节点-->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find perception)/launch/simulation.rviz" />
 
-    <param name="simu_data_path" value="$(arg simu_data_path)" />
-  </node> -->
-
-  <!-- 调试 -->
   <!-- <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"></node> -->
 
   <!-- <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot"></node> -->

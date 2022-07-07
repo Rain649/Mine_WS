@@ -1,0 +1,364 @@
+---
+#angleDiff: 指到达下一vertex处的角度
+
+- vertex_id: 0
+  # number of linked edges
+  branch_numbers: 1
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 1
+     edge_id: 0
+     angleDiff: 0
+     targetPoint: [13, 0, 0]
+  paths: ~
+
+- vertex_id: 1
+  # number of linked edges
+  branch_numbers: 2
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 2
+     edge_id: 1
+     angleDiff: 0
+     targetPoint: [15, 0, 0]
+   - linkedVertex_id: 17
+     edge_id: 3
+     angleDiff: 90
+     targetPoint: [0, 17, 90]
+  paths:
+   - incomingVertex_id: 0
+     connectingVertex_id: 2
+     path:
+      - [0,1,2]
+      - [2,3,4]
+      - [3,4,5]
+      - [4,5,6]
+      - [5,6,7]
+   - incomingVertex_id: 0
+     connectingVertex_id: 17
+     path:
+      - [0,0,0]
+      - [1,1,1]
+   - incomingVertex_id: 2
+     connectingVertex_id: 17
+     path:
+      - [0,0,0]
+      - [1,1,1]
+   - incomingVertex_id: 17
+     connectingVertex_id: 2
+     path:
+      - [0,2,4]
+      - [3,5,1]
+
+- vertex_id: 2
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 1
+     edge_id: 2
+     angleDiff: 180
+     targetPoint: [-15, 0, 180]
+   - linkedVertex_id: 3
+     edge_id: 5
+     angleDiff: 0
+     targetPoint: [15, -1, 0]
+   - linkedVertex_id: 11
+     edge_id: 7
+     angleDiff: 71
+     targetPoint: [10.5, 29.5, 71]
+  paths: ~
+
+- vertex_id: 3
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 2
+     edge_id: 6
+     angleDiff: 180
+     targetPoint: [-15, 0, 180]
+   - linkedVertex_id: 4
+     edge_id: 9
+     angleDiff: 0
+     
+     targetPoint: [15, 0, 0]
+   - linkedVertex_id: 10
+     edge_id: 11
+     angleDiff: 90
+     targetPoint: [1.5, 17, 90]
+  paths: ~
+
+- vertex_id: 4
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 3
+     edge_id: 10
+     angleDiff: 180
+     targetPoint: [-16, 0, 180]
+   - linkedVertex_id: 5
+     edge_id: 13
+     angleDiff: 0
+     targetPoint: [13, -1.5, 0]
+   - linkedVertex_id: 9
+     edge_id: 15
+     angleDiff: 90
+     targetPoint: [1.5, 15.5, 90]
+  paths: ~
+
+- vertex_id: 5
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 4
+     edge_id: 14
+     angleDiff: 180
+     targetPoint: [-13, 0, 180]
+   - linkedVertex_id: 6
+     edge_id: 17
+     angleDiff: 0
+     targetPoint: [13, -1.5, 0]
+   - linkedVertex_id: 8
+     edge_id: 19
+     angleDiff: 90
+     targetPoint: [1.5, 15.5, 90]
+  paths: ~
+
+- vertex_id: 6
+  # number of linked edges
+  branch_numbers: 2
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 5
+     edge_id: 18
+     angleDiff: 180
+     targetPoint: [-10, 0.5, 180]
+   - linkedVertex_id: 7
+     edge_id: 21
+     angleDiff: 90
+     targetPoint: [2.5, 13.5, 90]
+  paths: ~
+
+- vertex_id: 7
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 6
+     edge_id: 22
+     angleDiff: 270
+     targetPoint: [1.5, -16.5, 270]
+   - linkedVertex_id: 8
+     edge_id: 23
+     angleDiff: 180
+     targetPoint: [-10, 0.5, 180]
+   - linkedVertex_id: 18
+     edge_id: 25
+     angleDiff: 180
+     targetPoint: [2.5, 14.5, 90]
+  paths: ~
+
+
+- vertex_id: 8
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 5
+     edge_id: 20
+     angleDiff: 270
+     targetPoint: [-0.5, -17.5, 270]
+   - linkedVertex_id: 7
+     edge_id: 24
+     angleDiff: 0
+     targetPoint: [13, -1.5, 0]
+   - linkedVertex_id: 9
+     edge_id: 27
+     angleDiff: 180
+     targetPoint: [-10, 0.5, 180]
+  paths: ~
+
+- vertex_id: 9
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 4
+     edge_id: 16
+     angleDiff: 270
+     targetPoint: [-2.5, -15.5, 270]
+   - linkedVertex_id: 8
+     edge_id: 28
+     angleDiff: 0
+     targetPoint: [10, -0.5, 0]
+   - linkedVertex_id: 10
+     edge_id: 29
+     angleDiff: 145
+     targetPoint: [-7.5, 8.5, 145]
+  paths: ~
+
+- vertex_id: 10
+  # number of linked edges
+  branch_numbers: 4
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 3
+     edge_id: 12
+     angleDiff: 270
+     targetPoint: [-0.5, -24.5, 270]
+   - linkedVertex_id: 9
+     edge_id: 30
+     angleDiff: 315
+     targetPoint: [17.5, -18.5, 315]
+   - linkedVertex_id: 11
+     edge_id: 31
+     angleDiff: 180
+     targetPoint: [-16.5, 1.5, 180]
+   - linkedVertex_id: 15
+     edge_id: 33
+     angleDiff: 90
+     targetPoint: [2.5, 14.5, 90]
+  paths: ~
+
+- vertex_id: 11
+  # number of linked edges
+  branch_numbers: 4
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 2
+     edge_id: 8
+     angleDiff: 251
+     targetPoint: [-6.5, -16.5, 251]
+   - linkedVertex_id: 10
+     edge_id: 32
+     angleDiff: 0
+     targetPoint: [16, -2.5, 0]
+   - linkedVertex_id: 12
+     edge_id: 35
+     angleDiff: 180
+     targetPoint: [-17, 0.5, 180]
+   - linkedVertex_id: 14
+     edge_id: 37
+     angleDiff: 90
+     targetPoint: [1.5, 20, 90]
+  paths: ~
+
+- vertex_id: 12
+  # number of linked edges
+  branch_numbers: 2
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 11
+     edge_id: 36
+     angleDiff: 0
+     targetPoint: [13, -2.5, 0]
+   - linkedVertex_id: 13
+     edge_id: 39
+     angleDiff: 90
+     targetPoint: [0, 15, 90]
+  paths: ~
+
+- vertex_id: 13
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 12
+     edge_id: 40
+     angleDiff: 270
+     targetPoint: [-1.5, -15, 270]
+   - linkedVertex_id: 14
+     edge_id: 41
+     angleDiff: 0
+     targetPoint: [13, -1.5, 0]
+   - linkedVertex_id: 16
+     edge_id: 45
+     angleDiff: 90
+     targetPoint: [0, 15, 90]
+  paths: ~
+
+- vertex_id: 14
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 11
+     edge_id: 38
+     angleDiff: 270
+     targetPoint: [-1, -16, 270]
+   - linkedVertex_id: 13
+     edge_id: 42
+     angleDiff: 180
+     targetPoint: [-15, 1.5, 180]
+   - linkedVertex_id: 15
+     edge_id: 43
+     angleDiff: 0
+     targetPoint: [15, -1.5, 0]
+  paths: ~
+
+- vertex_id: 15
+  # number of linked edges
+  branch_numbers: 2
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 10
+     edge_id: 34
+     angleDiff: 270
+     targetPoint: [0.5, -16, 270]
+   - linkedVertex_id: 14
+     edge_id: 44
+     angleDiff: 180
+     targetPoint: [-15, 1.5, 180]
+  paths: ~
+
+- vertex_id: 16
+  # number of linked edges
+  branch_numbers: 2
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 13
+     edge_id: 46
+     angleDiff: 270
+     targetPoint: [0.5, -18, 270]
+   - linkedVertex_id: 17
+     edge_id: 47
+     angleDiff: 180
+     targetPoint: [-13, 1.5, 180]
+  paths: ~
+
+- vertex_id: 17
+  # number of linked edges
+  branch_numbers: 3
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 1
+     edge_id: 4
+     angleDiff: 270
+     targetPoint: [-2.5, -18, 270]
+   - linkedVertex_id: 16
+     edge_id: 48
+     angleDiff: 0
+     targetPoint: [17, -1.5, 0]
+   - linkedVertex_id: 18
+     edge_id: 49
+     angleDiff: 90
+     targetPoint: [-0.5, 10, 90]
+  paths: ~
+
+- vertex_id: 18
+  # number of linked edges
+  branch_numbers: 2
+  # linked vertexes' information
+  linkedInfo:
+   - linkedVertex_id: 7
+     edge_id: 26
+     angleDiff: 270
+     targetPoint: [13, -0.5, 0]
+   - linkedVertex_id: 17
+     edge_id: 50
+     angleDiff: 270
+     targetPoint: [-2.5, -14, 270]
+  paths: ~

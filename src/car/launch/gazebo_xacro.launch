@@ -7,7 +7,7 @@
   <!-- <node pkg="tf" type="static_transform_publisher" name="base_link2vehicle_reference" args="-2 0 1 0 0 0 /base_link /vehicle_reference 10" /> -->
 
   <!-- these are the arguments you can pass to this launch file, for example paused:=true -->
-  <arg name="paused" default="true"/>
+  <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/>

@@ -105,18 +105,28 @@ topoMap.cpp
 
 ```
 TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePath, const std::string &pcdFilePath);
-```
-
-```
 1.vertexFilePath为Edge.yaml路径
-```
-
-```
 2.edgeFilePath为Vertex.yaml路径
+3.pcdFilePath为节点点云pcd文件夹路径
 ```
 
 ```
-3.pcdFilePath为节点点云pcd文件夹路径
+std::vector<perception::WayPoint> get_wayPoints(const int &vertex1_id, const int &vertex2_id);
+获取路点，路点存储结构为
+struct WayPoint
+{
+    double x;
+    double y;
+    double theta;
+};
+```
+
+```
+
+```
+
+```
+
 ```
 
 ## 二、安装：
@@ -126,7 +136,6 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 3. 安装阿克曼转向驱动：sudo apt-get install ros-melodic-ackermann-msgs
 4. 安装弹性元件驱动：sudo apt-get install ros-melodic-effort-controllers
 5. 编译：catkin_make
-
 
 ## 三、依赖介绍
 
@@ -209,3 +218,6 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 7. 输入起始节点id和目标节点id
 8. gazebo点击开始运行按钮
 9. (可选)启动车辆控制程序：rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+
+统计代码行数： find . -name *.cpp | xargs wc -l
+

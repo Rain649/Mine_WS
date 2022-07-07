@@ -8,6 +8,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/registration/icp.h>
 #include <pcl/console/time.h>
+#include <pcl/common/transforms.h>
 #include <pcl/filters/filter.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h> //统计滤波
@@ -23,7 +24,7 @@
 #include <std_msgs/Bool.h>
 #include <dynamic_reconfigure/server.h>
 #include <perception/intersectionDetection_Config.h>
-#include <std_msgs/UInt8.h>
+#include <std_msgs/Int32.h>
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <pcl/visualization/pcl_plotter.h>
@@ -32,6 +33,8 @@
 #include <numeric>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
+
+std_msgs::Bool intersectionVerified_combine;
 
 class Detection
 {
@@ -53,21 +56,21 @@ private:
 
     bool outlier_Bool;
     bool medianFilter_Bool;
+    bool cloudUpdate_Bool;
 
     std::string lidarTopic;
     std::string frame_id;
 
-    std::vector<std::pair<int, double>> beam_Invalid; //有效laser列索引、距离
+    std::vector<std::pair<int, double>> beam_Valid; //有效laser列索引、距离
+    std::vector<float> rightCoefficient_vec;
 
     std_msgs::Bool intersectionDetected;
     std_msgs::Bool intersectionVerified;
-    std_msgs::UInt8 peak_Num;
-    std_msgs::UInt8 cluster_Num;
+    std_msgs::Int32 peak_Num;
+    std_msgs::Int32 cluster_Num;
     std_msgs::Float32 peakDistance_Max;
 
     ros::NodeHandle nh;
-
-    ros::Subscriber subLaserCloudNew;
 
     geometry_msgs::Point endPoint;
 
@@ -89,9 +92,12 @@ private:
     pcl::ConditionAnd<pcl::PointXYZI>::Ptr longitudinal_Condition;                 //条件滤波
     pcl::ConditionOr<pcl::PointXYZI>::Ptr lateral_Condition;                       //条件滤波
     pcl::ConditionalRemoval<pcl::PointXYZI> condition;
-    // pcl::visualization::PCLPlotter *plotter = new pcl::visualization::PCLPlotter("Dis_Ang"); //定义绘图器
+    // pcl::visualization::PCLPlotter::Ptr plotter; //定义绘图器
     pcl::KdTreeFLANN<pcl::PointXYZI> kdtree;
     pcl::ExtractIndices<pcl::PointXYZI> extract;
+
+    ros::Subscriber subLidarCloud;
+    ros::Subscriber subRightCoefficient;
 
     ros::Publisher pubCloudOutlierRemove;
     ros::Publisher pubCloudWithInfo;
@@ -112,11 +118,14 @@ private:
     ros::Publisher pubCluster_4;
     ros::Publisher pubCluster_5;
 
+    ros::Time currentLidarStamp;
+    ros::Time time_deliver;
+
 public:
     Detection(std::string _lidarTopic, std::string _frame_id) : lidarTopic(_lidarTopic), frame_id(_frame_id), nh("~")
     {
         //加载参数
-        nh.param<double>("ground_remove_height_", ground_remove_height, -1.0);
+        nh.param<double>("ground_remove_height_", ground_remove_height, -0.1);
         ROS_INFO("Ground remove height : %f", ground_remove_height);
         nh.param("segmentation_radius_", segmentationRadius, 8);
         ROS_INFO("Segmentation Radius: %d", segmentationRadius);
@@ -141,7 +150,8 @@ public:
         nh.param("medianFilter_Bool_", medianFilter_Bool, true);
         ROS_INFO("MedianFilter Bool : %s", medianFilter_Bool ? "True" : "False");
 
-        subLaserCloudNew = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic, 1, &Detection::laserCloudNewHandler, this);
+        subLidarCloud = nh.subscribe<sensor_msgs::PointCloud2>(lidarTopic, 1, &Detection::lidarCloudHandler, this);
+        subRightCoefficient = nh.subscribe("/laneDetection/rightCoefficient_order2", 1, &Detection::rightCoefficientHandler, this);
 
         pubCloudOutlierRemove = nh.advertise<sensor_msgs::PointCloud2>("cloud_outlier_remove", 1);
         pubCloudWithInfo = nh.advertise<sensor_msgs::PointCloud2>("cloudWithInfo", 1);
@@ -152,10 +162,10 @@ public:
         pubBeamDistance = nh.advertise<std_msgs::Float32MultiArray>("beamDistance", 1);
         pubLaserLane = nh.advertise<visualization_msgs::Marker>("laserLane", 1);
         pubEdgeLane = nh.advertise<visualization_msgs::Marker>("edgeLane", 1);
-        pubPeakNum = nh.advertise<std_msgs::UInt8>("peakNum", 1);
-        pubClusterNum = nh.advertise<std_msgs::UInt8>("clusterNum", 1);
+        pubPeakNum = nh.advertise<std_msgs::Int32>("peakNum", 1);
+        pubClusterNum = nh.advertise<std_msgs::Int32>("clusterNum", 1);
         peakDistanceMax = nh.advertise<std_msgs::Float32>("peakDistance_Max", 1);
-        pubSegmentationRadius = nh.advertise<std_msgs::UInt8>("segmentationRadius", 1);
+        pubSegmentationRadius = nh.advertise<std_msgs::Int32>("segmentationRadius", 1);
         pubCluster_1 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_1", 1);
         pubCluster_2 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_2", 1);
         pubCluster_3 = nh.advertise<sensor_msgs::PointCloud2>("cloudCluster_3", 1);
@@ -169,17 +179,16 @@ public:
 
         intersectionDetected.data = false;
         intersectionVerified.data = false;
+        cloudUpdate_Bool = false;
 
-        //设置特性
+        // plotter.reset(new pcl::visualization::PCLPlotter("Dis_Ang"));
         // plotter->setShowLegend(true);
         // plotter->setXTitle("Beam");
         // plotter->setYTitle("Distance");
         // plotter->setXRange(0, Horizon_SCAN);
 
         for (int i = 0; i < Horizon_SCAN; ++i)
-        {
             Cols[i] = i;
-        }
 
         laser_Lane.header.frame_id = Edge_Lane.header.frame_id = circle_Lane.header.frame_id = frame_id;
         laser_Lane.ns = Edge_Lane.ns = circle_Lane.ns = "intersectionDetection";
@@ -205,11 +214,6 @@ public:
 
         egoPoint.x = egoPoint.y = egoPoint.z = egoPoint.intensity = 0;
 
-        allocateMemory();
-    }
-
-    void allocateMemory()
-    {
         memset(beamDistance_Vec, 0, sizeof(beamDistance_Vec));
         memset(index_Array, 0, sizeof(index_Array));
         laserOrigin_Cloud.reset(new pcl::PointCloud<pcl::PointXYZI>());
@@ -225,11 +229,11 @@ public:
         longitudinal_Condition.reset(new pcl::ConditionAnd<pcl::PointXYZI>());
         lateral_Condition.reset(new pcl::ConditionOr<pcl::PointXYZI>());
 
-        // ROS_DEBUG("Allocate Memory Success !!!");
     }
 
     void clearMemory()
     {
+
         memset(beamDistance_Vec, 0, sizeof(beamDistance_Vec));
         memset(index_Array, 0, sizeof(index_Array));
         peak_Num.data = 0;
@@ -239,10 +243,7 @@ public:
         cloudIntersections->clear();
         laser_Lane.points.clear();
         Edge_Lane.points.clear();
-        beam_Invalid.clear();
-
-        intersectionDetected.data = false;
-        intersectionVerified.data = false;
+        beam_Valid.clear();
 
         cloudCluster_1->clear();
         cloudCluster_2->clear();
@@ -253,8 +254,10 @@ public:
         // ROS_DEBUG("Clear Memory Success !!!");
     }
 
-    void laserCloudNewHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
+    void lidarCloudHandler(const sensor_msgs::PointCloud2ConstPtr &msg)
     {
+        currentLidarStamp = msg->header.stamp;
+
         laserOrigin_Cloud->clear();
         timeLaserCloudNew = msg->header.stamp.toSec();
         laser_Lane.header.stamp = msg->header.stamp;
@@ -269,8 +272,19 @@ public:
             cloud_after_StatisticalRemoval.setStddevMulThresh(2.0);
             cloud_after_StatisticalRemoval.filter(*outlierRemove_Cloud);
         }
+        // time_deliver = ros::Time::now();
+        // ROS_ERROR("DELIVER FROM LIDAR TO INTERSECTION PROGRAM TIME COST: %f s", (time_deliver - currentLidarStamp).toSec());
 
-        // ROS_DEBUG("laserCloudNewHandler Success !!!");
+        // ROS_DEBUG("lidarCloudHandler Success !!!");
+        cloudUpdate_Bool = true;
+    }
+    void rightCoefficientHandler(const std_msgs::Float32MultiArray &msg)
+    {
+        rightCoefficient_vec.clear();
+        for (auto i : msg.data)
+        {
+            rightCoefficient_vec.push_back(i);
+        }
     }
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr getCloudWithInfo(pcl::PointCloud<pcl::PointXYZI>::Ptr input_Cloud, const int row_Min, const int row_Max, const int horizon_Num)
@@ -284,7 +298,7 @@ public:
         result->points.resize(N_SCAN * Horizon_SCAN);
         std::fill(result->points.begin(), result->points.end(), nanPoint);
 
-        for (int i = 0; i < input_Cloud->points.size(); i++)
+        for (size_t i = 0; i < input_Cloud->points.size(); ++i)
         {
             int rowIdn, columnIdn, index;
             thisPoint.x = input_Cloud->points[i].x;
@@ -298,21 +312,21 @@ public:
             if (rowIdn < row_Min || rowIdn >= row_Max)
                 continue;
 
-            horizonAngle = atan2(thisPoint.y, thisPoint.x) * 180 / M_PI;
+            horizonAngle = atan2(thisPoint.y, thisPoint.x);
             if (thisPoint.y < 0)
-                horizonAngle += 360;
+                horizonAngle += 2 * M_PI;
 
-            columnIdn = round(horizonAngle * horizon_Num / 360);
+            columnIdn = round(horizonAngle / (2 * M_PI) * horizon_Num);
             if (columnIdn >= horizon_Num)
                 columnIdn -= horizon_Num;
 
-            float range = sqrt(thisPoint.x * thisPoint.x + thisPoint.y * thisPoint.y + thisPoint.z * thisPoint.z);
+            // float range = sqrt(thisPoint.x * thisPoint.x + thisPoint.y * thisPoint.y + thisPoint.z * thisPoint.z);
+            // thisPoint.intensity = range;
 
             index = columnIdn + rowIdn * horizon_Num;
             result->points[index] = thisPoint;
         }
 
-        // ROS_DEBUG("Get Cloud With Info Success !!!");
         return result;
     }
 
@@ -336,7 +350,6 @@ public:
                 continue;
             index_Array[columnIdn] = max_Index;
         }
-        /*求雷达每列最大距离*/
 
         /*中值滤波（实际用为扩张）*/
         if (medianFilter_Bool)
@@ -345,7 +358,6 @@ public:
             for (int i = 0; i < Horizon_SCAN; ++i)
             {
                 std::vector<double> beamNeighbor_Vec;
-                int k = 0;
                 for (int j = -median_Size; j <= median_Size; ++j)
                 {
                     int index = i + j;
@@ -355,23 +367,16 @@ public:
                         index -= Horizon_SCAN;
                     beamNeighbor_Vec.push_back(beamDistance_Vec[index]);
                 }
-
-                //排序
                 sort(beamNeighbor_Vec.begin(), beamNeighbor_Vec.end());
 
-                beam_Distance_0[i] = beamNeighbor_Vec[(int)median_Coefficient * (median_Size - 1)];
+                beam_Distance_0[i] = beamNeighbor_Vec[static_cast<int>(median_Coefficient * (median_Size - 1))];
             }
 
             for (int i = 0; i < Horizon_SCAN; ++i)
-            {
                 beamDistance_Vec[i] = beam_Distance_0[i];
-            }
-
-            // ROS_DEBUG("Median Filter Success !!!");
         }
-        /*中值滤波（实际用为扩张）*/
 
-        /*laser可视化处理*/
+        /*rviz可视化处理*/
         for (int columnIdn = 0; columnIdn < Horizon_SCAN; ++columnIdn)
         {
             if (index_Array[columnIdn] == 0)
@@ -383,9 +388,8 @@ public:
             endPoint.y = cloudWithInfo->points[index_Array[columnIdn]].y;
             endPoint.z = cloudWithInfo->points[index_Array[columnIdn]].z;
             laser_Lane.points.push_back(endPoint);
-            beam_Invalid.push_back(std::pair<int, double>(columnIdn, beamDistance_Vec[columnIdn]));
+            beam_Valid.push_back(std::pair<int, double>(columnIdn, beamDistance_Vec[columnIdn]));
         }
-        /*laser可视化处理*/
 
         // beam model(距离-角度分布图)
         // plotter->clearPlots();
@@ -398,33 +402,41 @@ public:
         for (int i = 0; i < 360; ++i)
         {
             geometry_msgs::Point circle;
-            circle.x = distance_Thre * cos(i / 2 / M_PI);
-            circle.y = distance_Thre * sin(i / 2 / M_PI);
+            circle.x = distance_Thre * cos(i / 2 * M_1_PI);
+            circle.y = distance_Thre * sin(i / 2 * M_1_PI);
             circle.z = 0;
             circle_Lane.points.push_back(circle);
         }
-
-        // ROS_DEBUG("Laser Visualizaton Success !!!");
     }
 
-    void intersectionDetection()
+    void detector()
     {
-        int rowIdn, columnIdn;
-        int sizeOfBeamInvalid = beam_Invalid.size();
-        std::vector<double> peakPoints_Vec;
+        int sizeOfBeamValid = beam_Valid.size();
         std::vector<double> peakDistance_Vec;
         std::vector<std::pair<int, int>> startEnd_Vec;
         Edge_Lane.header.stamp = laser_Lane.header.stamp;
 
-        /*横向距离阈值判定路口*/
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -15))); // GT表示大于等于
-        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 15)));  // GT表示大于等于
+        /****横向距离阈值判定路口****/
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, -10))); // GT表示大于等于
+        longitudinal_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, 20)));  // GT表示大于等于
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 6)));  // LT表示小于等于
+        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -6))); // LT表示小于等于        //条件滤波
 
-        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 7)));  // LT表示小于等于
-        lateral_Condition->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -7))); // LT表示小于等于        //条件滤波
+        float k{0};
+        if (intersectionVerified_combine.data)
+            k = 0;
+        else if (!rightCoefficient_vec.empty())
+            k = rightCoefficient_vec[1];
+
+        Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+        transform.translation() << 0.0, 0.0, 0.0;
+        transform.rotate(Eigen::AngleAxisf(-atan(k), Eigen::Vector3f::UnitZ()));
+
+        pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_trans(new pcl::PointCloud<pcl::PointXYZI>());
+        pcl::transformPointCloud(*laserOrigin_Cloud, *cloud_trans, transform);
 
         condition.setCondition(longitudinal_Condition);
-        condition.setInputCloud(laserOrigin_Cloud);
+        condition.setInputCloud(cloud_trans);
         condition.setKeepOrganized(false);
         condition.filter(*cloudFar);
 
@@ -432,22 +444,31 @@ public:
         condition.setInputCloud(cloudFar);
         condition.setKeepOrganized(false);
         condition.filter(*cloudFar);
-        /*横向距离阈值判定路口*/
 
-        /*从vector提取数组，方便后续使用*/
-        int Cols_plot[sizeOfBeamInvalid];
-        double Distance_plot[sizeOfBeamInvalid];
+
+        if (cloudFar->points.size() >= 20)
+            ROS_DEBUG_STREAM("                    Size of Far >= " << cloudFar->points.size());
+        if (cloudFar->points.size() >= 40)
+        {
+            intersectionVerified.data = true;
+            // ROS_INFO("------------------------------------------------------");
+            // ROS_INFO("******************Confirm Arriving The Intersections !!!");
+            return;
+        }
+
+        /****从vector提取数组，方便后续使用****/
+        int Cols_plot[sizeOfBeamValid];
+        double Distance_plot[sizeOfBeamValid];
         int i_plot = 0;
-        for (std::vector<std::pair<int, double>>::iterator itr = beam_Invalid.begin(); itr != beam_Invalid.end(); ++itr)
+        for (std::vector<std::pair<int, double>>::iterator itr = beam_Valid.begin(); itr != beam_Valid.end(); ++itr)
         {
             Cols_plot[i_plot] = itr->first;
             Distance_plot[i_plot++] = itr->second;
         }
-        /*从vector提取数组，方便后续使用*/
 
         /*路口数量检测*/
         int numOfEdgeLaser = 0;
-        for (int i_left = 0; i_left < sizeOfBeamInvalid; ++i_left)
+        for (int i_left = 0; i_left < sizeOfBeamValid; ++i_left)
         {
             //跳过最初相位的波峰
             if (i_left == 0)
@@ -455,15 +476,15 @@ public:
                     ++i_left;
 
             int i_neighbor = i_left + 1;
-            if (i_neighbor >= sizeOfBeamInvalid)
-                i_neighbor -= sizeOfBeamInvalid;
+            if (i_neighbor >= sizeOfBeamValid)
+                i_neighbor -= sizeOfBeamValid;
 
             //满足边界判断条件，选定左边界
             if (Distance_plot[i_neighbor] > distance_Thre && Distance_plot[i_neighbor] > Distance_plot[i_left])
             {
                 int i_right = i_neighbor + 1;
-                if (i_right >= sizeOfBeamInvalid)
-                    i_right -= sizeOfBeamInvalid;
+                if (i_right >= sizeOfBeamValid)
+                    i_right -= sizeOfBeamValid;
                 int colIndexMinus = Cols_plot[i_right] - Cols_plot[i_left];
                 if (colIndexMinus < 0)
                     colIndexMinus += Horizon_SCAN;
@@ -523,7 +544,7 @@ public:
 
                             int i_right_neighbor = i_right - 1;
                             if (i_right_neighbor < 0)
-                                i_right_neighbor = sizeOfBeamInvalid - 1;
+                                i_right_neighbor = sizeOfBeamValid - 1;
                             if (index_Array[Cols_plot[i_right_neighbor]])
                             {
                                 // mark right beam
@@ -552,7 +573,7 @@ public:
 
                     //右边界索引迭代，计算右边界与左边界水平索引差值
                     ++i_right;
-                    if (i_right == sizeOfBeamInvalid)
+                    if (i_right == sizeOfBeamValid)
                         i_right = 0;
                     colIndexMinus = Cols_plot[i_right] - Cols_plot[i_left];
                     if (colIndexMinus < 0)
@@ -564,18 +585,6 @@ public:
     //跳到此处
     part1:
         // ROS_DEBUG("Jump to Part 1");
-
-        // laser可视数量
-        ROS_DEBUG_STREAM("Num of Edge Laser =   " << numOfEdgeLaser);
-
-        if (cloudFar->points.size() >= 20)
-            ROS_DEBUG_STREAM("                    Size of Far >= " << cloudFar->points.size());
-        if (cloudFar->points.size() >= 40)
-        {
-            intersectionVerified.data = true;
-            // ROS_INFO("------------------------------------------------------");
-            // ROS_INFO("******************Confirm Arriving The Intersections !!!");
-        }
 
         /*排除检测为岔道线的最大光束距离*/
         if (startEnd_Vec.empty())
@@ -598,7 +607,7 @@ public:
 
             if (itr->first < itr_front->second)
             {
-                for (int i = 0; i < sizeOfBeamInvalid; ++i)
+                for (int i = 0; i < sizeOfBeamValid; ++i)
                 {
                     if (i == itr->first)
                         i = itr_front->second;
@@ -629,6 +638,9 @@ public:
             peakDistance_Vec.push_back(thisMin);
         }
         peakDistance_Max.data = *(std::max_element(peakDistance_Vec.begin(), peakDistance_Vec.end()));
+        
+        // laser可视数量
+        ROS_DEBUG_STREAM("Num of Edge Laser =   " << numOfEdgeLaser);
 
         if (peak_Num.data > 2)
         {
@@ -637,10 +649,6 @@ public:
             //     ROS_DEBUG_STREAM("Intersection Number = " << peak_Num.data);
             //     ROS_INFO("------------------------------------------------------");
             //     ROS_INFO("****Detect The Intersections !!!****************");
-        }
-        if (cloudFar->points.size() < 40 && !intersectionDetected.data)
-        {
-            intersectionVerified.data = false;
         }
 
         // ROS_DEBUG("Intersection Detection Success !!!");
@@ -695,7 +703,6 @@ public:
         if (cloudIntersections->empty())
             return;
 
-        // Creating the KdTree object for the search method of the extraction
         pcl::search::KdTree<pcl::PointXYZI>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZI>);
         tree->setInputCloud(cloudIntersections); //创建点云索引向量，用于存储实际的点云信息
 
@@ -874,14 +881,21 @@ public:
         }
         pubBeamDistance.publish(beam_Dis);
 
-        // std_msgs::UInt8 segmentationRadius_Uint8;
+        // std_msgs::Int32 segmentationRadius_Uint8;
         // segmentationRadius_Uint8.data = segmentationRadius;
         // pubSegmentationRadius.publish(segmentationRadius_Uint8);
     }
 
+    bool isCloudUpdate()
+    {
+        return cloudUpdate_Bool;
+    }
+
     void run()
     {
-        clearMemory();
+        cloudUpdate_Bool = false;
+        intersectionDetected.data = false;
+        intersectionVerified.data = false;
 
         // getDynamicParameter();
         if (outlier_Bool)
@@ -889,7 +903,11 @@ public:
         else
             cloudWithInfo = getCloudWithInfo(laserOrigin_Cloud, groundScanInd, aboveScanInd, Horizon_SCAN);
         laser_Visualizaton();
-        intersectionDetection();
+        detector();
+
+        // ros::Time time_process = ros::Time::now();
+        // ROS_ERROR("Intersection Detection TIME COST: %f s", (time_process - time_deliver).toSec());
+
         // if (intersectionVerified.data)
         // {
         // loop:
@@ -911,6 +929,8 @@ public:
         // }
 
         // publishResult();
+        
+        clearMemory();
     }
 
     bool get_Verified()
@@ -961,67 +981,50 @@ int main(int argc, char **argv)
 
     ROS_INFO("\033[1;32m---->\033[0m Intersection Detection Started.");
 
+    int jump_times;
     ros::NodeHandle nh("~");
-    std::string lidarTopic_top;
-    std::string lidarTopic_left;
-    std::string lidarTopic_right;
-    std::string lidarFrameID_top;
-    std::string lidarFrameID_left;
-    std::string lidarFrameID_right;
-    // 顶部雷达
-    nh.param<std::string>("lidarTopic_top_", lidarTopic_top, "/velodyne_top");
-    ROS_INFO("Top Lidar Topic : %s", lidarTopic_top.c_str());
-    nh.param<std::string>("top_frame_id_", lidarFrameID_top, "/velodyne_top_base_link");
-    ROS_INFO("Top Lidar Frame id : %s", lidarFrameID_top.c_str());
-    // 左侧雷达
-    nh.param<std::string>("lidarTopic_left_", lidarTopic_left, "/velodyne_left");
-    ROS_INFO("Left Lidar topic : %s", lidarTopic_left.c_str());
-    nh.param<std::string>("left_frame_id_", lidarFrameID_left, "/velodyne_left_base_link");
-    ROS_INFO("Left Lidar Frame id : %s", lidarFrameID_left.c_str());
-    // 右侧雷达
-    nh.param<std::string>("lidarTopic_right_", lidarTopic_right, "/velodyne_right");
-    ROS_INFO("Right Lidar topic : %s", lidarTopic_right.c_str());
-    nh.param<std::string>("right_frame_id_", lidarFrameID_right, "/velodyne_right_base_link");
-    ROS_INFO("Right Lidar Frame id : %s", lidarFrameID_right.c_str());
+    std::string pointCloud_topic;
+    std::string lidarFrameID;
+    // 加载参数
+    nh.param<std::string>("pointCloud_topic_", pointCloud_topic, "/lidarCloudProcess/cloud_Combined");
+    ROS_INFO("PointCloud Topic : %s", pointCloud_topic.c_str());
+    nh.param<std::string>("frame_id_", lidarFrameID, "/velodyne_base_link");
+    ROS_INFO("Top Lidar Frame id : %s", lidarFrameID.c_str());
+    nh.param<std::string>("frame_id_", lidarFrameID, "/velodyne_base_link");
+    ROS_INFO("Top Lidar Frame id : %s", lidarFrameID.c_str());
+    nh.param<int>("jump_times_", jump_times, 5);
+    ROS_INFO("Jump Times : %d", jump_times);
 
-    Detection ND_top(lidarTopic_top, lidarFrameID_top);
-    Detection ND_left(lidarTopic_left, lidarFrameID_left);
-    Detection ND_right(lidarTopic_right, lidarFrameID_right);
+    Detection ND_obj(pointCloud_topic, lidarFrameID);
 
-    //连续三次判定转换成立
-    std::vector<int> que(3, 0);
-    std_msgs::Bool intersectionVerified;
+    //连续N次判定转换成立
+    std::vector<int> que(jump_times, 0);
 
     ros::Publisher pubIntersectionVerified = nh.advertise<std_msgs::Bool>("intersectionVerified", 1);
 
-    ros::Rate rate(10);
+    ros::Rate rate(50);
     while (ros::ok())
     {
         ros::spinOnce();
-        ND_top.run();
-        ND_left.run();
-        ND_right.run();
 
-        for (size_t i = que.size() - 1; i > 0; --i)
-            que[i] = que[i - 1];
-
-        if (ND_top.get_Verified() || ND_left.get_Verified() || ND_right.get_Verified())
+        if (ND_obj.isCloudUpdate())
         {
-            que[0] = 1;
-            // ROS_INFO_THROTTLE(1, "Confirm Arriving The Intersections !!!");
-        }
-        else
-        {
-            que[0] = 0;
-        }
-        // ND_top.publishResult();
-        if (std::accumulate(que.begin(), que.end(), 0) == que.size())
-            intersectionVerified.data = true;
-        if (std::accumulate(que.begin(), que.end(), 0) == 0)
-            intersectionVerified.data = false;
+            ND_obj.run();
 
-        //发布交叉路口检测布尔值
-        pubIntersectionVerified.publish(intersectionVerified);
+            for (size_t i = que.size() - 1; i > 0; --i)
+                que[i] = que[i - 1];
+
+            que[0] = ND_obj.get_Verified() ? 1 : 0;
+
+            // ND_obj.publishResult();
+            if (static_cast<size_t>(std::accumulate(que.begin(), que.end(), 0)) == que.size())
+                intersectionVerified_combine.data = true;
+            else if (std::accumulate(que.begin(), que.end(), 0) == 0)
+                intersectionVerified_combine.data = false;
+
+            //发布交叉路口检测布尔值
+            pubIntersectionVerified.publish(intersectionVerified_combine);
+        }
 
         rate.sleep();
     }

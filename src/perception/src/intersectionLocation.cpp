@@ -11,7 +11,14 @@
 // viewer.initCameraParameters();
 // viewer.setCameraPosition(30, 40, 50, -3, -4, -5, 0);
 
-inline void radianTransform(float &radian)
+ros::Time lastLidarStamp;
+ros::Time currentLidarStamp;
+
+int locationTimes{0};
+// int error_place{0};
+
+inline void
+radianTransform(float &radian)
 {
   while (radian > M_PI)
     radian -= 2 * M_PI;
@@ -21,12 +28,15 @@ inline void radianTransform(float &radian)
 
 int v1(1); //设置左窗口
 int v2(2); //设置右窗口
-// ros::Time tm = ros::TIME_MIN;
 
-bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer &viewer)
+bool intersectionLocation(VehicleState &vehicleState, const pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud, const pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud, RegistrationConfig &registrationConfig, pcl::visualization::PCLVisualizer::Ptr viewer)
 {
+  // error_place = 0;
   if (input_cloud->empty())
     return false;
+  currentLidarStamp = pcl_conversions::fromPCL(input_cloud->header.stamp);
+  // pcl_convers
+
   /********读取数据********/
   float maximumIterations = registrationConfig.maximumIterations;
   float resolution = registrationConfig.resolution;
@@ -51,13 +61,12 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   /********读取数据********/
   else
   {
-    x_pre = pose[0];
-    y_pre = pose[1];
-    yaw_pre = pose[2];
+    x_pre = vehicleState.x;
+    y_pre = vehicleState.y;
+    yaw_pre = vehicleState.yaw;
   }
   radianTransform(yaw_pre);
   // ROS_INFO("---------------------------------------");
-  // ROS_INFO_STREAM("yaw_pre =  " << yaw_pre << "; x =  " << x_pre << "; y =  " << y_pre);
 
   //将输入的扫描过滤到原始尺寸的大概10%以提高匹配的速度。
   pcl::PointCloud<pcl::PointXYZ> cloudTemp;
@@ -69,21 +78,6 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
 
   std::vector<int> mapping;
   pcl::removeNaNFromPointCloud(cloudTemp, *filtered_cloud, mapping);
-  // pcl::PointCloud<pcl::PointXYZ>::iterator it = filtered_cloud->points.begin();
-  // while (it != filtered_cloud->points.end())
-  // {
-  //   float x, y, z;
-  //   x = it->x;
-  //   y = it->y;
-  //   z = it->z;
-  //   // cout << "x: " << x << "  y: " << y << "  z: " << z << "  rgb: " << rgb << endl;
-  //   if (!pcl_isfinite(x) || !pcl_isfinite(y) || !pcl_isfinite(z))
-  //   {
-  //     it = filtered_cloud->points.erase(it);
-  //   }
-  //   else
-  //     ++it;
-  // }
 
   if (filtered_cloud->empty())
   {
@@ -94,22 +88,17 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
   pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
   //初始化正态分布变换（NDT）
   pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
-  // 匹配后的点云
-  pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
   if (filtered_cloud->empty())
   {
     return false;
   }
 
-  // ROS_ERROR("start");
 #pragma omp parallel sections
   {
 #pragma omp section
     {
-      // ros::Time time_start = ros::Time::now();
       // icp配准
-      // icp.setInputSource(input_cloud);
       icp.setInputSource(filtered_cloud);
       icp.setInputTarget(target_cloud);
       icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
@@ -120,15 +109,12 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
       Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
       Eigen::Translation3f init_translation(x_pre, y_pre, 0);
       Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
-      icp.align(*output_cloud, init_guess);
-      Eigen::Matrix4f transformation = icp.getFinalTransformation();
-
-      // ros::Duration dur = ros::Time::now()-time_start;
-      // ROS_INFO_STREAM("icp time consumption = " << dur.toSec() << "s");
+      // 匹配后的点云
+      pcl::PointCloud<pcl::PointXYZ> cloud_temp;
+      icp.align(cloud_temp, init_guess);
     }
 #pragma omp section
     {
-      // ros::Time time_start = ros::Time::now();
       // ndt配准
       //为终止条件设置最小转换差异
       ndt.setTransformationEpsilon(transformationEpsilon); //定义了[x,y,z,roll,pitch,yaw]在配准中的最小递增量，一旦递增量小于此限制，配准终止
@@ -147,30 +133,16 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
       Eigen::AngleAxisf init_rotation(yaw_pre, Eigen::Vector3f::UnitZ());
       Eigen::Translation3f init_translation(x_pre, y_pre, 0);
       Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix();
-      ndt.align(*output_cloud, init_guess);
-      Eigen::Matrix4f transformation = ndt.getFinalTransformation();
-
-      // ros::Duration dur = ros::Time::now() - time_start;
-      // ROS_INFO_STREAM("ndt time consumption = " << dur.toSec() << "s");
+      // 匹配后的点云
+      pcl::PointCloud<pcl::PointXYZ> cloud_temp;
+      ndt.align(cloud_temp, init_guess);
     }
   }
-  // ROS_ERROR("end");
-  // {
-  // }
-  // catch (...)
-  // {
-  //   ROS_ERROR("ERROR!!!");
-  //   return false;
-  // }
 
-  // ros::Duration duration = ros::Time::now() - tm;
-  // double yaw_speed = (yaw_registration - yaw_pre) / duration.toSec();
-  // ROS_ERROR_STREAM("duration.toSec() : " << duration.toSec());
-  // if (yaw_speed < 0)
-  //   ROS_ERROR_STREAM("yaw_speed : " << yaw_speed);
+  // 匹配后的点云
+  pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
   if (std::min(icp.getFitnessScore(), ndt.getFitnessScore()) <= fitnessScore_thre)
   {
-    // ROS_ERROR_STREAM_THROTTLE(0.5,"FitnessScore:  " << std::min(icp.getFitnessScore(), ndt.getFitnessScore()));
     Eigen::Matrix4f transformation;
     if (ndt.getFitnessScore() < icp.getFitnessScore())
     {
@@ -184,37 +156,103 @@ bool intersectionLocation(std::vector<float> &pose, const pcl::PointCloud<pcl::P
       pcl::transformPointCloud(*filtered_cloud, *output_cloud, transformation);
       // ROS_INFO_STREAM("ICP WIN, SCORE : " << icp.getFitnessScore());
     }
-    //位姿更新
-    double yaw_registration = (acos((transformation(0, 0) + transformation(1, 1)) / 2) + asin((-transformation(0, 1) + transformation(1, 0)) / 2)) / 2;
-    if (yaw_registration < -4 * M_PI || yaw_registration > 4 * M_PI)
+    double yaw_sin = (-transformation(0, 1) + transformation(1, 0)) / 2;
+    double yaw_cos = (transformation(0, 0) + transformation(1, 1)) / 2;
+    double yaw_registration;
+    if (yaw_cos == 0)
+      yaw_registration = (yaw_sin > 0) ? M_PI / 2 : -M_PI / 2;
+    else
+    {
+      yaw_registration = atan(yaw_sin / yaw_cos);
+      if (yaw_cos < 0)
+        yaw_registration += (yaw_sin > 0) ? M_PI : -M_PI;
+    }
+
+    //异常判断
+    float yaw_diff = abs(vehicleState.yaw - yaw_registration);
+    if (yaw_diff > yaw_thre * M_PI / 180)
+    {
+      if (2 * M_PI - yaw_diff > yaw_thre * M_PI / 180)
+      {
+        // ROS_INFO("yaw change too big: %f from %f to %f ", yaw_diff * 180 / M_PI, vehicleState.yaw * 180 / M_PI, yaw_registration * 180 / M_PI);
+        return false;
+      }
+    }
+
+    pcl::PointXY p = {vehicleState.x, vehicleState.y};
+    pcl::PointXY t = {transformation(0, 3), transformation(1, 3)};
+    float distance = pcl::euclideanDistance(p, t);
+    if (distance > 8)
+    {
+      // ROS_INFO("distance change too big: %f", distance);
       return false;
-    pose[0] = transformation(0, 3);
-    pose[1] = transformation(1, 3);
-    pose[2] = yaw_registration;
-    radianTransform(pose[2]);
-    // ROS_INFO_STREAM("yaw =  " << pose[2] << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
-    // tm = ros::Time::now();
+    }
+    float timeInterval;
+    if (locationTimes == 0)
+      timeInterval = 0.1;
+    else
+      timeInterval = (currentLidarStamp - lastLidarStamp).toSec();
+    float velocity = sqrt(pow(transformation(0, 3) - vehicleState.x, 2) + pow(transformation(1, 3) - vehicleState.y, 2)) / timeInterval;
+    // if (locationTimes > 5)
+    // {
+    //   if (timeInterval > 0.5)
+    //   {
+    //     ROS_INFO("time interval too big: %f", timeInterval);
+    //     return false;
+    //   }
+    //   if (velocity - vehicleState.v < -5)
+    //   {
+    //     ROS_INFO("velocity too small: %f", velocity);
+    //     return false;
+    //   }
+    // }
+    // float acceleration = abs(velocity - vehicleState.v) / timeInterval;
+    // if (locationTimes > 5 && acceleration > 8)
+    // {
+    //   ROS_INFO("%f : %f", vehicleState.v, velocity);
+    //   ROS_INFO("acceleration too big: %f", acceleration);
+    //   return false;
+    // }
 
-    //对目标点云着色（红色）并可视化
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
-    //对转换前的输入点云着色（绿色）并可视化
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> input_color(filtered_cloud, 0, 255, 0);
-    //对转换后的输入点云着色（蓝色）并可视化
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> output_color(output_cloud, 0, 0, 255);
+    //位姿更新
+    vehicleState.v = velocity;
+    vehicleState.x = transformation(0, 3);
+    vehicleState.y = transformation(1, 3);
+    vehicleState.yaw = yaw_registration;
+    radianTransform(vehicleState.yaw);
+    lastLidarStamp = currentLidarStamp;
+    // ROS_INFO_STREAM("yaw =  " << vehicleState.yaw << "; x =  " << transformation(0, 3) << "; y =  " << transformation(1, 3));
 
-    viewer.removeAllPointClouds();
+    if (viewer != nullptr)
+    {
+      //对目标点云着色（红色）并可视化
+      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> target_color(target_cloud, 255, 0, 0);
+      //对转换前的输入点云着色（绿色）并可视化
+      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> input_color(filtered_cloud, 0, 255, 0);
+      //对转换后的输入点云着色（蓝色）并可视化
+      pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> output_color(output_cloud, 0, 0, 255);
 
-    viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud1", v1);
-    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud1");
-    viewer.addPointCloud<pcl::PointXYZ>(filtered_cloud, input_color, "input cloud", v1);
-    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "input cloud");
+      viewer->removeAllPointClouds();
 
-    //对目标点云着色（红色）并可视化
-    viewer.addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud2", v2);
-    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud2");
-    // //对转换后的输入点云着色（蓝色）并可视化
-    viewer.addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud", v2);
-    viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "output cloud");
+      viewer->addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud1", v1);
+      viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud1");
+      viewer->addPointCloud<pcl::PointXYZ>(filtered_cloud, input_color, "input cloud", v1);
+      viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "input cloud");
+
+      //对目标点云着色（红色）并可视化
+      viewer->addPointCloud<pcl::PointXYZ>(target_cloud, target_color, "target cloud2", v2);
+      viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "target cloud2");
+      //对转换后的输入点云着色（蓝色）并可视化
+      viewer->addPointCloud<pcl::PointXYZ>(output_cloud, output_color, "output cloud", v2);
+      viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "output cloud");
+    }
   }
+  else
+  {
+    // ROS_ERROR_STREAM_THROTTLE(0.5, "FitnessScore Too Big:  " << std::min(icp.getFitnessScore(), ndt.getFitnessScore()));
+    return false;
+  }
+  ++locationTimes;
+  // ROS_INFO("times: %d", locationTimes);
   return true;
 }

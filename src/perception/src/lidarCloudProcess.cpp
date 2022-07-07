@@ -16,15 +16,15 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/search/kdtree.h>                 // 包含kdtree头文件
-#include <pcl/kdtree/kdtree_flann.h>           //kdtree搜索
-#include <pcl/filters/extract_indices.h>       //按索引提取
-#include <pcl/segmentation/extract_clusters.h> //分割聚类
-#include <pcl/filters/passthrough.h>           //直通滤波
-#include <pcl/filters/conditional_removal.h>   //条件滤波
-#include <pcl/filters/filter.h>                //移除无效点
-#include <message_filters/subscriber.h>        //同步接收
-#include <message_filters/time_synchronizer.h> //时间同步
+#include <pcl/search/kdtree.h>                              // 包含kdtree头文件
+#include <pcl/kdtree/kdtree_flann.h>                        //kdtree搜索
+#include <pcl/filters/extract_indices.h>                    //按索引提取
+#include <pcl/segmentation/extract_clusters.h>              //分割聚类
+#include <pcl/filters/passthrough.h>                        //直通滤波
+#include <pcl/filters/conditional_removal.h>                //条件滤波
+#include <pcl/filters/filter.h>                             //移除无效点
+#include <message_filters/subscriber.h>                     //同步接收
+#include <message_filters/time_synchronizer.h>              //时间同步
 #include <message_filters/sync_policies/approximate_time.h> //近似同步
 
 #include <dynamic_reconfigure/server.h>
@@ -46,11 +46,10 @@ private:
     std::string lidarTopic_top;
     std::string vehicle_frame_id;
 
-    // ros::Time time;
+    sensor_msgs::PointCloud2 cloudNoCar_msgs;
+
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudOrigin;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedTrans;
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloudNoCar;
-    ros::Time time_st;
 
     message_filters::Subscriber<sensor_msgs::PointCloud2> *subLidarCloudLeft;
     message_filters::Subscriber<sensor_msgs::PointCloud2> *subLidarCloudRight;
@@ -59,17 +58,24 @@ private:
 
     ros::Publisher cloudCombined_pub;
 
+    ros::Time currentLidarStamp;
+    // ros::Time time_deliver;
+
     tf::TransformListener listener_top;
     tf::TransformListener listener_left;
     tf::TransformListener listener_right;
 
-    bool lidarTop_bool;
+    /*动态参数*/
+    int segmentationRadius;
+    int node_Id;
+    bool save_Bool;
+    std::string save_Name;
 
 public:
     lidarCloudProcess() : nh("~")
     {
         //加载参数
-        nh.param<double>("ground_remove_height_", ground_remove_height, -1.0);
+        nh.param<double>("ground_remove_height_", ground_remove_height, -0.1);
         ROS_INFO("Ground remove height : %f", ground_remove_height);
         nh.param<std::string>("frame_id_", vehicle_frame_id, "vehicle_base_link");
         ROS_INFO("vehicle_frame_id_: %s", vehicle_frame_id.c_str());
@@ -79,33 +85,29 @@ public:
         ROS_INFO("Right lidar topic : %s", lidarTopic_right.c_str());
         nh.param<std::string>("lidarTopic_top_", lidarTopic_top, "/velodyne_top");
         ROS_INFO("Top lidar topic : %s", lidarTopic_top.c_str());
-        
-            ROS_INFO("----------------------------------------------------------------------");
+
+        ROS_INFO("----------------------------------------------------------------------");
 
         subLidarCloudLeft = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_left, 1);
         subLidarCloudRight = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_right, 1);
         subLidarCloudTop = new message_filters::Subscriber<sensor_msgs::PointCloud2>(nh, lidarTopic_top, 1);
 
-        sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(10), *subLidarCloudLeft, *subLidarCloudRight, *subLidarCloudTop);
-
+        sync = new message_filters::Synchronizer<MySyncPolicy>(MySyncPolicy(2), *subLidarCloudLeft, *subLidarCloudRight, *subLidarCloudTop);
+        sync->setInterMessageLowerBound(ros::Duration(0.01));
+        // sync->setsetInterMessageLowerBound(ros::Duration(0.1));
         sync->registerCallback(boost::bind(&lidarCloudProcess::combineCallback, this, _1, _2, _3));
-
 
         cloudCombined_pub = nh.advertise<sensor_msgs::PointCloud2>("cloud_Combined", 1);
 
         cloudNoCar.reset(new pcl::PointCloud<pcl::PointXYZI>());
         cloudOrigin.reset(new pcl::PointCloud<pcl::PointXYZI>());
-        cloudCombinedTrans.reset(new pcl::PointCloud<pcl::PointXYZI>());
-        lidarTop_bool = false;
 
         cloudOrigin->header.frame_id = vehicle_frame_id;
-        cloudCombinedTrans->header.frame_id = vehicle_frame_id;
         cloudNoCar->header.frame_id = vehicle_frame_id;
     }
 
     void combineCallback(const sensor_msgs::PointCloud2ConstPtr &msg_left, const sensor_msgs::PointCloud2ConstPtr &msg_right, const sensor_msgs::PointCloud2ConstPtr &msg_top)
     {
-        time_st = msg_right->header.stamp;
         pcl::PointCloud<pcl::PointXYZI> lidarCloudThis, cloudTrans;
         cloudTrans.header.frame_id = vehicle_frame_id;
         pcl::fromROSMsg(*msg_left, lidarCloudThis);
@@ -124,24 +126,29 @@ public:
         pcl_ros::transformPointCloud(vehicle_frame_id, lidarCloudThis, cloudTrans, listener_top);
         *cloudOrigin += cloudTrans;
 
-        cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
+        if (!lidarCloudThis.empty())
+        {
+            currentLidarStamp = msg_top->header.stamp;
+            cloudOrigin->header.stamp = lidarCloudThis.header.stamp;
+            // time_deliver = ros::Time::now();
+            // ROS_ERROR("DELIVER FROM LIDAR TO LIDAR CLOUD PROCESS PROGRAM TIME COST: %f s", (time_deliver - currentLidarStamp).toSec());
+        }
+        else
+        {
+            // ROS_ERROR("TOP LIDAR MSG NOT RECIEVE");
+        }
     }
 
-    void pointCloudProcess()
+    int pointCloudProcess()
     {
-        cloudCombinedTrans = cloudOrigin;
+        if (cloudOrigin->empty())
+            return 1;
 
-        /*动态参数*/
-        int segmentationRadius;
-        int node_Id;
-        bool save_Bool;
-        std::string save_Name;
-
+        //加载参数
         ros::param::get("/lidarCloudProcess/segmentation_radius", segmentationRadius);
         ros::param::get("/lidarCloudProcess/node_id", node_Id);
         ros::param::get("/lidarCloudProcess/bool_save", save_Bool);
         ros::param::get("/lidarCloudProcess/save_name", save_Name);
-        /*动态参数*/
 
         pcl::PointCloud<pcl::PointXYZI> cloudFinal;
 
@@ -155,17 +162,21 @@ public:
         //分离地面点
         pcl::PointCloud<pcl::PointXYZI>::Ptr cloudCombinedFiltered(new pcl::PointCloud<pcl::PointXYZI>());
         pcl::PassThrough<pcl::PointXYZI> groundFilter;
-        groundFilter.setInputCloud(cloudCombinedTrans);
+        groundFilter.setInputCloud(cloudOrigin);
         groundFilter.setFilterFieldName("z");
         groundFilter.setFilterLimits(ground_remove_height, 2);
         groundFilter.setFilterLimitsNegative(false);
         groundFilter.filter(*cloudCombinedFiltered);
+
+        if (cloudCombinedFiltered->empty())
+            return 2;
+
         // 分割车辆
         pcl::ConditionOr<pcl::PointXYZI>::Ptr conditionOr(new pcl::ConditionOr<pcl::PointXYZI>()); //条件滤波
         pcl::ConditionalRemoval<pcl::PointXYZI> condition;
 
-        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, 2.65))); // GT表示大于等于
-        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -2.85)));  // GT表示大于等于
+        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::GE, 2.8)));   // GT表示大于等于
+        conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("x", pcl::ComparisonOps::LE, -2.62))); // GT表示大于等于
         conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::GE, 1.1)));   // LT表示小于等于
         conditionOr->addComparison(pcl::FieldComparison<pcl::PointXYZI>::ConstPtr(new pcl::FieldComparison<pcl::PointXYZI>("y", pcl::ComparisonOps::LE, -1.1)));  // LT表示小于等于
 
@@ -178,13 +189,15 @@ public:
         std::vector<int> mapping;
         pcl::removeNaNFromPointCloud(cloudTemp, *cloudNoCar, mapping);
 
+        if (cloudNoCar->empty())
+            return 3;
+
         // 外围分割
         kdtree.setInputCloud(cloudNoCar); // 设置要搜索的点云，建立KDTree
         pcl::ExtractIndices<pcl::PointXYZI> extract_2;
         if (kdtree.radiusSearch(zeroPoint, segmentationRadius, index, distance) == 0)
         {
-            ROS_ERROR("There is no point nearby !!!");
-            return;
+            return 4;
         }
         extract_2.setInputCloud(cloudNoCar);
         boost::shared_ptr<std::vector<int>> index_ptr = boost::make_shared<std::vector<int>>(index);
@@ -195,40 +208,14 @@ public:
         // 保存文件
         if (save_Bool)
         {
-            std::string fileName;
-            fileName = "/home/lsj/dev/Mine_WS/src/perception/simu_data/" + std::to_string(node_Id) + save_Name;
+            std::string fileName = "/home/lsj/dev/Mine_WS/src/perception/simu_data/" + std::to_string(node_Id) + save_Name;
             pcl::io::savePCDFileASCII(fileName, cloudFinal); //将点云保存到PCD文件中
             ROS_INFO("PCD file saved in  :  [%s]", fileName.c_str());
         }
+
+        return 0;
     }
 
-    // void vehicleReference_pub()
-    // {
-    //     // 发布变换
-    //     tf::TransformBroadcaster br;
-    //     tf::Transform transform;
-    //     transform.setOrigin(tf::Vector3(-2, 0, 1));
-    //     transform.setRotation(tf::Quaternion(0, 0, 0, 1));
-    //     while (ros::ok())
-    //     {
-    //         tf::StampedTransform st(transform, ros::Time::now(), vehicle_frame_id, "vehicle_reference");
-    //         usleep(10000);
-    //         br.sendTransform(st);
-    //     }
-    // }
-
-    // void tfReceive()
-    // {
-    //     tf::TransformListener listener(ros::Duration(1));
-    //     while (ros::ok())
-    //     {
-    //         // 坐标系转换
-    //         if (listener.waitForTransform(vehicle_frame_id, "vehicle_reference", ros::Time(0), ros::Duration(1)))
-    //             ROS_INFO("YES Receive Tranform !!!!");
-    //         else
-    //             ROS_INFO("NO Receive Tranform !!!!");
-    //     }
-    // }
     void listen2tf()
     {
         listener_left.waitForTransform(vehicle_frame_id, "velodyne_left_base_link", ros::Time(0), ros::Duration(100));
@@ -238,25 +225,20 @@ public:
 
     void run()
     {
-
-        // if (lidarTop_bool)
-        if (!cloudOrigin->empty())
+        if (pointCloudProcess() == 0)
         {
-            pointCloudProcess();
-
             //发布点云
-            // cloudNoCar->header.stamp = time_st.toSec();
             cloudNoCar->header.stamp = cloudOrigin->header.stamp;
-            sensor_msgs::PointCloud2 output;
-            toROSMsg(*cloudNoCar, output);
-            cloudCombined_pub.publish(output);
+            toROSMsg(*cloudNoCar, cloudNoCar_msgs);
+            cloudNoCar_msgs.header.stamp = currentLidarStamp;
+            cloudCombined_pub.publish(cloudNoCar_msgs);
 
-            lidarTop_bool = false;
+            // ros::Time time_process = ros::Time::now();
+            // ROS_ERROR("LIDAR MSG PROCESS TIME COST: %f s", (time_process - time_deliver).toSec());
+
+            cloudOrigin->clear();
+            cloudNoCar->clear();
         }
-
-        cloudOrigin->clear();
-        cloudCombinedTrans->clear();
-        cloudNoCar->clear();
     }
 };
 
@@ -279,18 +261,14 @@ int main(int argc, char **argv)
     dynamic_reconfigure::Server<perception::lidarCloudProcess_Config>::CallbackType f;
     f = boost::bind(&callback, _1, _2);
     server.setCallback(f);
-    /*动态参数调节*/
 
     ROS_INFO("\033[1;32m---->\033[0m Simulation Segmentation Save Started.");
 
     lidarCloudProcess lidarCloudProcess_obj;
 
-    // std::thread thread_1(vehicleReference_pub);
-    // std::thread thread_2(tfReceive);
-
     lidarCloudProcess_obj.listen2tf();
 
-    ros::Rate rate(10);
+    ros::Rate rate(100);
     while (ros::ok())
     {
         ros::spinOnce();
@@ -299,9 +277,6 @@ int main(int argc, char **argv)
 
         rate.sleep();
     }
-
-    // thread_1.join();
-    // thread_2.join();
 
     return 0;
 }

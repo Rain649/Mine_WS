@@ -1,0 +1,31 @@
+yaw: 180
+
+x: 0
+
+y: 0
+
+resolution: 18
+
+maximumIterations: 50
+
+stepSize: 0.5
+
+transformationEpsilon: 0.01
+
+euclideanFitnessEpsilon: 0.01
+
+maxCorrespondenceDistance: 2
+
+fitnessScore: 10
+
+minFitnessScore_thre: 4
+
+yaw_thre: 40
+
+yaw_pre: 180
+
+x_pre: 0
+
+y_pre: 0
+
+menu_bool: n

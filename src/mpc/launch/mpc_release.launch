@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node pkg="mpc" type="mpc" name="mpc" output="screen">
+  </node>
+
+
+<!-- 调试 -->
+<!--- Run Rviz节点-->
+<!-- <node pkg="rviz" type="rviz" name="rviz" args="-d $(find mpc)/launch/mpc.rviz" /> -->
+
+<!-- <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"></node> -->
+
+<!-- <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot"></node> -->
+
+<!-- <node name="rqt_logger_level" pkg="rqt_logger_level" type="rqt_logger_level"></node> -->
+
+</launch>

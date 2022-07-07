@@ -1,0 +1,7 @@
+<launch>
+
+  <node name="pointPosition" pkg="assistant" type="pointPosition" output="screen" ></node>
+  
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assistant)/launch/pointPosition.rviz"/>
+  
+</launch>
