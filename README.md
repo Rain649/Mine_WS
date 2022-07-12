@@ -6,7 +6,7 @@
 
 **作者**：Rain649	**版本**：v3.0
 
-![rosgraph](/home/lsj/dev/Mine_WS/README.assets/rosgraph.png)
+![rosgraph](README.assets/rosgraph.png)
 
 <center>软件框架</center>
 
@@ -26,7 +26,7 @@ lidarCloudProcess.cpp
 
 ## 2.交叉路口检测
 
-![交叉路口检测](/home/lsj/dev/Mine_WS/README.assets/交叉路口检测.png)
+![交叉路口检测](README.assets/交叉路口检测.png)
 
 <center>交叉路口检测效果</center>
 
@@ -99,7 +99,7 @@ topoMap.h
 
 ## 5.拓扑地图
 
-<img src="/home/lsj/dev/Mine_WS/README.assets/局部几何-拓扑地图.png" alt="局部几何-拓扑地图" style="zoom: 33%;" />
+<img src="README.assets/局部几何-拓扑地图.png" alt="局部几何-拓扑地图" style="zoom: 33%;" />
 
 <center>局部几何-拓扑地图结构</center>
 
@@ -157,17 +157,17 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 
 ### 1.gazebo中搭建如下图所示的地下狂仿真环境及车辆模型
 
-<img src="/home/lsj/dev/Mine_WS/README.assets/矿下地图gazebo.png" alt="矿下地图gazebo" style="zoom: 33%;" />
+<img src="README.assets/矿下地图gazebo.png" alt="矿下地图gazebo" style="zoom: 33%;" />
 
 <center>地下矿仿真环境</center>
 
-<img src="/home/lsj/dev/Mine_WS/README.assets/车辆模型.png" alt="车辆模型" style="zoom:80%;" />
+<img src="README.assets/车辆模型.png" alt="车辆模型" style="zoom:80%;" />
 
 <center>车辆模型</center>
 
 ### 2.构建拓扑地图
 
-<img src="/home/lsj/dev/Mine_WS/README.assets/拓扑地图.png" alt="拓扑地图" style="zoom:150%;" />
+<img src="README.assets/拓扑地图.png" alt="拓扑地图" style="zoom:150%;" />
 
 <center>拓扑地图</center>
 
@@ -183,13 +183,13 @@ TopoMap loadMap(const std::string &vertexFilePath, const std::string &edgeFilePa
 
 测试结果如图所示，红线表示车辆运动轨迹：
 
-<img src="/home/lsj/dev/Mine_WS/README.assets/轨迹-合.png" alt="轨迹-合" style="zoom: 80%;" />
+<img src="README.assets/轨迹-合.png" alt="轨迹-合" style="zoom: 80%;" />
 
 <center>自动驾驶测试轨迹</center>
 
 ### 4.UI监控界面
 
-![2022-07-12 14-20-19 的屏幕截图](/home/lsj/dev/Mine_WS/README.assets/2022-07-12 14-20-19 的屏幕截图.png)
+![2022-07-12 14-20-19 的屏幕截图](README.assets/2022-07-12 14-20-19 的屏幕截图.png)
 
 <center>UI监控界面</center>
 
